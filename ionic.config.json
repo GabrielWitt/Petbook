@@ -1,0 +1,7 @@
+{
+  "name": "petbook",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
