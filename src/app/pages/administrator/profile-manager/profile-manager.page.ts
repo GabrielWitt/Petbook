@@ -8,6 +8,7 @@ import { VerificationFuncService } from 'src/app/shared/utilities/verificationFu
 import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
+import { buttonRight } from 'src/app/shared/components/detail-header/detail-header.component';
 
 @Component({
   selector: 'app-profile-manager',
@@ -17,6 +18,7 @@ import { ImageUploaderService } from 'src/app/core/services/image-uploader.servi
 export class ProfileManagerPage implements OnInit {
   loading = false;
   edit = false;
+  endButton: buttonRight = {show: false}
   defaultUser = '../../../../assets/profile/ProfileBlank.png';
   newImage;
   progress=0;
@@ -69,7 +71,9 @@ export class ProfileManagerPage implements OnInit {
       this.auth.getUser().then((user: User) =>{
         if(user){
           this.user = user;
+          console.log(user)
           this.auth.readUserForm(user.uid).then((data:userFormData) => {
+            console.log(data)
             this.userData = data;
             this.loading = false;
             resolve('user loaded');
@@ -108,7 +112,6 @@ export class ProfileManagerPage implements OnInit {
       } else{
         this.edit = !this.edit;
       }
-      
     }
   }
 
@@ -128,7 +131,6 @@ export class ProfileManagerPage implements OnInit {
   changeProfileImage(image: UserPhoto){
     this.loading = true;
     this.newImage = image;
-    console.log(this.newImage);
     const imageName = Date().toString()+'_'+this.user.uid;
     this.upload.uploadFile('profile',imageName, image.file,
     (progress)=>{ this.progress = progress })
@@ -143,17 +145,12 @@ export class ProfileManagerPage implements OnInit {
     })
   }
 
-  cerrarSesion(){
+  upgradeProfile(){
     this.loading = true;
-    this.alerts.AlertConfirm('','¿Seguro que desea salir de su sesión?').then(answer => {
-      if(answer){
-        this.auth.signOut().then(done => {
-          this.loading = false;
-          this.router.navigateByUrl('general/login');
-        });
-      }else{
-        this.loading = false;
-      }
+    this.auth.upgradeUser().then((done: any) => {
+      this.alerts.showAlert('PERFIL',done,'OK');
+      this.checkUser();
+      this.loading = false;
     })
   }
 

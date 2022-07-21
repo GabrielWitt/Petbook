@@ -23,11 +23,11 @@ export class AdministratorPage implements OnInit {
           this.router.navigateByUrl(photos[0].route.substring(1)); 
         }, 1500);
       }else{
-        this.router.navigateByUrl('/administrator/home');
+        this.router.navigateByUrl('/administrator/news');
       }
     }).catch(e => {
       console.log(e);
-      this.router.navigateByUrl('/administrator/home');
+      this.router.navigateByUrl('/administrator/news');
     })
   }
 

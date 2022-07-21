@@ -7,10 +7,14 @@ import { FirstKeyPipe } from './pipes/first-key.pipe';
 // Components
 import { BigButtonComponent } from './components/big-button/big-button.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { DetailHeaderComponent } from './components/detail-header/detail-header.component';
+import { MainHeaderComponent } from './components/main-header/main-header.component';
 
 const components = [
   BigButtonComponent,
-  UserProfileComponent
+  UserProfileComponent,
+  MainHeaderComponent,
+  DetailHeaderComponent
 ]
 const pipes = [
   FirstKeyPipe

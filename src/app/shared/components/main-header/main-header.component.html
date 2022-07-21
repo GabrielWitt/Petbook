@@ -1,0 +1,6 @@
+<ion-toolbar mode="ios">
+  <ion-title class="ion-text-uppercase">{{title}}</ion-title>
+  <ion-buttons slot="end" *ngIf="title == 'Mi Perfil'" (click)="cerrarSesion()">
+    <ion-button color="danger">Cerrar Sesión</ion-button>
+  </ion-buttons>
+</ion-toolbar>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
 import { ErrorHandlerService } from 'src/app/shared/utilities/error-handler.service';
 
 @Injectable({
@@ -31,9 +31,12 @@ export class FirestoreActionsService {
   createDocument(folder: string, data){
     return new Promise((resolve, reject) => {
       const db = getFirestore();
-      data['updatedAt'] = serverTimestamp();
+      data['createddAt'] = serverTimestamp();
       addDoc(collection(db, folder), data)
-      .then(done => { resolve(done) })
+      .then((done: any) => { 
+        this.updateDocument(folder,done.uid)
+        resolve(done) 
+      })
       .catch((error) => { reject(this.error.handle(error)); });
     })
   }
@@ -43,6 +46,16 @@ export class FirestoreActionsService {
       const db = getFirestore();
       data['updatedAt'] = serverTimestamp();
       setDoc(doc(db, folder, filename), data)
+      .then(done => { resolve(done); })
+      .catch((error) => { reject(this.error.handle(error)); });
+    })
+  }
+
+  updateDocument(folder: string, uid: string){
+    return new Promise((resolve, reject) => {
+      const db = getFirestore();
+      const ref = doc(db, folder, uid)
+      updateDoc(ref, {uid})
       .then(done => { resolve(done) })
       .catch((error) => { reject(this.error.handle(error)); });
     })

@@ -10,8 +10,9 @@ export interface User {
 }
 
 export interface userFormData {
+    uid?: string;
     name: string;
     lastName: string;
     birthDate: Date;
-    
+    manager?: boolean;
 }

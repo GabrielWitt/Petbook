@@ -131,6 +131,19 @@ export class FirebaseAuthService {
     });
   }
 
+  upgradeUser(){
+    return new Promise((resolve,reject) => {
+      const auth = getAuth();
+      updateProfile(auth.currentUser, { 
+        displayName: 'administrador'
+      }).then(() => {
+        // Profile updated!
+        resolve('Tu tipo de usuario se ha actualizado');
+      })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
+  }
+
   signOut(){
     return new Promise((resolve,reject) => {
       const auth = getAuth();
@@ -154,8 +167,8 @@ export class FirebaseAuthService {
 
   uploadUserForm(uid: string, name: string, lastName: string, birthDate: Date){
     return new Promise((resolve,reject) => {
-      this.updateUser('employee', null).then(ok => {
-        const userForm: userFormData = { name, lastName, birthDate }
+      this.updateUser('cliente', null).then(ok => {
+        const userForm: userFormData = { uid, name, lastName, birthDate }
         this.FS.setNamedDocument('users',uid, userForm)
         .then(data => { resolve('done'); })
         .catch((error) => { reject(this.error.handle(error)); });

@@ -53,7 +53,18 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.auth.getUser().then((user: User) =>{
       if(user){
-        if(user.emailVerified){ this.router.navigateByUrl('administrator'); }
+        if(user.emailVerified){ 
+          switch(user.displayName){
+            case 'administrador':
+              this.router.navigateByUrl('administrator');
+              break;
+            case 'cliente':
+              this.router.navigateByUrl('client');
+              break;
+            default:
+              this.router.navigateByUrl('client');
+              break;
+          } }
         else{ this.router.navigateByUrl('general/verify-email/'+user.email); }
         this.loading = false;
       }else{
