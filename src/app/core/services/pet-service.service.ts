@@ -1,31 +1,63 @@
 import { Injectable } from '@angular/core';
-import { Species } from '../models/species';
+import { ErrorHandlerService } from 'src/app/shared/utilities/error-handler.service';
+import { BreedColor, Pet, Species } from '../models/species';
 import { FirestoreActionsService } from './firestore-actions.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PetServiceService {
+export class PetService {
 
-  constructor(private firestore: FirestoreActionsService) { }
+  constructor(
+    private firestore: FirestoreActionsService,
+    private error: ErrorHandlerService,
+  ) { }
 
-  createSpecies(){
-    const Species: Species = {
-      name: 'Perro',
-      description: 'Canis familiaris o Canis lupus familiaris, dependiendo de si se lo considera una especie por derecho propio o una subespecie del lobo), llamado perro doméstico o can, y en algunos lugares coloquialmente llamado chucho, tuso, choco, entre otros; es un mamífero carnívoro de la familia de los cánidos, que constituye una especie del género Canis. En el 2013, la población mundial estimada de perros estaba entre setecientos millones y novecientos ochenta y siete millones. Su tamaño (o talla), su forma y su pelaje es muy diverso y varía según la raza. Posee un oído y un olfato muy desarrollados, y este último es su principal órgano sensorial. Su longevidad media es de diez a trece años,​ dependiendo de la raza.'
-    }
-    this.firestore.createDocument('species',Species)
+  createSpecies(data: Species){
+    return new Promise((resolve,reject) => {
+      this.firestore.createDocument('species',data)
+      .then(doc => { resolve(doc) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
   }
 
   readSpecies(){
-
+    return new Promise<Species[]>((resolve,reject) => {
+      this.firestore.readCollection('species')
+      .then((docs: any[]) => { resolve(docs) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
   }
 
-  createBreed(){
-
+  createColor(data: BreedColor){
+    return new Promise((resolve,reject) => {
+      this.firestore.createDocument('colors',data)
+      .then(doc => { resolve(doc) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
   }
 
-  readBreed(){
+  updateColor(uid, data: BreedColor){
+    return new Promise((resolve,reject) => {
+      this.firestore.setNamedDocument('colors', uid, data)
+      .then(doc => { resolve(doc) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
+  }
 
+  readColors(){
+    return new Promise<BreedColor[]>((resolve,reject) => {
+      this.firestore.readCollection('colors')
+      .then((docs: any[]) => { resolve(docs) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
+  }
+
+  readPetList(){
+    return new Promise<Pet[]>((resolve,reject) => {
+      this.firestore.readCollection('pets')
+      .then((docs: any[]) => { resolve(docs) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
   }
 }

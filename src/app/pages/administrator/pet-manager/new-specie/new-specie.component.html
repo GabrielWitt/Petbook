@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar mode="ios">
+    <ion-buttons slot="start">
+      <ion-button color="danger" (click)="modal.dismiss(false)">
+        Cancelar
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-uppercase">Nueva Especie</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="success" (click)="saveSpecie()" [disabled]="!newSpecieForm.valid">
+        Guardar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form #email="ngForm" [formGroup]="newSpecieForm" novalidate>
+  
+    <ion-item>
+      <ion-thumbnail *ngIf="!newImage" slot="start" class="profileCircle redImage" (click)="addPhoto()">
+        <ion-icon class="imageProfile" name="paw-outline"></ion-icon>
+        <div class="cameraButton">
+          <ion-icon name="camera-outline" color="light"></ion-icon>
+        </div>
+      </ion-thumbnail>
+      <ion-thumbnail *ngIf="newImage" slot="start" class="profileCircle">
+        <img src="{{newImage.webPath}}">
+        <ion-spinner *ngIf="progress > 0" class="uploadingImage" size="large" name="circles"></ion-spinner>
+        <ion-progress-bar *ngIf="progress > 0" class="loadingImage" color="primary" [value]="progress"></ion-progress-bar>
+      </ion-thumbnail>
+      <ion-label position="stacked">Nombre de Especie:</ion-label>
+      <ion-input color="dark" formControlName="name" type="text" clearInput="true"></ion-input>
+    </ion-item>
+    <ng-container *ngFor="let validation of validationMessages.name">
+      <div class="error-message" *ngIf="newSpecieForm.get('name').hasError(validation.type) && (newSpecieForm.get('name').dirty || newSpecieForm.get('name').touched)">
+        <ion-text class="ion-padding-start" color="danger"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>  {{ validation.message }}
+        </ion-text>
+      </div>
+    </ng-container>
+
+    <ion-item>
+      <ion-label position="stacked">Description de Especie:</ion-label>
+      <ion-textarea placeholder="Ingrese la info de la especie aquí..." color="dark" autoGrow="true" formControlName="description"></ion-textarea>
+    </ion-item>
+    <ng-container *ngFor="let validation of validationMessages.description">
+      <div class="error-message" *ngIf="newSpecieForm.get('description').hasError(validation.type) && (newSpecieForm.get('description').dirty || newSpecieForm.get('description').touched)">
+        <ion-text class="ion-padding-start" color="danger"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>  {{ validation.message }}
+        </ion-text>
+      </div>
+    </ng-container>
+  </form>
+  <ion-row>
+    <app-big-button class="ion-padding-top"  style="width: 100%;" LABEL="Agregar Raza" buttonType="" [loading]="loading" [disabled]="loading || !newSpecieForm.value.name" (click)="addBreed()"></app-big-button>
+  </ion-row>
+  <ion-card *ngFor="let item of newBreeds">
+    <ion-item>
+      <ion-label position="stacked">Your name</ion-label>
+      <ion-input [(ngModel)]="item.name" placeholder="Your name"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Your name</ion-label>
+      <ion-textarea placeholder="Ingrese la info de la raza aquí..." color="dark" autoGrow="true" [(ngModel)]="item.description"></ion-textarea>
+    </ion-item>
+  </ion-card>
+</ion-content>

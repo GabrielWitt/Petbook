@@ -142,6 +142,25 @@ let FirebaseAuthService = class FirebaseAuthService {
     })();
   }
 
+  checkUser() {
+    return new Promise((resolve, reject) => {
+      this.getUser().then(user => {
+        if (user) {
+          this.user = user;
+          this.readUserForm(user.uid).then(data => {
+            resolve({
+              user,
+              data
+            });
+          });
+        } else {
+          this.router.navigateByUrl('general');
+          reject('user not found');
+        }
+      });
+    });
+  }
+
   updateUser(displayName, photoURL) {
     return new Promise((resolve, reject) => {
       const auth = (0,firebase_auth__WEBPACK_IMPORTED_MODULE_5__.getAuth)();
@@ -151,6 +170,20 @@ let FirebaseAuthService = class FirebaseAuthService {
       }).then(() => {
         // Profile updated!
         resolve('Tus datos se han actualizado');
+      }).catch(error => {
+        reject(this.error.handle(error));
+      });
+    });
+  }
+
+  upgradeUser() {
+    return new Promise((resolve, reject) => {
+      const auth = (0,firebase_auth__WEBPACK_IMPORTED_MODULE_5__.getAuth)();
+      (0,firebase_auth__WEBPACK_IMPORTED_MODULE_5__.updateProfile)(auth.currentUser, {
+        displayName: 'administrador'
+      }).then(() => {
+        // Profile updated!
+        resolve('Tu tipo de usuario se ha actualizado');
       }).catch(error => {
         reject(this.error.handle(error));
       });
@@ -182,8 +215,9 @@ let FirebaseAuthService = class FirebaseAuthService {
 
   uploadUserForm(uid, name, lastName, birthDate) {
     return new Promise((resolve, reject) => {
-      this.updateUser('employee', null).then(ok => {
+      this.updateUser('cliente', null).then(ok => {
         const userForm = {
+          uid,
           name,
           lastName,
           birthDate
@@ -248,13 +282,43 @@ let FirestoreActionsService = class FirestoreActionsService {
     }
     updateCollection() {
     }
-    readCollection() {
+    readCollection(folderName) {
+        return new Promise((resolve, reject) => {
+            const db = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore)();
+            const q = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.query)((0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.collection)(db, folderName), (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.orderBy)("name"));
+            (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocs)(q)
+                .then(querySnapshot => {
+                let docList = [];
+                querySnapshot.forEach((doc) => {
+                    docList.push(doc.data());
+                });
+                resolve(docList);
+            })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readCollectionFilter(folderName, filterName, filterValue) {
+        const db = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore)();
+        const q = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.query)((0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.collection)(db, folderName), (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.where)(filterName, "==", filterValue));
     }
     createDocument(folder, data) {
         return new Promise((resolve, reject) => {
             const db = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore)();
-            data['updatedAt'] = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp)();
+            data['createddAt'] = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp)();
             (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.addDoc)((0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.collection)(db, folder), data)
+                .then((done) => {
+                this.updateDocument(folder, done)
+                    .then(updated => { resolve(updated); })
+                    .catch((error) => { reject(this.error.handle(error)); });
+            })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    updateDocument(folder, snapshot) {
+        return new Promise((resolve, reject) => {
+            const db = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore)();
+            const ref = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.doc)(db, folder, snapshot.id);
+            (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.updateDoc)(ref, { uid: snapshot.id })
                 .then(done => { resolve(done); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
@@ -264,7 +328,7 @@ let FirestoreActionsService = class FirestoreActionsService {
             const db = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore)();
             data['updatedAt'] = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp)();
             (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.setDoc)((0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.doc)(db, folder, filename), data)
-                .then(done => { resolve(done); })
+                .then((done) => { resolve(done); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
@@ -294,50 +358,6 @@ FirestoreActionsService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
         providedIn: 'root'
     })
 ], FirestoreActionsService);
-
-
-
-/***/ }),
-
-/***/ 8063:
-/*!**********************************************************************!*\
-  !*** ./src/app/shared/components/big-button/big-button.component.ts ***!
-  \**********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "BigButtonComponent": () => (/* binding */ BigButtonComponent)
-/* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _big_button_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./big-button.component.html?ngResource */ 8101);
-/* harmony import */ var _big_button_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./big-button.component.scss?ngResource */ 7172);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 2560);
-
-
-
-
-let BigButtonComponent = class BigButtonComponent {
-    constructor() { }
-    ngOnInit() { }
-    checkType(type, value) {
-        return type === value;
-    }
-};
-BigButtonComponent.ctorParameters = () => [];
-BigButtonComponent.propDecorators = {
-    LABEL: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
-    loading: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
-    disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
-    buttonType: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }]
-};
-BigButtonComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
-        selector: 'app-big-button',
-        template: _big_button_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
-        styles: [_big_button_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
-    })
-], BigButtonComponent);
 
 
 
@@ -411,6 +431,209 @@ UserProfileComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
 
 /***/ }),
 
+/***/ 3740:
+/*!***************************************************************************!*\
+  !*** ./src/app/shared/components/view/big-button/big-button.component.ts ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BigButtonComponent": () => (/* binding */ BigButtonComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 4929);
+/* harmony import */ var _big_button_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./big-button.component.html?ngResource */ 4557);
+/* harmony import */ var _big_button_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./big-button.component.scss?ngResource */ 6752);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 2560);
+
+
+
+
+let BigButtonComponent = class BigButtonComponent {
+    constructor() { }
+    ngOnInit() { }
+    checkType(type, value) {
+        return type === value;
+    }
+};
+BigButtonComponent.ctorParameters = () => [];
+BigButtonComponent.propDecorators = {
+    LABEL: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    loading: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    buttonType: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }]
+};
+BigButtonComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+        selector: 'app-big-button',
+        template: _big_button_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_big_button_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], BigButtonComponent);
+
+
+
+/***/ }),
+
+/***/ 8999:
+/*!*********************************************************************************!*\
+  !*** ./src/app/shared/components/view/detail-header/detail-header.component.ts ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DetailHeaderComponent": () => (/* binding */ DetailHeaderComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 4929);
+/* harmony import */ var _detail_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail-header.component.html?ngResource */ 4659);
+/* harmony import */ var _detail_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail-header.component.scss?ngResource */ 4219);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 2560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ 124);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ionic/angular */ 3819);
+
+
+
+
+
+
+let DetailHeaderComponent = class DetailHeaderComponent {
+    constructor(router, modal) {
+        this.router = router;
+        this.modal = modal;
+    }
+    ngOnInit() { }
+    goBack() {
+        this.router.navigateByUrl(this.backButton.backUrl);
+    }
+};
+DetailHeaderComponent.ctorParameters = () => [
+    { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__.Router },
+    { type: _ionic_angular__WEBPACK_IMPORTED_MODULE_3__.ModalController }
+];
+DetailHeaderComponent.propDecorators = {
+    title: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input }],
+    backButton: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input }],
+    endButton: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input }]
+};
+DetailHeaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+        selector: 'app-detail-header',
+        template: _detail_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_detail_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], DetailHeaderComponent);
+
+
+
+/***/ }),
+
+/***/ 4016:
+/*!*****************************************************************************!*\
+  !*** ./src/app/shared/components/view/main-header/main-header.component.ts ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MainHeaderComponent": () => (/* binding */ MainHeaderComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 4929);
+/* harmony import */ var _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main-header.component.html?ngResource */ 5229);
+/* harmony import */ var _main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./main-header.component.scss?ngResource */ 4182);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 2560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 124);
+/* harmony import */ var src_app_core_services_firebase_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/firebase.service */ 1683);
+/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 884);
+
+
+
+
+
+
+
+let MainHeaderComponent = class MainHeaderComponent {
+    constructor(router, alerts, auth) {
+        this.router = router;
+        this.alerts = alerts;
+        this.auth = auth;
+        this.loading = false;
+    }
+    ngOnInit() { }
+    cerrarSesion() {
+        this.loading = true;
+        this.alerts.AlertConfirm('', '¿Seguro que desea salir de su sesión?').then(answer => {
+            if (answer) {
+                this.auth.signOut().then(done => {
+                    this.loading = false;
+                    this.router.navigateByUrl('general/login');
+                });
+            }
+            else {
+                this.loading = false;
+            }
+        });
+    }
+};
+MainHeaderComponent.ctorParameters = () => [
+    { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router },
+    { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService },
+    { type: src_app_core_services_firebase_service__WEBPACK_IMPORTED_MODULE_2__.FirebaseAuthService }
+];
+MainHeaderComponent.propDecorators = {
+    title: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_5__.Input }]
+};
+MainHeaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Component)({
+        selector: 'app-main-header',
+        template: _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], MainHeaderComponent);
+
+
+
+/***/ }),
+
+/***/ 9168:
+/*!***********************************************************************************************!*\
+  !*** ./src/app/shared/components/view/not-data-yet-message/not-data-yet-message.component.ts ***!
+  \***********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NotDataYetMessageComponent": () => (/* binding */ NotDataYetMessageComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 4929);
+/* harmony import */ var _not_data_yet_message_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./not-data-yet-message.component.html?ngResource */ 5095);
+/* harmony import */ var _not_data_yet_message_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./not-data-yet-message.component.scss?ngResource */ 1368);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 2560);
+
+
+
+
+let NotDataYetMessageComponent = class NotDataYetMessageComponent {
+    constructor() { }
+    ngOnInit() { }
+};
+NotDataYetMessageComponent.ctorParameters = () => [];
+NotDataYetMessageComponent.propDecorators = {
+    text: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    icon: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }]
+};
+NotDataYetMessageComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+        selector: 'app-not-data-yet-message',
+        template: _not_data_yet_message_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_not_data_yet_message_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], NotDataYetMessageComponent);
+
+
+
+/***/ }),
+
 /***/ 2234:
 /*!************************************************!*\
   !*** ./src/app/shared/pipes/first-key.pipe.ts ***!
@@ -457,12 +680,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "SharedModule": () => (/* binding */ SharedModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common */ 4666);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 4929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 2560);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/common */ 4666);
 /* harmony import */ var _pipes_first_key_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pipes/first-key.pipe */ 2234);
-/* harmony import */ var _components_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/big-button/big-button.component */ 8063);
-/* harmony import */ var _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/user-profile/user-profile.component */ 4046);
+/* harmony import */ var _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/user-profile/user-profile.component */ 4046);
+/* harmony import */ var _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/view/big-button/big-button.component */ 3740);
+/* harmony import */ var _components_view_main_header_main_header_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/view/main-header/main-header.component */ 4016);
+/* harmony import */ var _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/view/detail-header/detail-header.component */ 8999);
+/* harmony import */ var _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/view/not-data-yet-message/not-data-yet-message.component */ 9168);
 
 
 
@@ -470,20 +696,28 @@ __webpack_require__.r(__webpack_exports__);
 
 // Components
 
+// General view
 
+
+
+
+// General view
 const components = [
-    _components_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_1__.BigButtonComponent,
-    _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_2__.UserProfileComponent
+    _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__.BigButtonComponent,
+    _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__.UserProfileComponent,
+    _components_view_main_header_main_header_component__WEBPACK_IMPORTED_MODULE_3__.MainHeaderComponent,
+    _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__.DetailHeaderComponent,
+    _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__.NotDataYetMessageComponent
 ];
 const pipes = [
     _pipes_first_key_pipe__WEBPACK_IMPORTED_MODULE_0__.FirstKeyPipe
 ];
 let SharedModule = class SharedModule {
 };
-SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.NgModule)({
+SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.NgModule)({
         imports: [
-            _angular_common__WEBPACK_IMPORTED_MODULE_5__.CommonModule,
+            _angular_common__WEBPACK_IMPORTED_MODULE_8__.CommonModule,
         ],
         declarations: [
             ...pipes,
@@ -493,7 +727,7 @@ SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
             ...pipes,
             ...components
         ],
-        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_4__.CUSTOM_ELEMENTS_SCHEMA],
+        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_7__.CUSTOM_ELEMENTS_SCHEMA],
     })
 ], SharedModule);
 
@@ -49448,16 +49682,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 7172:
-/*!***********************************************************************************!*\
-  !*** ./src/app/shared/components/big-button/big-button.component.scss?ngResource ***!
-  \***********************************************************************************/
-/***/ ((module) => {
-
-module.exports = ".buttonStyle {\n  border-radius: 7px;\n  --border-radius: 7px;\n  width: 90vw;\n  --width: 90vw;\n  font-size: 20pt;\n  height: 40px;\n  margin: 0 2vw;\n}\n\n.rowStyle {\n  width: 100%;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJpZy1idXR0b24uY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvYmlnLWJ1dHRvbi9iaWctYnV0dG9uLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0ksa0JBQUE7RUFDQSxvQkFBQTtFQUNBLFdBQUE7RUFDQSxhQUFBO0VBQ0EsZUFBQTtFQUNBLFlBQUE7RUFDQSxhQUFBO0FDQ0o7O0FERUE7RUFDSSxXQUFBO0FDQ0oiLCJmaWxlIjoiYmlnLWJ1dHRvbi5jb21wb25lbnQuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi5idXR0b25TdHlsZXtcbiAgICBib3JkZXItcmFkaXVzOiA3cHg7XG4gICAgLS1ib3JkZXItcmFkaXVzOiA3cHg7XG4gICAgd2lkdGg6IDkwdnc7XG4gICAgLS13aWR0aDogOTB2dztcbiAgICBmb250LXNpemU6IDIwcHQ7XG4gICAgaGVpZ2h0OiA0MHB4O1xuICAgIG1hcmdpbjogMCAydnc7XG59XG5cbi5yb3dTdHlsZXtcbiAgICB3aWR0aDogMTAwJTtcbn0iLCIuYnV0dG9uU3R5bGUge1xuICBib3JkZXItcmFkaXVzOiA3cHg7XG4gIC0tYm9yZGVyLXJhZGl1czogN3B4O1xuICB3aWR0aDogOTB2dztcbiAgLS13aWR0aDogOTB2dztcbiAgZm9udC1zaXplOiAyMHB0O1xuICBoZWlnaHQ6IDQwcHg7XG4gIG1hcmdpbjogMCAydnc7XG59XG5cbi5yb3dTdHlsZSB7XG4gIHdpZHRoOiAxMDAlO1xufSJdfQ== */";
-
-/***/ }),
-
 /***/ 4429:
 /*!***************************************************************************************!*\
   !*** ./src/app/shared/components/user-profile/user-profile.component.scss?ngResource ***!
@@ -49468,13 +49692,43 @@ module.exports = ".profileCircle {\n  --border-radius: 50%;\n  --size: 40pt ;\n}
 
 /***/ }),
 
-/***/ 8101:
-/*!***********************************************************************************!*\
-  !*** ./src/app/shared/components/big-button/big-button.component.html?ngResource ***!
-  \***********************************************************************************/
+/***/ 6752:
+/*!****************************************************************************************!*\
+  !*** ./src/app/shared/components/view/big-button/big-button.component.scss?ngResource ***!
+  \****************************************************************************************/
 /***/ ((module) => {
 
-module.exports = "<ion-row [ngSwitch]=\"buttonType\" class=\"rowStyle\">\n  <ion-button *ngSwitchDefault class='buttonStyle' color=\"primary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button>\n\n  <ion-button *ngSwitchCase=\"'SECONDARY'\" class='buttonStyle' color=\"secondary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'RED'\" class='buttonStyle' color=\"danger\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'GRAY'\" class='buttonStyle' color=\"medium\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"dark\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"dark\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n</ion-row>";
+module.exports = ".buttonStyle {\n  border-radius: 7px;\n  --border-radius: 7px;\n  width: 90vw;\n  --width: 90vw;\n  font-size: 20pt;\n  height: 40px;\n  margin: 0 2vw;\n}\n\n.rowStyle {\n  width: 100%;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJpZy1idXR0b24uY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvdmlldy9iaWctYnV0dG9uL2JpZy1idXR0b24uY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxrQkFBQTtFQUNBLG9CQUFBO0VBQ0EsV0FBQTtFQUNBLGFBQUE7RUFDQSxlQUFBO0VBQ0EsWUFBQTtFQUNBLGFBQUE7QUNDSjs7QURFQTtFQUNJLFdBQUE7QUNDSiIsImZpbGUiOiJiaWctYnV0dG9uLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLmJ1dHRvblN0eWxle1xuICAgIGJvcmRlci1yYWRpdXM6IDdweDtcbiAgICAtLWJvcmRlci1yYWRpdXM6IDdweDtcbiAgICB3aWR0aDogOTB2dztcbiAgICAtLXdpZHRoOiA5MHZ3O1xuICAgIGZvbnQtc2l6ZTogMjBwdDtcbiAgICBoZWlnaHQ6IDQwcHg7XG4gICAgbWFyZ2luOiAwIDJ2dztcbn1cblxuLnJvd1N0eWxle1xuICAgIHdpZHRoOiAxMDAlO1xufSIsIi5idXR0b25TdHlsZSB7XG4gIGJvcmRlci1yYWRpdXM6IDdweDtcbiAgLS1ib3JkZXItcmFkaXVzOiA3cHg7XG4gIHdpZHRoOiA5MHZ3O1xuICAtLXdpZHRoOiA5MHZ3O1xuICBmb250LXNpemU6IDIwcHQ7XG4gIGhlaWdodDogNDBweDtcbiAgbWFyZ2luOiAwIDJ2dztcbn1cblxuLnJvd1N0eWxlIHtcbiAgd2lkdGg6IDEwMCU7XG59Il19 */";
+
+/***/ }),
+
+/***/ 4219:
+/*!**********************************************************************************************!*\
+  !*** ./src/app/shared/components/view/detail-header/detail-header.component.scss?ngResource ***!
+  \**********************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJkZXRhaWwtaGVhZGVyLmNvbXBvbmVudC5zY3NzIn0= */";
+
+/***/ }),
+
+/***/ 4182:
+/*!******************************************************************************************!*\
+  !*** ./src/app/shared/components/view/main-header/main-header.component.scss?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJtYWluLWhlYWRlci5jb21wb25lbnQuc2NzcyJ9 */";
+
+/***/ }),
+
+/***/ 1368:
+/*!************************************************************************************************************!*\
+  !*** ./src/app/shared/components/view/not-data-yet-message/not-data-yet-message.component.scss?ngResource ***!
+  \************************************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJub3QtZGF0YS15ZXQtbWVzc2FnZS5jb21wb25lbnQuc2NzcyJ9 */";
 
 /***/ }),
 
@@ -49485,6 +49739,46 @@ module.exports = "<ion-row [ngSwitch]=\"buttonType\" class=\"rowStyle\">\n  <ion
 /***/ ((module) => {
 
 module.exports = "<ion-content>\n  <ion-card>\n    <ion-item>\n      <ion-thumbnail slot=\"start\" class=\"profileCircle\">\n        <img src=\"{{user?.photoURL ? user?.photoURL : defaultUser}}\">\n      </ion-thumbnail>\n      <ion-card-header>\n        <ion-card-title>{{user?.displayName ? user?.displayName : 'Username'}}</ion-card-title>\n        <ion-card-subtitle>{{user?.email ? user?.email : 'User Email'}}</ion-card-subtitle>\n      </ion-card-header>\n    </ion-item>\n  </ion-card>\n</ion-content>";
+
+/***/ }),
+
+/***/ 4557:
+/*!****************************************************************************************!*\
+  !*** ./src/app/shared/components/view/big-button/big-button.component.html?ngResource ***!
+  \****************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "<ion-row [ngSwitch]=\"buttonType\" class=\"rowStyle\">\n  <ion-button *ngSwitchDefault class='buttonStyle' color=\"primary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button>\n\n  <ion-button *ngSwitchCase=\"'SECONDARY'\" class='buttonStyle' color=\"secondary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'RED'\" class='buttonStyle' color=\"danger\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'GRAY'\" class='buttonStyle' color=\"medium\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"dark\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"dark\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n</ion-row>";
+
+/***/ }),
+
+/***/ 4659:
+/*!**********************************************************************************************!*\
+  !*** ./src/app/shared/components/view/detail-header/detail-header.component.html?ngResource ***!
+  \**********************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "<ion-toolbar mode=\"ios\">\n  <ion-buttons slot=\"start\" (click)=\"goBack()\" *ngIf=\"!backButton.modal\">\n    <ion-icon *ngIf=\"backButton.icon\" style=\"font-size: 16pt;\" name=\"{{backButton.icon?backButton.icon:'chevron-back-outline'}}\"></ion-icon> {{endButton.text}}\n    <ion-text class=\"ion-text-capitalize\">{{backButton.text ? backButton.text : 'Regresar'}}</ion-text>\n  </ion-buttons>\n  <ion-buttons slot=\"start\" *ngIf=\"backButton.modal\" (click)=\"modal.dismiss()\">\n    <ion-button>\n      <ion-text class=\"ion-text-capitalize\">{{backButton.text ? backButton.text : 'Atrás'}}</ion-text>\n    </ion-button>\n  </ion-buttons>\n  <ion-title class=\"ion-text-uppercase\">{{title}}</ion-title>\n  <ion-buttons slot=\"end\" *ngIf=\"endButton.show\">\n    <ion-button>\n      <ion-icon *ngIf=\"endButton.icon\" style=\"font-size: 16pt;\" name=\"{{endButton.icon}}\"></ion-icon> {{endButton.text}}\n    </ion-button>\n  </ion-buttons>\n</ion-toolbar>";
+
+/***/ }),
+
+/***/ 5229:
+/*!******************************************************************************************!*\
+  !*** ./src/app/shared/components/view/main-header/main-header.component.html?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-title class=\"ion-text-uppercase\">{{title}}</ion-title>\n    <ion-buttons [ngSwitch]=\"title\" slot=\"end\">\n      <ion-button *ngSwitchCase=\"'Mi Perfil'\" color=\"danger\" (click)=\"cerrarSesion()\">\n        Cerrar Sesión\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Cursos'\" (click)=\"cerrarSesion()\">\n        Nuevo Curso\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Anuncios'\" (click)=\"cerrarSesion()\">\n        Nuevo Anuncio\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Mis Mascotas'\" (click)=\"cerrarSesion()\">\n        Agregar Mascota\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Usuarios'\" (click)=\"cerrarSesion()\">Ascender</ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>";
+
+/***/ }),
+
+/***/ 5095:
+/*!************************************************************************************************************!*\
+  !*** ./src/app/shared/components/view/not-data-yet-message/not-data-yet-message.component.html?ngResource ***!
+  \************************************************************************************************************/
+/***/ ((module) => {
+
+module.exports = "<div class=\"positionTop\">\n  <ion-row>\n    <div class=\"ion-text-center positionTop\">\n      <ion-icon name=\"{{icon ? icon:'information-circle-outline'}}\"></ion-icon>\n    </div>\n  </ion-row>\n  <ion-row>\n    <div class=\"ion-text-center ion-text-uppercase positionTop\">{{text}}</div>\n  </ion-row>\n</div>";
 
 /***/ })
 

@@ -1,0 +1,14 @@
+
+<ion-header>
+  <app-detail-header [title]="specie.name" [backButton]="backButton" [endButton]="{show:false}" ></app-detail-header>
+</ion-header>
+
+<ion-content>
+
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <app-big-button LABEL="Guardar" buttonType="" [loading]="loading" [disabled]="loading" (click)="saveData()"></app-big-button>
+  </ion-toolbar>
+</ion-footer>

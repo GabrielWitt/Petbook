@@ -1,9 +1,129 @@
 <app-main-header title="Mascotas"></app-main-header>
-<!-- 
-<ion-header>
-  <app-detail-header [title]="'Mascotas'" [backText]="'Atrás'" [backUrl]="'administrator/home'" [endButton]="{show:false}" ></app-detail-header>
-</ion-header>
--->
 
 <ion-content>
+  <ion-segment mode="ios" (ionChange)="segmentChanged($event)" value="list">
+    <ion-segment-button value="list">
+      <ion-label> <h2>Lista de Mascotas</h2> </ion-label> 
+    </ion-segment-button>
+    <ion-segment-button value="types">
+      <ion-label> <h2>Lista de Especies</h2> </ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="arrow-down" pullingText="Pull to refresh..." refreshingSpinner="dots"></ion-refresher-content> 
+  </ion-refresher>
+  
+  <app-not-data-yet-message 
+    *ngIf="selectedTab === 'list' && petList.length == 0 && !loading"
+    text="No hay mascotas aún" icon="alert-circle-outline"
+  ></app-not-data-yet-message>
+
+  <app-not-data-yet-message 
+    *ngIf="selectedTab === 'types' && speciesList.length == 0 && !loading"
+    text="No hay especies aún" icon="archive-outline"
+  ></app-not-data-yet-message>
+
+  <ion-list *ngIf="selectedTab === 'types' && speciesList.length > 0 || colorList.length>0">
+
+    <div *ngIf="speciesList.length > 0 && !newColorShow">
+      <ion-list-header>
+        <ion-label>Especies</ion-label>
+      </ion-list-header>
+      <ion-item *ngFor="let item of speciesList" (click)="openSpecieDetail(item)" detail>
+        <ion-avatar slot="start">  <img [src]="item.photo"> </ion-avatar>
+        <ion-label> {{item.name}} </ion-label>
+      </ion-item>
+    </div>
+
+    <ion-card *ngIf="newColorShow" class="ion-padding">
+      <ion-row>
+        <ion-col size="3">
+          <ion-button  size="small" color="danger" (click)="newColorShow = false" 
+            [disabled]="(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor">
+            <ion-spinner *ngIf="loadingColor" style="margin-left: 10px;" color="light" name="dots"></ion-spinner>
+            <ion-text *ngIf="!loadingColor" color="light">Cancelar</ion-text>
+          </ion-button>
+        </ion-col>
+        <ion-col class="ion-text-uppercase ion-text-center ion-padding-top">
+          {{newColor.uid ?'Editar':'Nuevo'}} Color
+        </ion-col>
+        <ion-col size="3">
+          <ion-button size="small" color="success" (click)="saveColorData()" 
+            [disabled]="(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor">
+            <ion-spinner *ngIf="loadingColor" style="margin-left: 10px;" color="light" name="dots"></ion-spinner>
+            <ion-text *ngIf="!loadingColor" color="light">Guardar</ion-text>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Color de Pelaje:</ion-label>
+          <ion-input [(ngModel)]="newColor.name" placeholder="Nombre Color"></ion-input>
+        </ion-item>
+        <ion-text class="ion-padding-start" color="danger" *ngIf="!newColor.name"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Ingrese un nombre
+        </ion-text>
+  
+        <ion-item>
+          <ion-label position="stacked">Color de referencia:</ion-label>
+          <ion-input [(ngModel)]="newColor.color" placeholder="Color Referencía"></ion-input>
+        </ion-item>
+        <ion-text class="ion-padding-start" color="danger" *ngIf="!newColor.color"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Ingrese una referencia
+        </ion-text>
+  
+        <ion-item>
+          <ion-avatar style="border: 1px solid black;" size="small" slot="start" *ngIf="newColor.rgbCode.length > 1" [ngStyle]="{ 'background-color': newColor.rgbCode }">
+          </ion-avatar>
+          <ion-label position="stacked">Color en código:</ion-label>
+          <ion-input [(ngModel)]="newColor.rgbCode" placeholder="Busque codigo de color rgb en google y pegue aquí"></ion-input>
+        </ion-item>
+        <ion-text class="ion-padding-start" color="danger" *ngIf="!newColor.rgbCode"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Ingrese un código
+        </ion-text>
+        <ion-text class="ion-padding-start" color="danger" *ngIf="newColor.rgbCode.length > 0 && newColor.rgbCode.length < 7"> 
+          <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Codigo incompleto 
+        </ion-text>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-list-header *ngIf="colorList.length > 0">
+      <ion-label>Colores Disponibles</ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let color of colorList">
+      <ion-avatar style="border: 1px solid black;" size="small" slot="start" [ngStyle]="{ 'background-color': color.rgbCode }"></ion-avatar>
+      <ion-label> {{color.name}} ({{color.color}}) </ion-label>
+      <ion-button fill="outline" slot="end" (click)="editColor(color)">Editar</ion-button>
+    </ion-item>
+  </ion-list>
+  
+  <ion-list *ngIf="loading">
+    <ion-item *ngFor="let item of loadingList">
+      <ion-avatar slot="start">
+        <ion-skeleton-text animated></ion-skeleton-text>
+      </ion-avatar>
+      <ion-label>
+        <h3>
+          <ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
+        </h3>
+        <p>
+          <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  
+  <ion-fab *ngIf="selectedTab === 'types' && !loadingColor && !loading && !newColorShow" horizontal="center" vertical="bottom" slot="fixed">
+    <ion-fab-button close-icon="close-outline" id="open-modal">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button color="secondary" (click)="newColorOption()">
+        <ion-icon name="brush-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="secondary" (click)="newType()">
+        <ion-icon name="extension-puzzle-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>  
 </ion-content>

@@ -57,16 +57,21 @@ export class LoginComponent implements OnInit {
           switch(user.displayName){
             case 'administrador':
               this.router.navigateByUrl('administrator');
+              this.loading = false;
               break;
             case 'cliente':
               this.router.navigateByUrl('client');
+              this.loading = false;
               break;
             default:
               this.router.navigateByUrl('client');
+              this.loading = false;
               break;
-          } }
-        else{ this.router.navigateByUrl('general/verify-email/'+user.email); }
-        this.loading = false;
+          } 
+        } else { 
+          this.router.navigateByUrl('general/verify-email/'+user.email);
+          this.loading = false;
+        }
       }else{
         this.loading = false;
       }

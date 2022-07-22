@@ -41,7 +41,6 @@ export class SignUpComponent implements OnInit {
       name:[ {type: 'required', message: ' Escribe tu nombre'},],
       lastName:[ {type: 'required', message: ' Escribe tu apellido'},],
       birthday:[ {type: 'required', message: ' Ingresa tu fecha de nacimiento'},],
-      code:[ {type: 'required', message: ' Requiere un código'},],
     };
     this.signUpForm = this.formBuilder.group({
       email:[null, { validators: [Validators.required, Validators.email] }],

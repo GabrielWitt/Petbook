@@ -1377,5 +1377,11 @@ sub {
 .ion-align-items-baseline {
   align-items: baseline !important;
 }
+.positionTop {
+  margin: 2em auto;
+}
+.positionTop ion-icon {
+  font-size: 60px;
+}
 
 /*# sourceMappingURL=styles.css.map*/

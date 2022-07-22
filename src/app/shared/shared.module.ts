@@ -5,16 +5,22 @@ import { CommonModule } from '@angular/common';
 import { FirstKeyPipe } from './pipes/first-key.pipe';
 
 // Components
-import { BigButtonComponent } from './components/big-button/big-button.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
-import { DetailHeaderComponent } from './components/detail-header/detail-header.component';
-import { MainHeaderComponent } from './components/main-header/main-header.component';
+
+// General view
+import { BigButtonComponent } from './components/view/big-button/big-button.component';
+import { MainHeaderComponent } from './components/view/main-header/main-header.component';
+import { DetailHeaderComponent } from './components/view/detail-header/detail-header.component';
+import { NotDataYetMessageComponent } from './components/view/not-data-yet-message/not-data-yet-message.component';
+
+// General view
 
 const components = [
   BigButtonComponent,
   UserProfileComponent,
   MainHeaderComponent,
-  DetailHeaderComponent
+  DetailHeaderComponent,
+  NotDataYetMessageComponent
 ]
 const pipes = [
   FirstKeyPipe

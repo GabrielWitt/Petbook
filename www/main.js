@@ -28,17 +28,13 @@ const routes = [
         loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("default-src_app_shared_utilities_alerts_ts-src_app_shared_utilities_error-handler_service_ts--662e9f"), __webpack_require__.e("common"), __webpack_require__.e("src_app_pages_general_general_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pages/general/general.module */ 3387)).then(m => m.GeneralPageModule)
     },
     {
-        path: 'manager',
-        loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_utilities_alerts_ts-src_app_shared_utilities_error-handler_service_ts--662e9f"), __webpack_require__.e("src_app_pages_manager_manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pages/manager/manager.module */ 5767)).then(m => m.ManagerPageModule)
+        path: 'administrator',
+        loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_utilities_alerts_ts-src_app_shared_utilities_error-handler_service_ts--662e9f"), __webpack_require__.e("default-src_app_shared_utilities_attachments_service_ts"), __webpack_require__.e("src_app_pages_administrator_administrator_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pages/administrator/administrator.module */ 6484)).then(m => m.AdministratorPageModule)
     },
     {
-        path: 'employee',
-        loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_pages_employee_employee_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./pages/employee/employee.module */ 3354)).then(m => m.EmployeePageModule)
-    },
-    {
-        path: 'resident',
-        loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_pages_resident_resident_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./pages/resident/resident.module */ 8604)).then(m => m.ResidentPageModule)
-    },
+        path: 'client',
+        loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_utilities_alerts_ts-src_app_shared_utilities_error-handler_service_ts--662e9f"), __webpack_require__.e("default-src_app_shared_utilities_attachments_service_ts"), __webpack_require__.e("src_app_pages_client_client_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pages/client/client.module */ 4373)).then(m => m.ClientPageModule)
+    }
 ];
 let AppRoutingModule = class AppRoutingModule {
 };

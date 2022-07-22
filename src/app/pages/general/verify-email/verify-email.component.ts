@@ -40,15 +40,39 @@ export class VerifyEmailComponent implements OnInit {
   checkUser() {
     this.loading = true;
     this.errorMessage = '';
-    this.auth.getUser().then((user: User) =>{
-      this.loading = false;
-      if(user){
-        if(user.emailVerified){ this.router.navigateByUrl('administrator'); }
-        else{ this.errorMessage = 'Email no ha sido verificado'; }
+    this.loading = true;
+    this.auth.checkUser().then((user: any) =>{
+      if(user.user){
+        if(user.user.emailVerified){ 
+          switch(user.user.displayName){
+            case 'administrador':
+              this.router.navigateByUrl('administrator');
+              this.loading = false;
+              break;
+            case 'cliente':
+              this.router.navigateByUrl('client');
+              this.loading = false;
+              break;
+            default:
+              this.router.navigateByUrl('client');
+              this.loading = false;
+              break;
+          } 
+        } else { 
+          this.errorMessage = 'Email no ha sido verificado';
+          this.loading = false;
+        }
       }else{ 
         this.alerts.showAlert('', 'La sessión ha expirado, intente ingresar nuevamente' + this.email, 'OK')
         this.router.navigateByUrl('general');
+        this.loading = false;
       }
+    }).catch(error => {
+      console.log(error);
+      this.loading = false;
+    });
+    this.auth.getUser().then((user: User) =>{
+      this.loading = false;
     });
   }
 

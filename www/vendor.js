@@ -18371,7 +18371,7 @@ function applyPolyfills() {
     };
 
     if ('function' !== typeof Object.assign || !Object.entries || !Array.prototype.find || !Array.prototype.includes || !String.prototype.startsWith || !String.prototype.endsWith || win.NodeList && !win.NodeList.prototype.forEach || !win.fetch || !checkIfURLIsSupported() || typeof WeakMap == 'undefined') {
-      promises.push(__webpack_require__.e(/*! import() | polyfills-core-js */ "polyfills-core-js").then(__webpack_require__.t.bind(__webpack_require__, /*! ./core-js.js */ 7320, 23)));
+      promises.push(__webpack_require__.e(/*! import() | polyfills-core-js */ "polyfills-core-js").then(__webpack_require__.t.bind(__webpack_require__, /*! ./core-js.js */ 1483, 23)));
     }
   }
 

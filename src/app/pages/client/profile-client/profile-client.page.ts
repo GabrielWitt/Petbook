@@ -7,7 +7,7 @@ import { VerificationFuncService } from 'src/app/shared/utilities/verificationFu
 import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
-import { buttonRight } from 'src/app/shared/components/detail-header/detail-header.component';
+import { ButtonRight } from 'src/app/shared/components/view/detail-header/detail-header.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -18,7 +18,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class ProfileClientPage implements OnInit {
   loading = false;
   edit = false;
-  endButton: buttonRight = {show: false}
   defaultUser = '../../../../assets/profile/ProfileBlank.png';
   newImage;
   progress=0;
@@ -68,21 +67,13 @@ export class ProfileClientPage implements OnInit {
   checkUser() {
     return new Promise((resolve, reject) => {
       this.loading = true;
-      this.auth.getUser().then((user: User) =>{
-        if(user){
-          this.user = user;
-          console.log(user)
-          this.auth.readUserForm(user.uid).then((data:userFormData) => {
-            console.log(data)
-            this.userData = data;
-            this.loading = false;
-            resolve('user loaded');
-          });
-        }else{
-          this.router.navigateByUrl('general');
-          this.loading = false;
-          reject('user not loaded');
-        }
+      this.auth.checkUser().then((user: any) =>{
+        this.user = user.user;
+        this.userData = user.data;
+        this.loading = false;
+      }).catch(error => {
+        console.log(error);
+        this.loading = false;
       });
     })
   }

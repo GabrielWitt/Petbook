@@ -97,13 +97,13 @@
         <div class="error-message ion-margin-bottom" *ngIf="(signUpForm.get('password2').errors | first) === 'required'">
           <ion-text class="ion-padding-start" color="danger"> 
             <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
-            Required field
+            Repita la contraseña
           </ion-text>
         </div>
         <div class="error-message ion-margin-bottom" *ngIf="(signUpForm.errors | first) === 'compareValidator'">
           <ion-text class="ion-padding-start" color="danger"> 
             <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>  
-            Passwords do not match
+            Las contraseñas no coinciden
           </ion-text>
         </div>
       </div>

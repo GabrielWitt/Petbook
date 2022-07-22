@@ -117,6 +117,22 @@ export class FirebaseAuthService {
     })
   }
 
+  checkUser() {
+    return new Promise((resolve, reject) => {
+      this.getUser().then((user: User) =>{
+        if(user){
+          this.user = user;
+          this.readUserForm(user.uid).then((data:userFormData) => {
+            resolve({user, data});
+          });
+        }else{
+          this.router.navigateByUrl('general');
+          reject('user not found');
+        }
+      });
+    })
+  }
+
   updateUser(displayName: string, photoURL: string){
     return new Promise((resolve,reject) => {
       const auth = getAuth();
