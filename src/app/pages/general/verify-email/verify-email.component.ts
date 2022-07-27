@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from 'firebase/auth';
-import { FirebaseAuthService } from 'src/app/core/services/firebase.service';
+import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 
 @Component({
@@ -17,7 +17,7 @@ export class VerifyEmailComponent implements OnInit {
   constructor(
     private routerParams: ActivatedRoute,
     private router: Router,
-    private auth: FirebaseAuthService,
+    private auth: FireAuthService,
     private alerts: AlertsService 
   ) { }
 

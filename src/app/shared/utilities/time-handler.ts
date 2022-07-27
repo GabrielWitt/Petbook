@@ -120,6 +120,14 @@ export class TimeHandlerModule {
     return final;
   }
 
+  dateTransform(data){
+    if(data?.seconds){
+      return moment(data.seconds * 1000 + data.nanoseconds/1000000).toISOString();
+    } else {
+      return moment(data).toISOString();
+    }
+  }
+
  }
 
  export const joinDateTimeInISO8601 = (date: string, time: string) => {

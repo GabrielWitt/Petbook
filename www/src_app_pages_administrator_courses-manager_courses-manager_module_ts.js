@@ -1,7 +1,7 @@
 "use strict";
 (self["webpackChunkapp"] = self["webpackChunkapp"] || []).push([["src_app_pages_administrator_courses-manager_courses-manager_module_ts"],{
 
-/***/ 2309:
+/***/ 42309:
 /*!***************************************************************************************!*\
   !*** ./src/app/pages/administrator/courses-manager/courses-manager-routing.module.ts ***!
   \***************************************************************************************/
@@ -11,10 +11,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CoursesManagerPageRoutingModule": () => (/* binding */ CoursesManagerPageRoutingModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 124);
-/* harmony import */ var _courses_manager_page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager.page */ 3796);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var _courses_manager_page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager.page */ 43796);
 
 
 
@@ -38,7 +38,7 @@ CoursesManagerPageRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_1__.__decora
 
 /***/ }),
 
-/***/ 7790:
+/***/ 77790:
 /*!*******************************************************************************!*\
   !*** ./src/app/pages/administrator/courses-manager/courses-manager.module.ts ***!
   \*******************************************************************************/
@@ -48,14 +48,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CoursesManagerPageModule": () => (/* binding */ CoursesManagerPageModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common */ 4666);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common */ 94666);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ 2508);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 3819);
-/* harmony import */ var _courses_manager_routing_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager-routing.module */ 2309);
-/* harmony import */ var _courses_manager_page__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./courses-manager.page */ 3796);
-/* harmony import */ var src_app_shared_shared_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/shared/shared.module */ 4466);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var _courses_manager_routing_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager-routing.module */ 42309);
+/* harmony import */ var _courses_manager_page__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./courses-manager.page */ 43796);
+/* harmony import */ var src_app_shared_shared_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/shared/shared.module */ 44466);
 
 
 
@@ -83,7 +83,7 @@ CoursesManagerPageModule = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
 
 /***/ }),
 
-/***/ 3796:
+/***/ 43796:
 /*!*****************************************************************************!*\
   !*** ./src/app/pages/administrator/courses-manager/courses-manager.page.ts ***!
   \*****************************************************************************/
@@ -93,10 +93,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CoursesManagerPage": () => (/* binding */ CoursesManagerPage)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _courses_manager_page_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager.page.html?ngResource */ 7842);
-/* harmony import */ var _courses_manager_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./courses-manager.page.scss?ngResource */ 9379);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 2560);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _courses_manager_page_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./courses-manager.page.html?ngResource */ 57842);
+/* harmony import */ var _courses_manager_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./courses-manager.page.scss?ngResource */ 59379);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
 
 
 
@@ -119,7 +119,7 @@ CoursesManagerPage = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
 
 /***/ }),
 
-/***/ 9379:
+/***/ 59379:
 /*!******************************************************************************************!*\
   !*** ./src/app/pages/administrator/courses-manager/courses-manager.page.scss?ngResource ***!
   \******************************************************************************************/
@@ -129,7 +129,7 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 
 /***/ }),
 
-/***/ 7842:
+/***/ 57842:
 /*!******************************************************************************************!*\
   !*** ./src/app/pages/administrator/courses-manager/courses-manager.page.html?ngResource ***!
   \******************************************************************************************/

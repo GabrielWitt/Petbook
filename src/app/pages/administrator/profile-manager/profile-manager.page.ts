@@ -3,11 +3,15 @@ import { Router } from '@angular/router';
 import { User, userFormData } from 'src/app/core/models/user';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FirebaseAuthService } from 'src/app/core/services/firebase.service';
 import { VerificationFuncService } from 'src/app/shared/utilities/verificationFunc';
 import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
+import { NewPetComponent } from 'src/app/shared/components/new-pet/new-pet.component';
+import { IonRouterOutlet, ModalController } from '@ionic/angular';
+import { Pet } from 'src/app/core/models/species';
+import { PetService } from 'src/app/core/services/modules/pet-service.service';
+import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 
 @Component({
   selector: 'app-profile-manager',
@@ -23,26 +27,28 @@ export class ProfileManagerPage implements OnInit {
 
   user: User;
   userData: userFormData;
+  petList: Pet[] = [];
 
   registerForm: FormGroup;
-  validationMessages
+  validationMessages  = {
+    name:[ {type: 'required', message: ' Escribe tu nombre'},],
+    lastName:[ {type: 'required', message: ' Escribe tu apellido'},],
+    birthday:[ {type: 'required', message: ' Ingresa tu fecha de nacimiento'},]
+  };
 
   constructor(
-    private router: Router,
+    private pets: PetService,
     private alerts: AlertsService,
+    private modal: ModalController,
     private upload: ImageUploaderService,
     private images: AttachmentsService,
+    private routerOutlet: IonRouterOutlet,
     private formBuilder: FormBuilder,
-    private auth: FirebaseAuthService,
+    private auth: FireAuthService,
     private verification: VerificationFuncService,
   ) { }
 
   ngOnInit() {
-    this.validationMessages = {
-      name:[ {type: 'required', message: ' Escribe tu nombre'},],
-      lastName:[ {type: 'required', message: ' Escribe tu apellido'},],
-      birthday:[ {type: 'required', message: ' Ingresa tu fecha de nacimiento'},]
-    };
     this.registerForm = this.formBuilder.group({
       name:[null, { validators: [Validators.required, Validators.minLength(2)] }],
       lastName:[null, { validators: [Validators.required, Validators.minLength(3)] }],
@@ -65,16 +71,31 @@ export class ProfileManagerPage implements OnInit {
 
   checkUser() {
     return new Promise((resolve, reject) => {
-      this.loading = true;
-      this.auth.checkUser().then((user: any) =>{
-        this.user = user.user;
-        this.userData = user.data;
-        this.loading = false;
-      }).catch(error => {
+      try {
+        this.loading = true;
+        this.auth.checkUser().then((user: any) =>{
+          this.user = user.user;
+          this.userData = user.data;
+          this.loadMyPets().then(ok => {
+            this.loading = false;
+            resolve('done')
+          });
+        });
+      } catch (error) {
         console.log(error);
         this.loading = false;
-      });
+        reject(error);
+      }
     })
+  }
+
+  async loadMyPets(){
+    try {
+      this.petList = await this.pets.myPetList(this.user.uid);
+      return 'done';
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   editForm(){
@@ -92,7 +113,13 @@ export class ProfileManagerPage implements OnInit {
       const birthDateCheck = this.userData.birthDate !== newValues.birthday;
       if(nameCheck || lastNameCheck || birthDateCheck) {
         this.loading = true;
-        this.auth.uploadUserForm(this.user.uid,newValues.name,newValues.lastName,newValues.birthday)
+        const data = {
+          ...this.userData,
+          name: newValues.name,
+          lastName: newValues.lastName,
+          birthDate: newValues.birthday
+        }
+        this.auth.uploadUserForm(this.user.uid, data)
         .then(ok => { 
           this.edit = !this.edit;
           this.alerts.showAlert('PERFIL','Tus datos han sido actualizados','OK');
@@ -125,7 +152,7 @@ export class ProfileManagerPage implements OnInit {
     this.upload.uploadFile('profile',imageName, image.file,
     (progress)=>{ this.progress = progress })
     .then((data:any) => {
-      this.auth.updateUser(this.user.displayName,data.url).then(done => {
+      this.auth.updateUser('administrador', data.url).then(done => {
         this.alerts.showAlert('PERFIL','Tus imagen de perfil ha sido actualizada','OK');
         this.upload.deletePicture();
         this.newImage = null;
@@ -142,6 +169,40 @@ export class ProfileManagerPage implements OnInit {
       this.checkUser();
       this.loading = false;
     })
+  }
+
+  async doRefresh(refresh?){
+    await this.checkUser().then(done => {
+      console.log('done');
+      if (refresh){ refresh.target.complete(); }
+    }).catch(error => {
+      console.log(error);
+      if (refresh){ refresh.target.complete(); }
+    })
+  }
+
+  async newPet(){
+    const modal = await this.modal.create({
+      component: NewPetComponent,
+      componentProps: {pet: null, userData: this.userData},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.loadMyPets(); }
+  }
+
+  async editPet(pet){
+    const modal = await this.modal.create({
+      component: NewPetComponent,
+      componentProps: {pet, userData: this.userData},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.loadMyPets(); }
   }
 
 }

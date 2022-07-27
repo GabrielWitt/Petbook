@@ -1,7 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { BreedColor } from 'src/app/core/models/species';
-import { PetService } from 'src/app/core/services/pet-service.service';
+import { User, userFormData } from 'src/app/core/models/user';
+import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
+import { PetService } from 'src/app/core/services/modules/pet-service.service';
+import { NewPetComponent } from 'src/app/shared/components/new-pet/new-pet.component';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { NewSpecieComponent } from './new-specie/new-specie.component';
 import { SpecieDetailComponent } from './specie-detail/specie-detail.component';
@@ -12,12 +15,14 @@ import { SpecieDetailComponent } from './specie-detail/specie-detail.component';
   styleUrls: ['./pet-manager.page.scss'],
 })
 export class PetManagerPage implements OnInit {
+  user: User;
+  userData: userFormData;
   loading = true;
   loadingColor = false;
   loadingList = [1,2,3,4,5]
   name: string;
   
-  selectedTab = 'types' // 'list'
+  selectedTab = 'list'
   petList:any[] = [];
   speciesList = [];
 
@@ -27,13 +32,19 @@ export class PetManagerPage implements OnInit {
 
   constructor(
     private pets: PetService,
+    private auth: FireAuthService,
     private alerts: AlertsService,
     private modal: ModalController,
     private routerOutlet: IonRouterOutlet,
   ) { }
 
   ngOnInit() {
-    this.loadData();
+    this.loading = true;
+    this.auth.checkUser().then((user: any) =>{
+      this.user = user.user;
+      this.userData = user.data;
+      this.loadData();
+    });
   }
 
   async loadData(){
@@ -69,7 +80,6 @@ export class PetManagerPage implements OnInit {
       await this.loadSpecies();
     }
     if (refresh){ refresh.target.complete(); }
-    
   }
 
   segmentChanged(ev: any) {
@@ -123,6 +133,18 @@ export class PetManagerPage implements OnInit {
       console.log(error);
       this.loadingColor = false;
     }
+  }
+
+  async editPet(pet){
+    const modal = await this.modal.create({
+      component: NewPetComponent,
+      componentProps: {pet, userData: this.userData},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.loadPets(); }
   }
 
 }

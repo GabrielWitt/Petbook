@@ -24,10 +24,6 @@ const routes: Routes = [
       {
         path: 'profile',
         loadChildren: () => import('./profile-client/profile-client.module').then( m => m.ProfileClientPageModule)
-      },
-      {
-        path: 'pets',
-        loadChildren: () => import('./pets-client/pets-client.module').then( m => m.PetsClientPageModule)
       }
     ]
   },

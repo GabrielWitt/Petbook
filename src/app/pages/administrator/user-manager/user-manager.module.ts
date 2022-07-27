@@ -8,6 +8,7 @@ import { UserManagerPageRoutingModule } from './user-manager-routing.module';
 
 import { UserManagerPage } from './user-manager.page';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { ProfileDetailComponent } from './profile-detail/profile-detail.component';
 
 @NgModule({
   imports: [
@@ -17,6 +18,9 @@ import { SharedModule } from 'src/app/shared/shared.module';
     SharedModule,
     UserManagerPageRoutingModule
   ],
-  declarations: [UserManagerPage]
+  declarations: [
+    UserManagerPage,
+    ProfileDetailComponent
+  ]
 })
 export class UserManagerPageModule {}

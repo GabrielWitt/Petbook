@@ -1,7 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FirebaseAuthService } from 'src/app/core/services/firebase.service';
+import { IonRouterOutlet, ModalController } from '@ionic/angular';
+import { userFormData } from 'src/app/core/models/user';
+import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
+import { NewCourseComponent } from '../../new-course/new-course.component';
+import { NewNoticeComponent } from '../../new-notice/new-notice.component';
 
 @Component({
   selector: 'app-main-header',
@@ -11,14 +15,21 @@ import { AlertsService } from 'src/app/shared/utilities/alerts';
 export class MainHeaderComponent implements OnInit {
   loading = false;
   @Input() title: string;
+  @Input() rightButton: any;
+  user: userFormData;
 
   constructor(
     private router: Router,
+    private modal: ModalController,
     private alerts: AlertsService,
-    private auth: FirebaseAuthService,
+    private auth: FireAuthService,
+    private routerOutlet: IonRouterOutlet,
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.auth.getUser()
+    .then((userData:any) => { this.user = userData.data; })
+  }
 
   cerrarSesion(){
     this.loading = true;
@@ -32,6 +43,30 @@ export class MainHeaderComponent implements OnInit {
         this.loading = false;
       }
     })
+  }
+
+  async createNotice(){
+    const modal = await this.modal.create({
+      component: NewNoticeComponent,
+      componentProps: {notice: null, user: this.user},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    this.rightButton(modalResult.data);
+  }
+
+  async createCourse(){
+    const modal = await this.modal.create({
+      component: NewCourseComponent,
+      componentProps: {course: null, user: this.user},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    this.rightButton(modalResult.data);
   }
 
 }

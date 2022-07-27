@@ -1,7 +1,17 @@
 <app-main-header title="Mi Perfil"></app-main-header>
 
 <ion-content>
-  <ion-list class="ion-padding">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" style="background-color: gray;">
+      <ion-refresher-content pullingIcon="arrow-down" pullingText="Desliza abajo para refrescar..." refreshingSpinner="dots"></ion-refresher-content> 
+    </ion-refresher>
+
+    <ion-fab horizontal="end" vertical="bottom" slot="fixed" (click)="newPet()" *ngIf="!loading">
+      <ion-fab-button close-icon="close-outline" id="open-modal">
+        <ion-icon name="add-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>  
+    
+    <ion-list class="ion-padding">
     <ion-item>
       <ion-thumbnail *ngIf="!newImage" slot="start" class="profileCircle" (click)="addPhoto()">
         <img class="imageProfile" src="{{user?.photoURL ? user?.photoURL : defaultUser}}">
@@ -16,13 +26,15 @@
       </ion-thumbnail>
       <ion-label class="ion-text-wrap">
         <ion-text color="dark">
-          <ion-card-title>{{userData ? userData.name + ' ' + userData.lastName : 'Loading...'}}</ion-card-title>
+          <ion-card-title>{{userData ? userData.name + ' ' + userData.lastName : 'Cargando'}} <ion-spinner *ngIf="!userData" name="dots"></ion-spinner></ion-card-title>
         </ion-text>
         <p>{{user?.email ? user?.email : '_'}}</p>
         <ion-text color="primary">
           <p class="ion-text-capitalize">Tipo: {{user?.displayName ? user?.displayName : '_'}}</p>
         </ion-text>
       </ion-label>
+      <ion-button size="small" color="secondary"  *ngIf="!edit"
+      [disabled]="loading" (click)="editForm()">Editar</ion-button>
     </ion-item>
     <ion-item class="ion-activatable ripple-parent" (click)="upgradeProfile()"
      *ngIf="user?.displayName !== 'administrador' && userData?.manager">
@@ -81,11 +93,20 @@
         </div>
       </ng-container>
     </form>
-    <ion-row *ngIf="!edit">
-      <app-big-button class="ion-padding-top"  style="width: 100%;" LABEL="EDITAR USUARIO" buttonType="danger" [loading]="loading" [disabled]="false" (click)="editForm()"></app-big-button>
-    </ion-row>
     <ion-row *ngIf="edit">
       <app-big-button class="ion-padding-top"  style="width: 100%;" LABEL="GUARDAR" buttonType="danger" [loading]="loading" [disabled]="false" (click)="editForm()"></app-big-button>
     </ion-row>
+    <div *ngIf="petList.length > 0">
+      <ion-list-header>
+        <ion-label>Mis Mascotas</ion-label>
+      </ion-list-header>
+      <ion-item *ngFor="let pet of petList" (click)="editPet(pet)" detail>
+        <ion-avatar slot="start">  <img [src]="pet.photo"> </ion-avatar>
+        <ion-label>
+          <h3> {{pet.name}} </h3>
+          <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>
+        </ion-label>
+      </ion-item>
+    </div>
   </ion-list>
 </ion-content>

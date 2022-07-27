@@ -4,7 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { attachmentOptions } from 'src/app/core/models/images';
 import { Breed, Species } from 'src/app/core/models/species';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
-import { PetService } from 'src/app/core/services/pet-service.service';
+import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 
@@ -57,21 +57,12 @@ export class NewSpecieComponent implements OnInit {
     });
   }
 
-  addBreed(){
-    const newBreed: Breed = {
-      specie: '',
-      name: '',
-      description: '',
-    }
-    this.newBreeds.push(newBreed);
-  }
-
   saveSpecie(){
     const imageName = Date().toString()+'_Specie'+this.newSpecieForm.value.name;
     this.upload.uploadFile('SpeciesList',imageName, this.newImage.file,
     (progress)=>{ this.progress = progress })
     .then((data:any) => {
-      console.log(data.url);
+      this.upload.deletePicture();
       let newSpecie: Species = {
         name: this.newSpecieForm.value.name,
         description: this.newSpecieForm.value.description,

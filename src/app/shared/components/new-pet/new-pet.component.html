@@ -1,0 +1,191 @@
+<ion-header>
+  <ion-toolbar mode="ios">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!pet" color="danger" [disabled]="loading" (click)="modal.dismiss(false)">
+        Cancelar
+      </ion-button>
+      <ion-button *ngIf="editPetForm" color="danger" [disabled]="loading" (click)="editPet()">
+        Cancelar
+      </ion-button>
+      <ion-button *ngIf="pet && !editPetForm" color="primary" [disabled]="loading" (click)="modal.dismiss(false)">
+        Atrás
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-uppercase">{{pet ? pet.name: 'Nueva Mascota'}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!pet || editPetForm" color="success" (click)="createPet()" 
+        [disabled]="loading || needDate || !myPetData.specie || !myPetData.color1 ||
+        (myPetData?.name.length === 0 || !myPetData?.name) || (myPetData?.photo.length === 0 || !myPetData?.photo)
+      ">
+          Guardar
+      </ion-button>
+      <ion-button *ngIf="pet && !editPetForm && (userData.uid === pet.ownerUid)" color="dark" (click)="editPet()">
+          Editar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding"  *ngIf="loading">
+  <app-loading-view></app-loading-view>
+</ion-content>
+
+<ion-content class="ion-padding"  *ngIf="!loading && pet && !editPetForm">
+  <ion-list>
+    <ion-item>
+      <ion-thumbnail slot="start" class="profileCircle">
+        <img *ngIf="pet" src="{{pet.photo}}">
+      </ion-thumbnail>
+      <ion-label>Nombre: {{myPetData.name}}</ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Especie: {{myPetData.specie}}</ion-label>
+    </ion-item>
+
+    <ion-item *ngIf="myPetData.breed?.length > 0">
+      <ion-label>Raza: {{myPetData.breed}}</ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Fecha de Nacimiento: {{myPetData.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Microchip:</ion-label>
+      <ion-checkbox slot="end" mode='md' [checked]="myPetData.microchip" color="primary" [disabled]="true"></ion-checkbox>
+    </ion-item>
+
+    <ion-list-header>
+      <ion-label>Colores de Pelaje</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
+      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
+      <ion-label>Dominante: {{myPetData.color1.name}} ({{myPetData.color1.color}})</ion-label>
+    </ion-item>
+      
+    <ion-item *ngIf="myPetData.color2">
+      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
+      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
+      <ion-label>Secundario: {{myPetData.color2.name}} ({{myPetData.color2.color}})</ion-label>
+    </ion-item>
+
+    <ion-list-header *ngIf="ownerData">
+      <ion-label>Dueño</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <app-user-profile *ngIf="ownerData" [user]="ownerData"></app-user-profile>
+</ion-content>
+
+<ion-content class="ion-padding" *ngIf="!loading && (!pet || editPetForm)">
+  <ion-list>
+    <ion-item>
+      <ion-thumbnail *ngIf="!newImage && !pet" slot="start" class="profileCircle redImage" (click)="addPhoto()">
+        <ion-icon *ngIf="" class="imageProfile" name="paw-outline"></ion-icon>
+        <div class="cameraButton">
+          <ion-icon name="camera-outline" color="light"></ion-icon>
+        </div>
+      </ion-thumbnail>
+      <ion-thumbnail *ngIf="!newImage && pet" slot="start" class="profileCircle" (click)="addPhoto()">
+        <img *ngIf="pet" src="{{pet.photo}}">
+        <div class="cameraButton">
+          <ion-icon name="camera-outline" color="light"></ion-icon>
+        </div>
+      </ion-thumbnail>
+      <ion-thumbnail *ngIf="newImage" slot="start" class="profileCircle" (click)="addPhoto()">
+        <img src="{{newImage.webPath}}">
+        <ion-spinner *ngIf="progress > 0" class="uploadingImage" size="large" name="circles"></ion-spinner>
+      </ion-thumbnail>
+      <ion-label>Nombre:</ion-label>
+      <ion-input slot="end" type="text" placeholder="Mascota" [value]="myPetData.name" (ionChange)="nameListener($event)"></ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="myPetData?.name.length === 0 || !myPetData?.name">
+      <ion-text class="ion-padding-start" color="danger"> 
+        <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+        Ingresa el nombre de tu mascota
+      </ion-text>
+    </div>
+    <div class="error-message" *ngIf="myPetData?.photo.length === 0 || !myPetData?.photo">
+      <ion-text class="ion-padding-start" color="danger"> 
+        <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+        Selecciona la foto de tu mascota
+      </ion-text>
+    </div>
+    <ion-row *ngIf="progress > 0" style="margin-top: 8px;">
+      <ion-progress-bar color="primary" [value]="progress"></ion-progress-bar>
+      <ion-text class="ion-padding-start" color="warning"> 
+        <ion-icon class="vertical-align" color="warning" name="alert-circle-outline"> </ion-icon>
+        Guardando imagen {{progress * 100}}%
+      </ion-text>
+    </ion-row>
+
+    <ion-item>
+      <ion-label>Especie:</ion-label>
+      <ion-select slot="end" [value]="myPetData.specie" (ionChange)="handleSpecie($event)">
+        <ion-select-option *ngFor="let specie of speciesList" [value]="specie.name">{{specie.name}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="!myPetData.specie"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Seleccione una especie
+    </ion-text>
+
+    <ion-item *ngIf="myPetData.specie.length > 0">
+      <ion-label>Raza:</ion-label>
+      <ion-input slot="end" type="text" placeholder="(Opcional)" [value]="myPetData.breed" (ionChange)="handleBreed($event)"></ion-input>
+    </ion-item>
+
+    <ion-item (click)="showHideCalendar()">
+      <ion-label>Fecha de Nacimiento: {{myPetData.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>
+      <ion-button size="small" slot="end" color="secondary"><ion-icon color="light" name="calendar-outline"></ion-icon></ion-button>
+    </ion-item>
+    <ion-row *ngIf="showCalendar" class="ion-align-center {{needDate? 'redText': ''}}">
+      <ion-datetime style="margin: auto;"
+      locale="es-EC"
+      [(ngModel)]="birthDate"
+      [min]="minDate"
+      [max]="maxDate"
+      (ionChange)="handleCalendar($event)"
+      presentation="date"
+      ></ion-datetime>
+    </ion-row>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="needDate"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Ingrese la fecha de nacimiento
+    </ion-text>
+
+    <ion-item>
+      <ion-label>Microchip:</ion-label>
+      <ion-checkbox slot="end" mode='md' (ionChange)="ckeckboxChange($event)" [checked]="myPetData.microchip" color="primary"></ion-checkbox>
+    </ion-item>
+
+    <ion-list-header>
+      <ion-label>Colores de Pelaje</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
+      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
+      <ion-label>Dominante:</ion-label>
+      <ion-select mode='ios' [value]="newPetColor1" (ionChange)="handleColor1($event)" >
+        <ion-select-option *ngFor="let color of colorList" [value]="color.uid">
+          {{color.name}} ({{color.color}})
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="!newPetColor1"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Seleccione un color dominante
+    </ion-text>
+      
+    <ion-item *ngIf="myPetData.color1">
+      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
+      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
+      <ion-label>Secundario:</ion-label>
+      <ion-select mode='ios' placeholder="(Opcional)" [value]="newPetColor2" (ionChange)="handleColor2($event)">
+        <ion-select-option *ngFor="let color of colorList" [value]="color.uid">
+          {{color.name}} ({{color.color}})
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+</ion-content>

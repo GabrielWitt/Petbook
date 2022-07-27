@@ -1,5 +1,26 @@
-<app-main-header title="Cursos"></app-main-header>
+<app-main-header title="Cursos" [rightButton]="reloadData"></app-main-header>
 
-<ion-content>
 
+<ion-content class="ion-padding">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" style="background-color: gray;">
+      <ion-refresher-content pullingIcon="arrow-down" pullingText="Desliza abajo para refrescar..." refreshingSpinner="dots"></ion-refresher-content> 
+    </ion-refresher>
+
+    <app-not-data-yet-message 
+      *ngIf="courseList.length == 0 && !loading"
+      text="No hay cursos aún" icon="archive-outline"
+    ></app-not-data-yet-message>
+  
+    <ion-list *ngIf="courseList.length>0">
+        <ion-item  *ngFor="let course of courseList" (click)="detailCourse(course)">
+            <ion-thumbnail slot="start">
+                <img [src]="CourseCertificate">
+            </ion-thumbnail>
+            <ion-label>{{course.title}}</ion-label>
+        </ion-item>
+    </ion-list>
+    
+    <ion-list *ngIf="loading">
+        <app-loading-view></app-loading-view>
+    </ion-list>
 </ion-content>

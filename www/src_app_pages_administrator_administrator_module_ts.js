@@ -1,7 +1,7 @@
 "use strict";
 (self["webpackChunkapp"] = self["webpackChunkapp"] || []).push([["src_app_pages_administrator_administrator_module_ts"],{
 
-/***/ 1850:
+/***/ 21850:
 /*!*********************************************************************!*\
   !*** ./src/app/pages/administrator/administrator-routing.module.ts ***!
   \*********************************************************************/
@@ -11,10 +11,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AdministratorPageRoutingModule": () => (/* binding */ AdministratorPageRoutingModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 124);
-/* harmony import */ var _administrator_page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./administrator.page */ 2784);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var _administrator_page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./administrator.page */ 52784);
 
 
 
@@ -31,27 +31,27 @@ const routes = [
         children: [
             {
                 path: 'profile',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_pages_administrator_profile-manager_profile-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../administrator/profile-manager/profile-manager.module */ 2232)).then(m => m.ProfileManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_pages_administrator_profile-manager_profile-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../administrator/profile-manager/profile-manager.module */ 72232)).then(m => m.ProfileManagerPageModule),
                 data: { viewName: 'Profile' }
             },
             {
                 path: 'courses',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_courses-manager_courses-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./courses-manager/courses-manager.module */ 7790)).then(m => m.CoursesManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_courses-manager_courses-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./courses-manager/courses-manager.module */ 77790)).then(m => m.CoursesManagerPageModule),
                 data: { viewName: 'Courses' }
             },
             {
                 path: 'news',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_notice-manager_notice-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./notice-manager/notice-manager.module */ 2034)).then(m => m.NoticeManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_notice-manager_notice-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./notice-manager/notice-manager.module */ 42034)).then(m => m.NoticeManagerPageModule),
                 data: { viewName: 'News' }
             },
             {
                 path: 'users',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_user-manager_user-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./user-manager/user-manager.module */ 2913)).then(m => m.UserManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_user-manager_user-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./user-manager/user-manager.module */ 22913)).then(m => m.UserManagerPageModule),
                 data: { viewName: 'Users' }
             },
             {
                 path: 'pets',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_pet-manager_pet-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pet-manager/pet-manager.module */ 7793)).then(m => m.PetManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_pet-manager_pet-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./pet-manager/pet-manager.module */ 27793)).then(m => m.PetManagerPageModule),
                 data: { viewName: 'Pets' }
             }
         ]
@@ -70,7 +70,7 @@ AdministratorPageRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_1__.__decorat
 
 /***/ }),
 
-/***/ 6484:
+/***/ 66484:
 /*!*************************************************************!*\
   !*** ./src/app/pages/administrator/administrator.module.ts ***!
   \*************************************************************/
@@ -80,13 +80,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AdministratorPageModule": () => (/* binding */ AdministratorPageModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common */ 4666);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common */ 94666);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/forms */ 2508);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ionic/angular */ 3819);
-/* harmony import */ var _administrator_routing_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./administrator-routing.module */ 1850);
-/* harmony import */ var _administrator_page__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./administrator.page */ 2784);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var _administrator_routing_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./administrator-routing.module */ 21850);
+/* harmony import */ var _administrator_page__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./administrator.page */ 52784);
 
 
 
@@ -112,7 +112,7 @@ AdministratorPageModule = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
 
 /***/ }),
 
-/***/ 2784:
+/***/ 52784:
 /*!***********************************************************!*\
   !*** ./src/app/pages/administrator/administrator.page.ts ***!
   \***********************************************************/
@@ -122,13 +122,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AdministratorPage": () => (/* binding */ AdministratorPage)
 /* harmony export */ });
-/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 1670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 4929);
-/* harmony import */ var _administrator_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./administrator.page.html?ngResource */ 554);
-/* harmony import */ var _administrator_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./administrator.page.scss?ngResource */ 9287);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 2560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 124);
-/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 5909);
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _administrator_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./administrator.page.html?ngResource */ 90554);
+/* harmony import */ var _administrator_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./administrator.page.scss?ngResource */ 59287);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
 
 
 
@@ -181,7 +181,7 @@ AdministratorPage = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angul
 
 /***/ }),
 
-/***/ 9287:
+/***/ 59287:
 /*!************************************************************************!*\
   !*** ./src/app/pages/administrator/administrator.page.scss?ngResource ***!
   \************************************************************************/
@@ -191,7 +191,7 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 
 /***/ }),
 
-/***/ 554:
+/***/ 90554:
 /*!************************************************************************!*\
   !*** ./src/app/pages/administrator/administrator.page.html?ngResource ***!
   \************************************************************************/

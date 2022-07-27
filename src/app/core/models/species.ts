@@ -25,9 +25,10 @@ export interface Pet {
     name: string;
     specie: string;
     breed?: string;
-    birthDate: Date;
+    birthDate: any;
     color1: BreedColor;
     color2?: BreedColor;
     microchip: boolean;
     photo?: string;
+    ownerUid: string;
 }

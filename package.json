@@ -9,12 +9,14 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build-ios": "ionic build && npx cap copy && npx cap sync && npx cap open ios"
   },
   "private": true,
   "dependencies": {
     "@angular/common": "^14.0.0",
     "@angular/core": "^14.0.0",
+    "@angular/fire": "^7.4.1",
     "@angular/forms": "^14.0.0",
     "@angular/platform-browser": "^14.0.0",
     "@angular/platform-browser-dynamic": "^14.0.0",
@@ -38,6 +40,7 @@
     "moment-timezone": "^0.5.34",
     "ngx-image-compress": "^13.1.13",
     "rxjs": "~6.6.0",
+    "terser": "^5.14.2",
     "tslib": "^2.2.0",
     "zone.js": "~0.11.4"
   },

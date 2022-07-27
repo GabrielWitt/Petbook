@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { User } from 'firebase/auth';
-import { FirebaseAuthService } from 'src/app/core/services/firebase.service';
+import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { RouteHistoryService } from 'src/app/shared/utilities/route-history';
 import { compareValidator, min1digit, min1lowercase, min1specialCharacter, min1uppercase } from 'src/app/shared/utilities/validators';
@@ -28,7 +28,7 @@ export class SignUpComponent implements OnInit {
     private router: Router,
     private verification: VerificationFuncService,
     public history: RouteHistoryService,
-    private auth: FirebaseAuthService,
+    private auth: FireAuthService,
     private alert: AlertsService
     ) { }
 

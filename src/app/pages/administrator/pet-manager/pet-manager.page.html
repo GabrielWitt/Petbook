@@ -9,8 +9,8 @@
       <ion-label> <h2>Lista de Especies</h2> </ion-label>
     </ion-segment-button>
   </ion-segment>
-  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content pullingIcon="arrow-down" pullingText="Pull to refresh..." refreshingSpinner="dots"></ion-refresher-content> 
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" style="background-color: gray;">
+    <ion-refresher-content pullingIcon="arrow-down" pullingText="Desliza abajo para refrescar..." refreshingSpinner="dots"></ion-refresher-content> 
   </ion-refresher>
   
   <app-not-data-yet-message 
@@ -23,7 +23,17 @@
     text="No hay especies aún" icon="archive-outline"
   ></app-not-data-yet-message>
 
-  <ion-list *ngIf="selectedTab === 'types' && speciesList.length > 0 || colorList.length>0">
+  <ion-list *ngIf="selectedTab === 'list' && petList.length>0">
+    <ion-item *ngFor="let pet of petList" (click)="editPet(pet)" detail>
+      <ion-avatar slot="start">  <img [src]="pet.photo"> </ion-avatar>
+      <ion-label>
+        <h3> {{pet.name}} </h3>
+        <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="selectedTab === 'types' && (speciesList.length > 0 || colorList.length>0)">
 
     <div *ngIf="speciesList.length > 0 && !newColorShow">
       <ion-list-header>
@@ -87,14 +97,29 @@
       </ion-card-content>
     </ion-card>
 
-    <ion-list-header *ngIf="colorList.length > 0">
-      <ion-label>Colores Disponibles</ion-label>
-    </ion-list-header>
-    <ion-item *ngFor="let color of colorList">
-      <ion-avatar style="border: 1px solid black;" size="small" slot="start" [ngStyle]="{ 'background-color': color.rgbCode }"></ion-avatar>
-      <ion-label> {{color.name}} ({{color.color}}) </ion-label>
-      <ion-button fill="outline" slot="end" (click)="editColor(color)">Editar</ion-button>
-    </ion-item>
+    <div *ngIf="colorList.length > 0">
+      <ion-list-header>
+        <ion-label>Colores Disponibles</ion-label>
+      </ion-list-header>
+      <ion-item *ngFor="let color of colorList">
+        <ion-avatar style="border: 1px solid black;" size="small" slot="start" [ngStyle]="{ 'background-color': color.rgbCode }"></ion-avatar>
+        <ion-label> {{color.name}} ({{color.color}}) </ion-label>
+        <ion-button fill="outline" slot="end" (click)="editColor(color)">Editar</ion-button>
+      </ion-item>
+    </div>
+    <ion-fab *ngIf="selectedTab === 'types' && !loadingColor && !loading && !newColorShow" horizontal="end" vertical="top" slot="fixed">
+      <ion-fab-button close-icon="close-outline" id="open-modal">
+        <ion-icon name="add-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-list side="down">
+        <ion-fab-button color="secondary" (click)="newType()">
+          <ion-icon name="extension-puzzle-outline"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button color="secondary" (click)="newColorOption()">
+          <ion-icon name="brush-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab-list>
+    </ion-fab>  
   </ion-list>
   
   <ion-list *ngIf="loading">
@@ -113,17 +138,4 @@
     </ion-item>
   </ion-list>
   
-  <ion-fab *ngIf="selectedTab === 'types' && !loadingColor && !loading && !newColorShow" horizontal="center" vertical="bottom" slot="fixed">
-    <ion-fab-button close-icon="close-outline" id="open-modal">
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-    <ion-fab-list side="top">
-      <ion-fab-button color="secondary" (click)="newColorOption()">
-        <ion-icon name="brush-outline"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button color="secondary" (click)="newType()">
-        <ion-icon name="extension-puzzle-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab-list>
-  </ion-fab>  
 </ion-content>
