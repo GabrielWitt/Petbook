@@ -1,12 +1,8 @@
 import { Injectable } from '@angular/core';
-import { 
-  getFirestore, 
-  doc, addDoc, setDoc, getDoc, updateDoc, serverTimestamp,
-  collection, query, where, getDocs, orderBy
-} from "firebase/firestore";
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/compat/firestore';
 import { ErrorHandlerService } from 'src/app/shared/utilities/error-handler.service';
 import { take } from 'rxjs/operators';
+import { serverTimestamp } from 'firebase/firestore'
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +18,20 @@ export class FirestoreActionsService {
     return new Promise((resolve, reject) => {
       try {
         const callDoc =  this.afs.collection(folderName).valueChanges();
+        callDoc.pipe(take(1)).subscribe((querySnapshot: any)=>{
+          resolve(querySnapshot); 
+        })
+      } catch (error) {
+        reject(this.error.handle(error));
+      }
+    });
+  }
+
+  readCollectionOrderBy(folderName:string, field: string, order?: 'desc'|'asc'){
+    return new Promise((resolve, reject) => {
+      const orderGo = order ? order : 'asc'
+      try {
+        const callDoc = this.afs.collection(folderName, ref => ref.orderBy(field,orderGo)).valueChanges();
         callDoc.pipe(take(1)).subscribe((querySnapshot: any)=>{
           resolve(querySnapshot); 
         })
@@ -47,7 +57,7 @@ export class FirestoreActionsService {
   createDocument(folder: string, data){
     return new Promise((resolve, reject) => {
       data['uid'] = this.afs.createId();
-      data['createddAt'] = serverTimestamp();
+      data['createdAt'] = new Date().toISOString();
       try {
         this.afs.collection(folder).doc(data.uid).set(data).then((data:any) => {
           resolve(data);
@@ -60,7 +70,7 @@ export class FirestoreActionsService {
 
   setNamedDocument(folder: string, filename: string, data){
     return new Promise((resolve, reject) => {
-      data['updatedAt'] = serverTimestamp();
+      data['updatedAt'] = new Date().toISOString();
       this.afs.collection(folder).doc(filename) 
       .set(JSON.parse(JSON.stringify(data)), { merge: true })
       .then((done: any) => { resolve(done); })

@@ -1,9 +1,202 @@
 (self["webpackChunkapp"] = self["webpackChunkapp"] || []).push([["default-src_app_shared_shared_module_ts"],{
 
-/***/ 28255:
-/*!****************************************************!*\
-  !*** ./src/app/core/services/fire-auth.service.ts ***!
-  \****************************************************/
+/***/ 14871:
+/*!************************************************************!*\
+  !*** ./src/app/core/services/firestore-actions.service.ts ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FirestoreActionsService": () => (/* binding */ FirestoreActionsService)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_fire_compat_firestore__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/fire/compat/firestore */ 92393);
+/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs/operators */ 83910);
+
+
+
+
+
+let FirestoreActionsService = class FirestoreActionsService {
+    constructor(error, afs) {
+        this.error = error;
+        this.afs = afs;
+    }
+    readCollection(folderName) {
+        return new Promise((resolve, reject) => {
+            try {
+                const callDoc = this.afs.collection(folderName).valueChanges();
+                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__.take)(1)).subscribe((querySnapshot) => {
+                    resolve(querySnapshot);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
+    readCollectionOrderBy(folderName, field, order) {
+        return new Promise((resolve, reject) => {
+            const orderGo = order ? order : 'asc';
+            try {
+                const callDoc = this.afs.collection(folderName, ref => ref.orderBy(field, orderGo)).valueChanges();
+                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__.take)(1)).subscribe((querySnapshot) => {
+                    resolve(querySnapshot);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
+    readCollectionFilter(folderName, filterName, filterValue) {
+        return new Promise((resolve, reject) => {
+            try {
+                const callDoc = this.afs.collection(folderName, ref => ref.where(filterName, "==", filterValue)).valueChanges();
+                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__.take)(1)).subscribe((querySnapshot) => {
+                    resolve(querySnapshot);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
+    createDocument(folder, data) {
+        return new Promise((resolve, reject) => {
+            data['uid'] = this.afs.createId();
+            data['createdAt'] = new Date().toISOString();
+            try {
+                this.afs.collection(folder).doc(data.uid).set(data).then((data) => {
+                    resolve(data);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
+    setNamedDocument(folder, filename, data) {
+        return new Promise((resolve, reject) => {
+            data['updatedAt'] = new Date().toISOString();
+            this.afs.collection(folder).doc(filename)
+                .set(JSON.parse(JSON.stringify(data)), { merge: true })
+                .then((done) => { resolve(done); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readDocument(folder, filename) {
+        return new Promise((resolve, reject) => {
+            try {
+                const callDoc = this.afs.collection(folder).doc(filename).valueChanges();
+                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__.take)(1)).subscribe((data) => {
+                    resolve(data);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
+};
+FirestoreActionsService.ctorParameters = () => [
+    { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__.ErrorHandlerService },
+    { type: _angular_fire_compat_firestore__WEBPACK_IMPORTED_MODULE_2__.AngularFirestore }
+];
+FirestoreActionsService = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Injectable)({
+        providedIn: 'root'
+    })
+], FirestoreActionsService);
+
+
+
+/***/ }),
+
+/***/ 40267:
+/*!**********************************************************!*\
+  !*** ./src/app/core/services/modules/courses.service.ts ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CoursesService": () => (/* binding */ CoursesService)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
+/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../firestore-actions.service */ 14871);
+
+
+
+
+let CoursesService = class CoursesService {
+    constructor(firestore, error) {
+        this.firestore = firestore;
+        this.error = error;
+        this.courseFolder = 'courses';
+        this.certificateFolder = 'certificates';
+    }
+    createCourse(data) {
+        return new Promise((resolve, reject) => {
+            this.firestore.createDocument(this.courseFolder, data)
+                .then(doc => { resolve(doc); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    UpdateCourse(data) {
+        return new Promise((resolve, reject) => {
+            this.firestore.setNamedDocument(this.courseFolder, data.uid, data)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readCourseList() {
+        return new Promise((resolve, reject) => {
+            this.firestore.readCollection(this.courseFolder)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    createCertificate(data) {
+        return new Promise((resolve, reject) => {
+            this.firestore.createDocument(this.courseFolder, data)
+                .then(doc => { resolve(doc); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readMyCertificatesList() {
+        return new Promise((resolve, reject) => {
+            this.firestore.readCollection(this.courseFolder)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+};
+CoursesService.ctorParameters = () => [
+    { type: _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__.FirestoreActionsService },
+    { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__.ErrorHandlerService }
+];
+CoursesService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+        providedIn: 'root'
+    })
+], CoursesService);
+
+
+
+/***/ }),
+
+/***/ 2687:
+/*!************************************************************!*\
+  !*** ./src/app/core/services/modules/fire-auth.service.ts ***!
+  \************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -12,12 +205,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "FireAuthService": () => (/* binding */ FireAuthService)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_fire_compat_auth__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/fire/compat/auth */ 5873);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_fire_compat_auth__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/fire/compat/auth */ 5873);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 60124);
 /* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
-/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./firestore-actions.service */ 14871);
+/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../firestore-actions.service */ 14871);
+/* harmony import */ var _my_store_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../my-store.service */ 30259);
+
 
 
 
@@ -26,19 +221,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let FireAuthService = class FireAuthService {
-  constructor(router, auth, FS, error) {
+  constructor(router, store, auth, FS, error) {
     this.router = router;
+    this.store = store;
     this.auth = auth;
     this.FS = FS;
     this.error = error;
     this.auth.authState.subscribe(user => {
       if (user) {
-        this.user = user;
-        localStorage.setItem('user', JSON.stringify(this.user));
-        JSON.parse(localStorage.getItem('user'));
+        this.user = this.setUser(user);
+        this.store.setData('session', user);
       } else {
-        localStorage.setItem('user', 'null');
-        JSON.parse(localStorage.getItem('user'));
+        this.store.removeFile('session');
       }
     });
   }
@@ -47,18 +241,51 @@ let FireAuthService = class FireAuthService {
     var _this = this;
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      return yield _this.auth.currentUser;
+      return new Promise((resolve, reject) => {
+        _this.getUser().then(user => {
+          if (user) {
+            resolve(user);
+          } else {
+            _this.router.navigateByUrl('general');
+
+            reject('user not found');
+          }
+        });
+      });
     })();
   }
 
   login(email, password) {
+    var _this2 = this;
+
     return new Promise((resolve, reject) => {
-      this.auth.signInWithEmailAndPassword(email, password).then(userCredential => {
-        // Signed in 
-        const user = userCredential.user;
-        this.user = this.setUser(user);
-        resolve(user);
-      }).catch(error => {
+      this.auth.signInWithEmailAndPassword(email, password).then( /*#__PURE__*/function () {
+        var _ref = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (userCredential) {
+          // Signed in 
+          const user = userCredential.user;
+          _this2.user = _this2.setUser(user);
+
+          _this2.store.setData('session', _this2.user);
+
+          _this2.getUser().then(myData => {
+            _this2.uploadUserForm(myData.user.uid, {
+              uid: user.uid,
+              email: user.email,
+              photo: user.photoURL,
+              name: myData.data.name,
+              lastName: myData.data.lastName,
+              birthDate: myData.data.birthDate,
+              manager: myData.data.manager
+            });
+
+            resolve(user);
+          });
+        });
+
+        return function (_x) {
+          return _ref.apply(this, arguments);
+        };
+      }()).catch(error => {
         reject(this.error.handle(error));
       });
     });
@@ -70,9 +297,13 @@ let FireAuthService = class FireAuthService {
         // Signed in 
         const user = userCredential.user;
         this.uploadUserForm(user.uid, {
+          uid: user.uid,
+          photo: '',
+          email: user.email,
           name,
           lastName,
-          birthDate
+          birthDate,
+          manager: false
         }).then(done => {
           resolve(user);
         }).catch(error => {
@@ -85,20 +316,20 @@ let FireAuthService = class FireAuthService {
   }
 
   verifyEmail() {
-    var _this2 = this;
+    var _this3 = this;
 
     return new Promise( /*#__PURE__*/function () {
-      var _ref = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this2.auth.currentUser).sendEmailVerification().then(() => {
+      var _ref2 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+        (yield _this3.auth.currentUser).sendEmailVerification().then(() => {
           // Email verification sent!
           resolve('Se ha enviado un email de verificación');
         }).catch(error => {
-          reject(_this2.error.handle(error));
+          reject(_this3.error.handle(error));
         });
       });
 
-      return function (_x, _x2) {
-        return _ref.apply(this, arguments);
+      return function (_x2, _x3) {
+        return _ref2.apply(this, arguments);
       };
     }());
   }
@@ -126,20 +357,27 @@ let FireAuthService = class FireAuthService {
   }
 
   getUser() {
-    var _this3 = this;
+    var _this4 = this;
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
         try {
-          const userData = _this3.user;
+          _this4.store.readFile('session').then(session => {
+            if (session) {
+              _this4.readUserForm(session.uid).then(data => {
+                resolve({
+                  user: _this4.user,
+                  data
+                });
+              });
+            } else {
+              _this4.router.navigateByUrl('general');
 
-          if (userData) {
-            resolve(_this3.user);
-          } else {
-            _this3.router.navigateByUrl('general');
-
-            resolve(null);
-          }
+              resolve(null);
+            }
+          }).catch(error => {
+            reject(error);
+          });
         } catch (error) {
           console.log('error');
           reject(error);
@@ -149,44 +387,44 @@ let FireAuthService = class FireAuthService {
   }
 
   updateUser(displayName, photoURL) {
-    var _this4 = this;
+    var _this5 = this;
 
     return new Promise( /*#__PURE__*/function () {
-      var _ref2 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this4.auth.currentUser).updateProfile({
+      var _ref3 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+        (yield _this5.auth.currentUser).updateProfile({
           displayName,
           photoURL
         }).then(() => {
           // Profile updated!
           resolve('Tus datos se han actualizado');
         }).catch(error => {
-          reject(_this4.error.handle(error));
+          reject(_this5.error.handle(error));
         });
       });
 
-      return function (_x3, _x4) {
-        return _ref2.apply(this, arguments);
+      return function (_x4, _x5) {
+        return _ref3.apply(this, arguments);
       };
     }());
   }
 
   upgradeUser() {
-    var _this5 = this;
+    var _this6 = this;
 
     return new Promise( /*#__PURE__*/function () {
-      var _ref3 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this5.auth.currentUser).updateProfile({
+      var _ref4 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+        (yield _this6.auth.currentUser).updateProfile({
           displayName: 'administrador'
         }).then(() => {
           // Profile updated!
           resolve('Tu tipo de usuario se ha actualizado');
         }).catch(error => {
-          reject(_this5.error.handle(error));
+          reject(_this6.error.handle(error));
         });
       });
 
-      return function (_x5, _x6) {
-        return _ref3.apply(this, arguments);
+      return function (_x6, _x7) {
+        return _ref4.apply(this, arguments);
       };
     }());
   }
@@ -194,7 +432,8 @@ let FireAuthService = class FireAuthService {
   signOut() {
     return new Promise((resolve, reject) => {
       this.auth.signOut().then(() => {
-        // Sign-out successful.
+        this.store.removeFile('session'); // Sign-out successful.
+
         resolve('Se ha cerrado sesión');
       }).catch(error => {
         reject(this.error.handle(error));
@@ -226,138 +465,110 @@ let FireAuthService = class FireAuthService {
 };
 
 FireAuthService.ctorParameters = () => [{
-  type: _angular_router__WEBPACK_IMPORTED_MODULE_3__.Router
+  type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router
 }, {
-  type: _angular_fire_compat_auth__WEBPACK_IMPORTED_MODULE_4__.AngularFireAuth
+  type: _my_store_service__WEBPACK_IMPORTED_MODULE_3__.MyStoreService
+}, {
+  type: _angular_fire_compat_auth__WEBPACK_IMPORTED_MODULE_5__.AngularFireAuth
 }, {
   type: _firestore_actions_service__WEBPACK_IMPORTED_MODULE_2__.FirestoreActionsService
 }, {
   type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_1__.ErrorHandlerService
 }];
 
-FireAuthService = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_6__.Injectable)({
+FireAuthService = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Injectable)({
   providedIn: 'root'
 })], FireAuthService);
 
 
 /***/ }),
 
-/***/ 14871:
-/*!************************************************************!*\
-  !*** ./src/app/core/services/firestore-actions.service.ts ***!
-  \************************************************************/
+/***/ 2941:
+/*!*********************************************************!*\
+  !*** ./src/app/core/services/modules/notice.service.ts ***!
+  \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "FirestoreActionsService": () => (/* binding */ FirestoreActionsService)
+/* harmony export */   "NoticeService": () => (/* binding */ NoticeService)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var firebase_firestore__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! firebase/firestore */ 31866);
-/* harmony import */ var _angular_fire_compat_firestore__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/fire/compat/firestore */ 92393);
-/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ 83910);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
+/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../firestore-actions.service */ 14871);
 
 
 
 
-
-
-let FirestoreActionsService = class FirestoreActionsService {
-    constructor(error, afs) {
+let NoticeService = class NoticeService {
+    constructor(firestore, error) {
+        this.firestore = firestore;
         this.error = error;
-        this.afs = afs;
+        this.noticeFolder = 'notices';
     }
-    readCollection(folderName) {
-        return new Promise((resolve, reject) => {
-            try {
-                const callDoc = this.afs.collection(folderName).valueChanges();
-                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__.take)(1)).subscribe((querySnapshot) => {
-                    let docList = [];
-                    querySnapshot.forEach((doc) => {
-                        docList.push(doc.data());
-                    });
-                    resolve(docList);
-                });
-            }
-            catch (error) {
-                reject(this.error.handle(error));
-            }
-        });
+    getNoticeType() {
+        return [
+            { icon: 'information-circle-outline', name: 'INFORMACIÓN' },
+            { icon: 'search-outline', name: 'PERDIDO/ENCONTRADO' },
+            { icon: 'gift-outline', name: 'ADOPCIONES' },
+        ];
     }
-    readCollectionFilter(folderName, filterName, filterValue) {
+    createNotice(data) {
         return new Promise((resolve, reject) => {
-            try {
-                const callDoc = this.afs.collection(folderName, ref => ref.where(filterName, "==", filterValue)).valueChanges();
-                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__.take)(1)).subscribe((querySnapshot) => {
-                    let docList = [];
-                    querySnapshot.forEach((doc) => {
-                        docList.push(doc.data());
-                    });
-                    resolve(docList);
-                });
-            }
-            catch (error) {
-                reject(this.error.handle(error));
-            }
-        });
-    }
-    createDocument(folder, data) {
-        return new Promise((resolve, reject) => {
-            data['uid'] = this.afs.createId();
-            data['createddAt'] = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp)();
-            try {
-                this.afs.collection(folder).doc(data.uid).set(data).then((data) => {
-                    resolve(data);
-                });
-            }
-            catch (error) {
-                reject(this.error.handle(error));
-            }
-        });
-    }
-    setNamedDocument(folder, filename, data) {
-        return new Promise((resolve, reject) => {
-            data['updatedAt'] = (0,firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp)();
-            this.afs.collection(folder).doc(filename).set(data)
-                .then((done) => { resolve(done); })
+            this.firestore.createDocument(this.noticeFolder, data)
+                .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
-    readDocument(folder, filename) {
+    UpdateNotice(data) {
         return new Promise((resolve, reject) => {
-            try {
-                const callDoc = this.afs.collection(folder).doc(filename).valueChanges();
-                callDoc.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__.take)(1)).subscribe((data) => {
-                    resolve(data);
-                });
-            }
-            catch (error) {
-                reject(this.error.handle(error));
-            }
+            this.firestore.setNamedDocument(this.noticeFolder, data.uid, data)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readNoticeList() {
+        return new Promise((resolve, reject) => {
+            this.firestore.readCollectionOrderBy(this.noticeFolder, 'createdAt', 'desc')
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    addComment(NoticeUID, comments) {
+        return new Promise((resolve, reject) => {
+            this.firestore.setNamedDocument(this.noticeFolder, NoticeUID, { comments })
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    addLike(NoticeUID, likes) {
+        return new Promise((resolve, reject) => {
+            this.firestore.setNamedDocument(this.noticeFolder, NoticeUID, { likes })
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
         });
     }
 };
-FirestoreActionsService.ctorParameters = () => [
-    { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_1__.ErrorHandlerService },
-    { type: _angular_fire_compat_firestore__WEBPACK_IMPORTED_MODULE_3__.AngularFirestore }
+NoticeService.ctorParameters = () => [
+    { type: _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__.FirestoreActionsService },
+    { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__.ErrorHandlerService }
 ];
-FirestoreActionsService = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Injectable)({
+NoticeService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
         providedIn: 'root'
     })
-], FirestoreActionsService);
+], NoticeService);
 
 
 
 /***/ }),
 
-/***/ 81132:
-/*!******************************************************!*\
-  !*** ./src/app/core/services/pet-service.service.ts ***!
-  \******************************************************/
+/***/ 34514:
+/*!**************************************************************!*\
+  !*** ./src/app/core/services/modules/pet-service.service.ts ***!
+  \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -368,7 +579,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
-/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./firestore-actions.service */ 14871);
+/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../firestore-actions.service */ 14871);
 
 
 
@@ -377,66 +588,84 @@ let PetService = class PetService {
     constructor(firestore, error) {
         this.firestore = firestore;
         this.error = error;
+        this.speciesFolder = 'species';
+        this.colorsFolder = 'colors';
+        this.petsFolder = 'pets';
     }
     createSpecies(data) {
         return new Promise((resolve, reject) => {
-            this.firestore.createDocument('species', data)
+            this.firestore.createDocument(this.speciesFolder, data)
                 .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     readSpecies() {
         return new Promise((resolve, reject) => {
-            this.firestore.readCollection('species')
+            this.firestore.readCollection(this.speciesFolder)
                 .then((docs) => { resolve(docs); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     createColor(data) {
         return new Promise((resolve, reject) => {
-            this.firestore.createDocument('colors', data)
+            this.firestore.createDocument(this.colorsFolder, data)
                 .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     updateColor(uid, data) {
         return new Promise((resolve, reject) => {
-            this.firestore.setNamedDocument('colors', uid, data)
+            this.firestore.setNamedDocument(this.colorsFolder, uid, data)
                 .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     readColors() {
         return new Promise((resolve, reject) => {
-            this.firestore.readCollection('colors')
+            this.firestore.readCollection(this.colorsFolder)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readMyPet(petUID) {
+        return new Promise((resolve, reject) => {
+            this.firestore.readDocument(this.petsFolder, petUID)
                 .then((docs) => { resolve(docs); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     createMyPet(pet) {
         return new Promise((resolve, reject) => {
-            this.firestore.createDocument('pets', pet)
+            this.firestore.createDocument(this.petsFolder, pet)
                 .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     updateMyPet(pet) {
         return new Promise((resolve, reject) => {
-            this.firestore.setNamedDocument('pets', pet.uid, pet)
+            this.firestore.setNamedDocument(this.petsFolder, pet.uid, pet)
+                .then(doc => { resolve(doc); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    statusMyPet(pet, status) {
+        return new Promise((resolve, reject) => {
+            console.log(this.petsFolder, pet.uid, status);
+            this.firestore.setNamedDocument(this.petsFolder, pet.uid, { status })
                 .then(doc => { resolve(doc); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     readPetList() {
         return new Promise((resolve, reject) => {
-            this.firestore.readCollection('pets')
+            this.firestore.readCollection(this.petsFolder)
                 .then((docs) => { resolve(docs); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
     }
     myPetList(uid) {
         return new Promise((resolve, reject) => {
-            this.firestore.readCollectionFilter('pets', 'ownerUid', uid)
+            this.firestore.readCollectionFilter(this.petsFolder, 'ownerUid', uid)
                 .then((docs) => { resolve(docs); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
@@ -456,6 +685,684 @@ PetService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
 
 /***/ }),
 
+/***/ 77464:
+/*!********************************************************!*\
+  !*** ./src/app/core/services/modules/users.service.ts ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "UsersService": () => (/* binding */ UsersService)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
+/* harmony import */ var _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../firestore-actions.service */ 14871);
+
+
+
+
+let UsersService = class UsersService {
+    constructor(firestore, error) {
+        this.firestore = firestore;
+        this.error = error;
+    }
+    readAllUsers() {
+        return new Promise((resolve, reject) => {
+            this.firestore.readCollection('users')
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    readUser(UserUID) {
+        return new Promise((resolve, reject) => {
+            this.firestore.readDocument('users', UserUID)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    upgradeUser(uid) {
+        return new Promise((resolve, reject) => {
+            this.firestore.setNamedDocument('users', uid, { manager: true })
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+};
+UsersService.ctorParameters = () => [
+    { type: _firestore_actions_service__WEBPACK_IMPORTED_MODULE_1__.FirestoreActionsService },
+    { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__.ErrorHandlerService }
+];
+UsersService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+        providedIn: 'root'
+    })
+], UsersService);
+
+
+
+/***/ }),
+
+/***/ 34674:
+/*!***********************************************************************************!*\
+  !*** ./src/app/shared/components/course/detail-course/detail-course.component.ts ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DetailCourseComponent": () => (/* binding */ DetailCourseComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _detail_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail-course.component.html?ngResource */ 59710);
+/* harmony import */ var _detail_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail-course.component.scss?ngResource */ 60999);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+
+
+
+
+let DetailCourseComponent = class DetailCourseComponent {
+    constructor() { }
+    ngOnInit() { }
+};
+DetailCourseComponent.ctorParameters = () => [];
+DetailCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
+        selector: 'app-detail-course',
+        template: _detail_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_detail_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], DetailCourseComponent);
+
+
+
+/***/ }),
+
+/***/ 29913:
+/*!*****************************************************************************!*\
+  !*** ./src/app/shared/components/course/new-course/new-course.component.ts ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NewCourseComponent": () => (/* binding */ NewCourseComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _new_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-course.component.html?ngResource */ 14489);
+/* harmony import */ var _new_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-course.component.scss?ngResource */ 83840);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
+/* harmony import */ var src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/courses.service */ 40267);
+/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
+/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../utilities/alerts */ 80884);
+
+
+
+
+
+
+
+
+
+
+let NewCourseComponent = class NewCourseComponent {
+  constructor(modal, courses, alerts, images, upload) {
+    this.modal = modal;
+    this.courses = courses;
+    this.alerts = alerts;
+    this.images = images;
+    this.upload = upload;
+    this.myCourse = {
+      title: '',
+      description: '',
+      video: '',
+      exam: null,
+      author: null
+    };
+    this.newQuestion = {
+      question: '',
+      answers: [{
+        text: '',
+        correct: false
+      }, {
+        text: '',
+        correct: false
+      }, {
+        text: '',
+        correct: false
+      }]
+    };
+    this.newExamen = {
+      questions: []
+    };
+    this.loading = false;
+    this.editCourseForm = false;
+    this.progress = 0;
+    this.QuestionNumber = 0;
+  }
+
+  ngOnInit() {
+    if (this.course) {
+      this.myCourse = this.course;
+    } else {
+      this.myCourse.author = {
+        uid: this.user.uid,
+        photo: this.user.photo,
+        email: this.user.email,
+        name: this.user.name + ' ' + this.user.lastName
+      };
+    }
+
+    console.log(this.newQuestion);
+  }
+
+  titleListener(e) {
+    this.myCourse.title = e.detail.value;
+  }
+
+  descriptionListener(e) {
+    this.myCourse.description = e.detail.value;
+  }
+
+  videoListener(e) {
+    this.myCourse.video = e.detail.value;
+  }
+
+  questionListener(e) {
+    this.newQuestion.question = e.detail.value;
+  }
+
+  answerListener(iNumber, e) {
+    this.newQuestion.answers[iNumber].text = e.detail.value;
+  }
+
+  checkBoxListener(iNumber, e) {
+    if (e.detail.checked) {
+      this.newQuestion.answers.forEach(item => {
+        item.correct = false;
+      });
+    }
+
+    this.newQuestion.answers[iNumber].correct = e.detail.checked;
+  }
+
+  saveQuestion() {
+    this.newExamen.questions.push(this.newQuestion);
+    this.newQuestion = {
+      question: '',
+      answers: [{
+        text: '',
+        correct: false
+      }, {
+        text: '',
+        correct: false
+      }, {
+        text: '',
+        correct: false
+      }]
+    };
+  }
+
+  editCourse() {
+    if (this.editCourseForm) {
+      this.myCourse = this.course;
+      this.editCourseForm = false;
+    } else {
+      this.editCourseForm = true;
+    }
+  }
+
+  createCourse() {
+    var _this = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.myCourse.exam = _this.newExamen;
+      console.log(_this.myCourse);
+
+      try {
+        _this.loading = true;
+        console.log(_this.myCourse);
+
+        if (_this.course) {
+          yield _this.courses.UpdateCourse(_this.myCourse);
+        } else {
+          yield _this.courses.createCourse(_this.myCourse);
+        }
+
+        _this.alerts.showAlert('CURSOS', _this.course ? 'Datos de ' + _this.myCourse.title + ' actualizados' : 'Nuevo curso agregado', 'OK');
+
+        _this.loading = false;
+
+        _this.modal.dismiss(true);
+      } catch (error) {
+        console.log(error);
+        _this.loading = false;
+      }
+    })();
+  } // IMAGE SYSTEM
+
+
+  addPhoto() {
+    const options = {
+      currentRoute: (this.user.manager ? 'administrator' : 'client') + '/courses',
+      height: null,
+      width: null,
+      pdf: false
+    };
+    this.images.presentImageOptions(options).then(imageObj => {
+      if (imageObj[0] !== undefined) {
+        this.newImage = imageObj[0];
+      }
+    });
+  }
+
+  uploadPhoto() {
+    return new Promise((resolve, reject) => {
+      const imageName = Date().toString() + '_Notice_' + this.myCourse.title;
+      this.upload.uploadFile('NoticeList', imageName, this.newImage.file, progress => {
+        this.progress = progress;
+      }).then(data => {
+        this.upload.deletePicture();
+        resolve(data.url);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+};
+
+NewCourseComponent.ctorParameters = () => [{
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_7__.ModalController
+}, {
+  type: src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_4__.CoursesService
+}, {
+  type: _utilities_alerts__WEBPACK_IMPORTED_MODULE_6__.AlertsService
+}, {
+  type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__.AttachmentsService
+}, {
+  type: src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__.ImageUploaderService
+}];
+
+NewCourseComponent.propDecorators = {
+  user: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_8__.Input
+  }],
+  course: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_8__.Input
+  }]
+};
+NewCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+  selector: 'app-new-course',
+  template: _new_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [_new_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
+})], NewCourseComponent);
+
+
+/***/ }),
+
+/***/ 67186:
+/*!**********************************************************************!*\
+  !*** ./src/app/shared/components/new-notice/new-notice.component.ts ***!
+  \**********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NewNoticeComponent": () => (/* binding */ NewNoticeComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _new_notice_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-notice.component.html?ngResource */ 49578);
+/* harmony import */ var _new_notice_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-notice.component.scss?ngResource */ 41142);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
+/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
+/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utilities/alerts */ 80884);
+/* harmony import */ var _utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utilities/time-handler */ 8123);
+
+
+
+
+
+
+
+
+
+
+
+
+let NewNoticeComponent = class NewNoticeComponent {
+  constructor(pets, notices, modal, time, alerts, images, upload) {
+    this.pets = pets;
+    this.notices = notices;
+    this.modal = modal;
+    this.time = time;
+    this.alerts = alerts;
+    this.images = images;
+    this.upload = upload;
+    this.scroll = false;
+    this.fullHeight = 0;
+    this.showScroll = 0;
+    this.defaultUser = 'assets/profile/ProfileBlank.png';
+    this.typeList = [];
+    this.myNotice = {
+      title: '',
+      type: null,
+      description: '',
+      photo: '',
+      writer: null,
+      comments: [],
+      likes: []
+    };
+    this.loading = true;
+    this.editNoticeForm = false;
+    this.myLike = false;
+    this.progress = 0; // Comments
+
+    this.sending = false;
+    this.newComment = {
+      text: '',
+      user: null
+    };
+  }
+
+  ngOnInit() {
+    this.loadTypes().then(() => {
+      this.loading = false;
+
+      if (this.notice) {
+        this.myNotice = this.notice;
+        this.noticeType = this.notice.type.name;
+        this.notice.likes.forEach(like => {
+          if (like === this.user.uid) {
+            this.myLike = true;
+          }
+        });
+      } else {
+        this.myNotice.writer = {
+          uid: this.user.uid,
+          photo: this.user.photo,
+          email: this.user.email,
+          name: this.user.name + ' ' + this.user.lastName
+        };
+      }
+
+      if (this.pet) {
+        this.noticeType = this.typeList[1].name;
+        this.myNotice.type = this.typeList[1];
+        this.myNotice.title = this.pet.specie + ' Perdido: ' + this.time.getCurrentDateEs();
+        this.myNotice.photo = this.pet.photo;
+        let prevMessage = this.pet.specie + ' perdido, su nombre es ' + this.pet.name + ' y es de color ' + this.pet.color1.color;
+
+        if (this.pet.color2) {
+          prevMessage = prevMessage + ' con ' + this.pet.color2.color;
+        }
+
+        if (this.pet.breed) {
+          prevMessage = prevMessage + '. Es de raza ' + this.pet.breed;
+        }
+
+        prevMessage = prevMessage + (this.pet.microchip ? '. Tiene' : 'No tiene') + ' microchip. Ser perdio en (agregar dirección)';
+        prevMessage = prevMessage + '. Si tiene información llamar al (agregar número)';
+        this.myNotice.description = prevMessage;
+      }
+    });
+  }
+
+  loadTypes() {
+    var _this = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        _this.typeList = yield _this.notices.getNoticeType();
+        return 'done';
+      } catch (error) {
+        console.log(error);
+        return 'error';
+      }
+    })();
+  } // IMAGE SYSTEM
+
+
+  addPhoto() {
+    const options = {
+      currentRoute: (this.user.manager ? 'administrator' : 'client') + '/news',
+      height: null,
+      width: null,
+      pdf: false
+    };
+    this.images.presentImageOptions(options).then(imageObj => {
+      if (imageObj[0] !== undefined) {
+        this.newImage = imageObj[0];
+      }
+    });
+  }
+
+  addAttachment() {
+    const options = {
+      currentRoute: (this.user.manager ? 'administrator' : 'client') + '/news',
+      height: null,
+      width: null,
+      pdf: false
+    };
+    this.images.presentImageOptions(options).then(imageObj => {
+      if (imageObj[0] !== undefined) {
+        this.newImage = imageObj[0];
+      }
+    });
+  }
+
+  uploadPhoto() {
+    return new Promise((resolve, reject) => {
+      const imageName = Date().toString() + '_Notice_' + this.myNotice.title;
+      this.upload.uploadFile('NoticeList', imageName, this.newImage.file, progress => {
+        this.progress = progress;
+      }).then(data => {
+        this.upload.deletePicture();
+        resolve(data.url);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  } // LISTENRES
+
+
+  handleType(e) {
+    this.typeList.forEach(type => {
+      if (type.name === e.detail.value) {
+        this.myNotice.type = type;
+      }
+    });
+  }
+
+  titleListener(e) {
+    this.myNotice.title = e.detail.value;
+  }
+
+  descriptionListener(e) {
+    this.myNotice.description = e.detail.value;
+  }
+
+  editNotice() {
+    if (this.editNoticeForm) {
+      this.myNotice = this.notice;
+      this.editNoticeForm = false;
+    } else {
+      this.editNoticeForm = true;
+    }
+  }
+
+  createNotice() {
+    var _this2 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        _this2.loading = true;
+
+        if (_this2.newImage) {
+          _this2.myNotice.photo = yield _this2.uploadPhoto();
+        }
+
+        console.log(_this2.myNotice);
+
+        if (_this2.notice) {
+          _this2.myNotice['createdAt'] = _this2.time.dateTransform(_this2.notice['createdAt']);
+          yield _this2.notices.UpdateNotice(_this2.myNotice);
+        } else {
+          if (_this2.pet) {
+            _this2.myNotice.pet = {
+              uid: _this2.pet.uid,
+              name: _this2.pet.name,
+              specie: _this2.pet.specie,
+              status: 'lost',
+              ownerUid: _this2.pet.ownerUid,
+              photo: _this2.pet.photo,
+              color1: _this2.pet.color1,
+              microchip: _this2.pet.microchip
+            };
+
+            if (_this2.pet.color2) {
+              _this2.myNotice.pet.color2 = _this2.pet.color2;
+            }
+          }
+
+          yield _this2.notices.createNotice(_this2.myNotice);
+
+          if (_this2.pet) {
+            yield _this2.pets.statusMyPet(_this2.pet, 'lost');
+          }
+        }
+
+        _this2.alerts.showAlert('ANUNCIOS', _this2.notice ? 'Datos de ' + _this2.myNotice.title + ' actualizados' : 'Nuevo anuncio agregado', 'OK');
+
+        _this2.loading = false;
+
+        _this2.modal.dismiss(true);
+      } catch (error) {
+        console.log(error);
+        _this2.loading = false;
+      }
+    })();
+  }
+
+  commentListener(e) {
+    this.newComment.text = e.detail.value;
+  }
+
+  pressSend() {
+    var _this3 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this3.sending = true;
+      _this3.myNotice = _this3.notice;
+
+      try {
+        _this3.newComment.user = {
+          uid: _this3.user.uid,
+          photo: _this3.user.photo,
+          email: _this3.user.email,
+          name: _this3.user.name + ' ' + _this3.user.lastName
+        };
+
+        _this3.myNotice.comments.push(_this3.newComment);
+
+        yield _this3.notices.UpdateNotice(_this3.myNotice);
+        setTimeout(() => {
+          _this3.sending = false;
+        }, 5000);
+        _this3.notice.comments = _this3.myNotice.comments;
+        _this3.newComment = {
+          text: '',
+          user: null
+        };
+
+        _this3.scrollDown();
+      } catch (error) {
+        console.log(error);
+        _this3.sending = false;
+      }
+    })();
+  }
+
+  checkScroll(scroll, content) {
+    this.content = content;
+
+    if (this.fullHeight < scroll.detail.currentY) {
+      this.fullHeight = scroll.detail.currentY;
+    }
+
+    this.showScroll = this.fullHeight - scroll.detail.scrollTop;
+  }
+
+  scrollDown() {
+    if (this.content?.scrollToBottom) {
+      setTimeout(() => {
+        this.content.scrollToBottom(400);
+        setTimeout(() => {
+          this.showScroll = 1;
+        }, 1000);
+      }, 500);
+    }
+  }
+
+};
+
+NewNoticeComponent.ctorParameters = () => [{
+  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_5__.PetService
+}, {
+  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__.NoticeService
+}, {
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_9__.ModalController
+}, {
+  type: _utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__.TimeHandlerModule
+}, {
+  type: _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__.AlertsService
+}, {
+  type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_6__.AttachmentsService
+}, {
+  type: src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__.ImageUploaderService
+}];
+
+NewNoticeComponent.propDecorators = {
+  content: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.ViewChild,
+    args: [_ionic_angular__WEBPACK_IMPORTED_MODULE_9__.IonContent, {
+      static: false
+    }]
+  }],
+  user: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.Input
+  }],
+  notice: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.Input
+  }],
+  pet: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.Input
+  }]
+};
+NewNoticeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Component)({
+  selector: 'app-new-notice',
+  template: _new_notice_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [_new_notice_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
+})], NewNoticeComponent);
+
+
+/***/ }),
+
 /***/ 20982:
 /*!*********************************************************************!*\
   !*** ./src/app/shared/components/pets/new-pet/new-pet.component.ts ***!
@@ -468,16 +1375,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "NewPetComponent": () => (/* binding */ NewPetComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _new_pet_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-pet.component.html?ngResource */ 23342);
 /* harmony import */ var _new_pet_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-pet.component.scss?ngResource */ 90766);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
-/* harmony import */ var src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/pet-service.service */ 81132);
-/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
-/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
-/* harmony import */ var src_app_shared_utilities_time_handler__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! src/app/shared/utilities/time-handler */ 8123);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+/* harmony import */ var src_app_core_services_modules_users_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/core/services/modules/users.service */ 77464);
+/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
+/* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
+/* harmony import */ var src_app_shared_utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! src/app/shared/utilities/time-handler */ 8123);
+
 
 
 
@@ -490,8 +1399,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let NewPetComponent = class NewPetComponent {
-  constructor(pets, alerts, modal, time, images, upload) {
+  constructor(pets, users, alerts, modal, time, images, upload) {
     this.pets = pets;
+    this.users = users;
     this.alerts = alerts;
     this.modal = modal;
     this.time = time;
@@ -502,6 +1412,7 @@ let NewPetComponent = class NewPetComponent {
       name: '',
       photo: '',
       birthDate: new Date(),
+      deceaseDate: null,
       specie: '',
       breed: '',
       microchip: false,
@@ -510,7 +1421,9 @@ let NewPetComponent = class NewPetComponent {
     this.newPetBreed = '';
     this.loading = true;
     this.showCalendar = false;
+    this.showCalendar2 = false;
     this.needDate = false;
+    this.editPetForm = false;
     this.progress = 0;
     this.minDate = '1990-12-31T00:00:00';
     this.maxDate = new Date().toISOString();
@@ -522,8 +1435,8 @@ let NewPetComponent = class NewPetComponent {
     this.loadSpecies().then(done => {
       if (this.pet?.ownerUid) {
         this.myPetData = this.pet;
-        this.myPetData.birthDate = new Date(this.pet.birthDate.seconds * 1000 + this.pet.birthDate.nanoseconds / 1000000);
-        this.birthDate = this.myPetData.birthDate.toISOString();
+        this.myPetData.birthDate = this.time.dateTransform(this.myPetData.birthDate);
+        this.birthDate = this.myPetData.birthDate;
 
         if (this.pet.color1) {
           this.newPetColor1 = this.pet.color1.uid;
@@ -537,6 +1450,14 @@ let NewPetComponent = class NewPetComponent {
       }
 
       console.log(this.myPetData);
+
+      if (this.myPetData.ownerUid !== this.userData.uid) {
+        this.users.readUser(this.myPetData.ownerUid).then(owner => {
+          console.log(owner);
+          this.ownerData = owner;
+        });
+      }
+
       this.loading = false;
     });
   }
@@ -594,6 +1515,14 @@ let NewPetComponent = class NewPetComponent {
     }
   }
 
+  showHideCalendar2() {
+    if (this.showCalendar2) {
+      this.showCalendar2 = false;
+    } else {
+      this.showCalendar2 = true;
+    }
+  }
+
   handleCalendar(e) {
     const fecha = this.time.dateTransform(e.detail.value);
 
@@ -608,9 +1537,31 @@ let NewPetComponent = class NewPetComponent {
     }
   }
 
+  handleCalendar2(e) {
+    const fecha = this.time.dateTransform(e.detail.value);
+
+    if (this.showCalendar2) {
+      if (this.myPetData.deceaseDate !== fecha) {
+        this.myPetData.deceaseDate = fecha;
+      }
+
+      this.showCalendar2 = false;
+    } else {
+      this.showCalendar2 = true;
+    }
+  }
+
+  editPet() {
+    if (this.editPetForm) {
+      this.myPetData = this.pet;
+      this.editPetForm = false;
+    } else {
+      this.editPetForm = true;
+    }
+  }
+
   nameListener(e) {
     this.myPetData.name = e.detail.value;
-    console.log(this.myPetData.name);
   }
 
   handleBreed(e) {
@@ -648,54 +1599,194 @@ let NewPetComponent = class NewPetComponent {
       try {
         _this2.loading = true;
         _this2.myPetData.ownerUid = _this2.userData.uid;
-        console.log(_this2.myPetData); //if(this.newImage){ this.myPetData.photo =  await this.uploadPhoto(); }
-        //this.myPetData.color1: null,
-        //this.myPetData.color2: null,
 
-        /*
-        if(this.pet){
-          console.log('updatePet');
-        }else{
-          await this.pets.createMyPet(this.myPetData);
+        if (_this2.newImage) {
+          _this2.myPetData.photo = yield _this2.uploadPhoto();
         }
-        this.alerts.showAlert( 'MASCOTAS',
-        this.pet? 'Datos de '+ this.myPetData.name + ' actualizados' : 'Nueva mascota agregada', 'OK');
-        this.loading = true;
-        this.modal.dismiss(true);
-         */
-      } catch (error) {}
+
+        if (_this2.myPetData.deceaseDate) {
+          _this2.myPetData.status = 'dead';
+        } else {
+          _this2.myPetData.status = _this2.pet?.status ? _this2.pet?.status : 'good';
+        }
+
+        if (_this2.pet) {
+          yield _this2.pets.updateMyPet(_this2.myPetData);
+        } else {
+          yield _this2.pets.createMyPet(_this2.myPetData);
+        }
+
+        _this2.alerts.showAlert('MASCOTAS', _this2.pet ? 'Datos de ' + _this2.myPetData.name + ' actualizados' : 'Nueva mascota agregada', 'OK');
+
+        _this2.loading = false;
+
+        _this2.modal.dismiss({
+          action: 'update'
+        });
+      } catch (error) {
+        console.log(error);
+        _this2.loading = false;
+      }
+    })();
+  }
+
+  reportLost() {
+    var _this3 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this3.alerts.AlertConfirm('REPORTAR PERDIDO', 'Esta seguro de reportar perdido a ' + _this3.pet.name + '?').then(answer => {
+        if (answer) {
+          _this3.modal.dismiss({
+            action: 'report',
+            pet: _this3.pet
+          });
+        }
+      });
+    })();
+  }
+
+  reportFound() {
+    var _this4 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this4.pets.statusMyPet(_this4.pet, 'good').then(data => {
+        _this4.modal.dismiss({
+          action: 'update'
+        });
+      }).catch(error => {
+        console.log(error);
+      });
     })();
   }
 
 };
 
 NewPetComponent.ctorParameters = () => [{
-  type: src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_4__.PetService
+  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_4__.PetService
 }, {
-  type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_5__.AlertsService
+  type: src_app_core_services_modules_users_service__WEBPACK_IMPORTED_MODULE_5__.UsersService
 }, {
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_8__.ModalController
+  type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_6__.AlertsService
 }, {
-  type: src_app_shared_utilities_time_handler__WEBPACK_IMPORTED_MODULE_7__.TimeHandlerModule
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_9__.ModalController
 }, {
-  type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_6__.AttachmentsService
+  type: src_app_shared_utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__.TimeHandlerModule
+}, {
+  type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_7__.AttachmentsService
 }, {
   type: src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__.ImageUploaderService
 }];
 
 NewPetComponent.propDecorators = {
   pet: [{
-    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.Input
   }],
   userData: [{
-    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_10__.Input
   }]
 };
-NewPetComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+NewPetComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Component)({
   selector: 'app-new-pet',
   template: _new_pet_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [_new_pet_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
 })], NewPetComponent);
+
+
+/***/ }),
+
+/***/ 98481:
+/*!***************************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-detail/pet-detail.component.ts ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PetDetailComponent": () => (/* binding */ PetDetailComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _pet_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pet-detail.component.html?ngResource */ 24758);
+/* harmony import */ var _pet_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pet-detail.component.scss?ngResource */ 87847);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 22560);
+
+
+
+
+let PetDetailComponent = class PetDetailComponent {
+    constructor() { }
+    ngOnInit() {
+        console.log(this.pet);
+    }
+};
+PetDetailComponent.ctorParameters = () => [];
+PetDetailComponent.propDecorators = {
+    pet: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    ownerData: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }]
+};
+PetDetailComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+        selector: 'app-pet-detail',
+        template: _pet_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_pet_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], PetDetailComponent);
+
+
+
+/***/ }),
+
+/***/ 2926:
+/*!***********************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-item/pet-item.component.ts ***!
+  \***********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PetItemComponent": () => (/* binding */ PetItemComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _pet_item_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pet-item.component.html?ngResource */ 17398);
+/* harmony import */ var _pet_item_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pet-item.component.scss?ngResource */ 41294);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+
+
+
+
+
+let PetItemComponent = class PetItemComponent {
+    constructor(pets) {
+        this.pets = pets;
+    }
+    ngOnInit() {
+        if (this.shortPet) {
+            console.log(this.shortPet);
+            this.pets.readMyPet(this.shortPet.uid).then(petData => {
+                console.log(petData);
+                this.petData = petData;
+                this.shortPet.status = petData.status;
+            });
+        }
+    }
+};
+PetItemComponent.ctorParameters = () => [
+    { type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_2__.PetService }
+];
+PetItemComponent.propDecorators = {
+    pet: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input }],
+    shortPet: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input }]
+};
+PetItemComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
+        selector: 'app-pet-item',
+        template: _pet_item_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
+        styles: [_pet_item_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
+    })
+], PetItemComponent);
+
 
 
 /***/ }),
@@ -711,54 +1802,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "UserProfileComponent": () => (/* binding */ UserProfileComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _user_profile_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./user-profile.component.html?ngResource */ 27861);
 /* harmony import */ var _user_profile_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./user-profile.component.scss?ngResource */ 34429);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
-/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utilities/alerts */ 80884);
-
-
-
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 22560);
 
 
 
 
 let UserProfileComponent = class UserProfileComponent {
-    constructor(router, auth, alerts) {
-        this.router = router;
-        this.auth = auth;
-        this.alerts = alerts;
-        this.loading = false;
+    constructor() {
         this.defaultUser = '../../../../assets/profile/ProfileBlank.png';
+        this.lastName = '';
     }
-    ngOnInit() { }
-    cerrarSesion() {
-        this.loading = true;
-        this.alerts.AlertConfirm('', '¿Seguro que desea salir de su sesión?').then(answer => {
-            if (answer) {
-                this.auth.signOut().then(done => {
-                    this.loading = false;
-                    this.router.navigateByUrl('general/login');
-                });
-            }
-            else {
-                this.loading = false;
-            }
-        });
+    ngOnInit() {
     }
 };
-UserProfileComponent.ctorParameters = () => [
-    { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
-    { type: _utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService }
-];
+UserProfileComponent.ctorParameters = () => [];
 UserProfileComponent.propDecorators = {
-    user: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_5__.Input }]
+    user: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }],
+    shortUser: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input }]
 };
-UserProfileComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Component)({
+UserProfileComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
         selector: 'app-user-profile',
         template: _user_profile_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
         styles: [_user_profile_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
@@ -915,13 +1981,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "MainHeaderComponent": () => (/* binding */ MainHeaderComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main-header.component.html?ngResource */ 55229);
-/* harmony import */ var _main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./main-header.component.scss?ngResource */ 4182);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
-/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./main-header.component.html?ngResource */ 55229);
+/* harmony import */ var _main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./main-header.component.scss?ngResource */ 4182);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
+/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
+/* harmony import */ var _course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../course/new-course/new-course.component */ 29913);
+/* harmony import */ var _new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../new-notice/new-notice.component */ 67186);
+
+
+
+
 
 
 
@@ -930,44 +2004,103 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let MainHeaderComponent = class MainHeaderComponent {
-    constructor(router, alerts, auth) {
-        this.router = router;
-        this.alerts = alerts;
-        this.auth = auth;
-        this.loading = false;
-    }
-    ngOnInit() { }
-    cerrarSesion() {
-        this.loading = true;
-        this.alerts.AlertConfirm('', '¿Seguro que desea salir de su sesión?').then(answer => {
-            if (answer) {
-                this.auth.signOut().then(done => {
-                    this.loading = false;
-                    this.router.navigateByUrl('general/login');
-                });
-            }
-            else {
-                this.loading = false;
-            }
-        });
-    }
-};
-MainHeaderComponent.ctorParameters = () => [
-    { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router },
-    { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService }
-];
-MainHeaderComponent.propDecorators = {
-    title: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_5__.Input }]
-};
-MainHeaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Component)({
-        selector: 'app-main-header',
-        template: _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
-        styles: [_main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
-    })
-], MainHeaderComponent);
+  constructor(router, modal, alerts, auth, routerOutlet) {
+    this.router = router;
+    this.modal = modal;
+    this.alerts = alerts;
+    this.auth = auth;
+    this.routerOutlet = routerOutlet;
+    this.loading = false;
+  }
 
+  ngOnInit() {
+    this.auth.getUser().then(userData => {
+      this.user = userData.data;
+    });
+  }
+
+  cerrarSesion() {
+    this.loading = true;
+    this.alerts.AlertConfirm('', '¿Seguro que desea salir de su sesión?').then(answer => {
+      if (answer) {
+        this.auth.signOut().then(done => {
+          this.loading = false;
+          this.router.navigateByUrl('general/login');
+        });
+      } else {
+        this.loading = false;
+      }
+    });
+  }
+
+  createNotice() {
+    var _this = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const modal = yield _this.modal.create({
+        component: _new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__.NewNoticeComponent,
+        componentProps: {
+          notice: null,
+          user: _this.user,
+          pet: null
+        },
+        mode: 'ios',
+        presentingElement: _this.routerOutlet.nativeEl
+      });
+      modal.present();
+      const modalResult = yield modal.onWillDismiss();
+
+      _this.rightButton(modalResult.data);
+    })();
+  }
+
+  createCourse() {
+    var _this2 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const modal = yield _this2.modal.create({
+        component: _course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_5__.NewCourseComponent,
+        componentProps: {
+          course: null,
+          user: _this2.user
+        },
+        mode: 'ios',
+        presentingElement: _this2.routerOutlet.nativeEl
+      });
+      modal.present();
+      const modalResult = yield modal.onWillDismiss();
+
+      _this2.rightButton(modalResult.data);
+    })();
+  }
+
+};
+
+MainHeaderComponent.ctorParameters = () => [{
+  type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.Router
+}, {
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_8__.ModalController
+}, {
+  type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__.AlertsService
+}, {
+  type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__.FireAuthService
+}, {
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_8__.IonRouterOutlet
+}];
+
+MainHeaderComponent.propDecorators = {
+  title: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
+  }],
+  rightButton: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
+  }]
+};
+MainHeaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+  selector: 'app-main-header',
+  template: _main_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [_main_header_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
+})], MainHeaderComponent);
 
 
 /***/ }),
@@ -1008,6 +2141,116 @@ NotDataYetMessageComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([
     })
 ], NotDataYetMessageComponent);
 
+
+
+/***/ }),
+
+/***/ 67798:
+/*!*****************************************************************************************!*\
+  !*** ./src/app/shared/components/view/notice-bottom-bar/notice-bottom-bar.component.ts ***!
+  \*****************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NoticeBottomBarComponent": () => (/* binding */ NoticeBottomBarComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _notice_bottom_bar_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./notice-bottom-bar.component.html?ngResource */ 63152);
+/* harmony import */ var _notice_bottom_bar_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./notice-bottom-bar.component.scss?ngResource */ 31402);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
+
+
+
+
+
+
+let NoticeBottomBarComponent = class NoticeBottomBarComponent {
+  constructor(notices) {
+    this.notices = notices;
+    this.myNotice = {
+      title: '',
+      type: null,
+      description: '',
+      photo: '',
+      writer: null,
+      comments: [],
+      likes: []
+    };
+    this.sending = true;
+    this.editNoticeForm = false;
+    this.myLike = false;
+  }
+
+  ngOnInit() {
+    this.notice.likes.forEach(like => {
+      if (like === this.userUID) {
+        this.myLike = true;
+      }
+    });
+  }
+
+  addLike() {
+    var _this = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.sending = true;
+      _this.myNotice = _this.notice;
+
+      try {
+        if (_this.myLike) {
+          let likeList = [];
+
+          _this.notice.likes.forEach(like => {
+            if (_this.userUID !== like) {
+              likeList.push(like);
+            }
+          });
+
+          _this.myNotice.likes = likeList;
+        } else {
+          _this.myNotice.likes.push(_this.userUID);
+        }
+
+        yield _this.notices.UpdateNotice(_this.myNotice);
+        _this.sending = false;
+        _this.notice.likes = _this.myNotice.likes;
+        _this.myLike = !_this.myLike;
+      } catch (error) {
+        console.log(error);
+        _this.sending = false;
+      }
+    })();
+  }
+
+};
+
+NoticeBottomBarComponent.ctorParameters = () => [{
+  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_3__.NoticeService
+}];
+
+NoticeBottomBarComponent.propDecorators = {
+  userUID: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  notice: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  likes: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  comments: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }]
+};
+NoticeBottomBarComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+  selector: 'app-notice-bottom-bar',
+  template: _notice_bottom_bar_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [_notice_bottom_bar_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
+})], NoticeBottomBarComponent);
 
 
 /***/ }),
@@ -1079,6 +2322,9 @@ let TimeFormatPipe = class TimeFormatPipe {
             case 'DD/MM/YYYY':
                 this.RESULT = moment__WEBPACK_IMPORTED_MODULE_0__(date).format('DD/MM/YYYY');
                 break;
+            case 'DD/MM/YY':
+                this.RESULT = moment__WEBPACK_IMPORTED_MODULE_0__(date).format('DD/MM/YY');
+                break;
             default:
                 this.RESULT = date;
         }
@@ -1106,9 +2352,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "SharedModule": () => (/* binding */ SharedModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common */ 94666);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/common */ 94666);
 /* harmony import */ var _pipes_first_key_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pipes/first-key.pipe */ 82234);
 /* harmony import */ var _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/user-profile/user-profile.component */ 94046);
 /* harmony import */ var _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/view/big-button/big-button.component */ 23740);
@@ -1116,10 +2362,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/view/detail-header/detail-header.component */ 88999);
 /* harmony import */ var _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/view/not-data-yet-message/not-data-yet-message.component */ 29168);
 /* harmony import */ var _components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/pets/new-pet/new-pet.component */ 20982);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/forms */ 2508);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _components_view_loading_view_loading_view_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/view/loading-view/loading-view.component */ 266);
 /* harmony import */ var _pipes_time_format_pipe__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pipes/time-format.pipe */ 84203);
 /* harmony import */ var _utilities_time_handler__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utilities/time-handler */ 8123);
+/* harmony import */ var _components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/new-notice/new-notice.component */ 67186);
+/* harmony import */ var _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/course/new-course/new-course.component */ 29913);
+/* harmony import */ var _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/view/notice-bottom-bar/notice-bottom-bar.component */ 67798);
+/* harmony import */ var _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/pets/pet-detail/pet-detail.component */ 98481);
+/* harmony import */ var _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/pets/pet-item/pet-item.component */ 2926);
+/* harmony import */ var _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./components/course/detail-course/detail-course.component */ 34674);
 
 
 
@@ -1137,14 +2389,26 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
 // General view
 const components = [
     _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__.BigButtonComponent,
     _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__.UserProfileComponent,
     _components_view_main_header_main_header_component__WEBPACK_IMPORTED_MODULE_3__.MainHeaderComponent,
+    _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_12__.NoticeBottomBarComponent,
     _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__.DetailHeaderComponent,
     _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__.NotDataYetMessageComponent,
     _components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_6__.NewPetComponent,
+    _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_13__.PetDetailComponent,
+    _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_14__.PetItemComponent,
+    _components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__.NewNoticeComponent,
+    _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_11__.NewCourseComponent,
+    _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_15__.DetailCourseComponent,
     _components_view_loading_view_loading_view_component__WEBPACK_IMPORTED_MODULE_7__.LoadingViewComponent
 ];
 const pipes = [
@@ -1153,12 +2417,12 @@ const pipes = [
 ];
 let SharedModule = class SharedModule {
 };
-SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.NgModule)({
+SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_17__.NgModule)({
         imports: [
-            _angular_common__WEBPACK_IMPORTED_MODULE_12__.CommonModule,
-            _angular_forms__WEBPACK_IMPORTED_MODULE_13__.FormsModule,
-            _angular_forms__WEBPACK_IMPORTED_MODULE_13__.ReactiveFormsModule,
+            _angular_common__WEBPACK_IMPORTED_MODULE_18__.CommonModule,
+            _angular_forms__WEBPACK_IMPORTED_MODULE_19__.FormsModule,
+            _angular_forms__WEBPACK_IMPORTED_MODULE_19__.ReactiveFormsModule,
             _utilities_time_handler__WEBPACK_IMPORTED_MODULE_9__.TimeHandlerModule
         ],
         declarations: [
@@ -1169,7 +2433,7 @@ SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([
             ...pipes,
             ...components
         ],
-        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_11__.CUSTOM_ELEMENTS_SCHEMA],
+        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_17__.CUSTOM_ELEMENTS_SCHEMA],
     })
 ], SharedModule);
 
@@ -1376,8 +2640,16 @@ let TimeHandlerModule = class TimeHandlerModule {
   }
 
   dateTransform(data) {
-    console.log(data);
-    return moment__WEBPACK_IMPORTED_MODULE_1__(data).toISOString();
+    if (data?.seconds) {
+      return moment__WEBPACK_IMPORTED_MODULE_1__(data.seconds * 1000 + data.nanoseconds / 1000000).toISOString();
+    } else {
+      return moment__WEBPACK_IMPORTED_MODULE_1__(data).toISOString();
+    }
+  }
+
+  getCurrentDateEs() {
+    moment__WEBPACK_IMPORTED_MODULE_1__.locale('es');
+    return moment__WEBPACK_IMPORTED_MODULE_1__().format('ddd, DD MMM YYYY');
   }
 
 };
@@ -1394,102 +2666,6 @@ const joinDateTimeInISO8601 = (date, time) => {
     s: 0
   }).format('YYYY-MM-DDTHH:mm:ss');
 };
-
-/***/ }),
-
-/***/ 31866:
-/*!***********************************************************!*\
-  !*** ./node_modules/firebase/firestore/dist/index.esm.js ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AbstractUserDataWriter": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.AbstractUserDataWriter),
-/* harmony export */   "Bytes": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.Bytes),
-/* harmony export */   "CACHE_SIZE_UNLIMITED": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.CACHE_SIZE_UNLIMITED),
-/* harmony export */   "CollectionReference": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.CollectionReference),
-/* harmony export */   "DocumentReference": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.DocumentReference),
-/* harmony export */   "DocumentSnapshot": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.DocumentSnapshot),
-/* harmony export */   "FieldPath": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.FieldPath),
-/* harmony export */   "FieldValue": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.FieldValue),
-/* harmony export */   "Firestore": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.Firestore),
-/* harmony export */   "FirestoreError": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.FirestoreError),
-/* harmony export */   "GeoPoint": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.GeoPoint),
-/* harmony export */   "LoadBundleTask": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.LoadBundleTask),
-/* harmony export */   "Query": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.Query),
-/* harmony export */   "QueryConstraint": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.QueryConstraint),
-/* harmony export */   "QueryDocumentSnapshot": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.QueryDocumentSnapshot),
-/* harmony export */   "QuerySnapshot": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.QuerySnapshot),
-/* harmony export */   "SnapshotMetadata": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.SnapshotMetadata),
-/* harmony export */   "Timestamp": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.Timestamp),
-/* harmony export */   "Transaction": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.Transaction),
-/* harmony export */   "WriteBatch": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.WriteBatch),
-/* harmony export */   "_DatabaseId": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._DatabaseId),
-/* harmony export */   "_DocumentKey": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._DocumentKey),
-/* harmony export */   "_EmptyAppCheckTokenProvider": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._EmptyAppCheckTokenProvider),
-/* harmony export */   "_EmptyAuthCredentialsProvider": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._EmptyAuthCredentialsProvider),
-/* harmony export */   "_FieldPath": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._FieldPath),
-/* harmony export */   "_cast": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._cast),
-/* harmony export */   "_debugAssert": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._debugAssert),
-/* harmony export */   "_isBase64Available": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._isBase64Available),
-/* harmony export */   "_logWarn": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._logWarn),
-/* harmony export */   "_setIndexConfiguration": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._setIndexConfiguration),
-/* harmony export */   "_validateIsNotUsedTogether": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__._validateIsNotUsedTogether),
-/* harmony export */   "addDoc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.addDoc),
-/* harmony export */   "arrayRemove": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.arrayRemove),
-/* harmony export */   "arrayUnion": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.arrayUnion),
-/* harmony export */   "clearIndexedDbPersistence": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.clearIndexedDbPersistence),
-/* harmony export */   "collection": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.collection),
-/* harmony export */   "collectionGroup": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.collectionGroup),
-/* harmony export */   "connectFirestoreEmulator": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.connectFirestoreEmulator),
-/* harmony export */   "deleteDoc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.deleteDoc),
-/* harmony export */   "deleteField": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.deleteField),
-/* harmony export */   "disableNetwork": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.disableNetwork),
-/* harmony export */   "doc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.doc),
-/* harmony export */   "documentId": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.documentId),
-/* harmony export */   "enableIndexedDbPersistence": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.enableIndexedDbPersistence),
-/* harmony export */   "enableMultiTabIndexedDbPersistence": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.enableMultiTabIndexedDbPersistence),
-/* harmony export */   "enableNetwork": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.enableNetwork),
-/* harmony export */   "endAt": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.endAt),
-/* harmony export */   "endBefore": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.endBefore),
-/* harmony export */   "ensureFirestoreConfigured": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.ensureFirestoreConfigured),
-/* harmony export */   "executeWrite": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.executeWrite),
-/* harmony export */   "getDoc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDoc),
-/* harmony export */   "getDocFromCache": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocFromCache),
-/* harmony export */   "getDocFromServer": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocFromServer),
-/* harmony export */   "getDocs": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocs),
-/* harmony export */   "getDocsFromCache": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocsFromCache),
-/* harmony export */   "getDocsFromServer": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getDocsFromServer),
-/* harmony export */   "getFirestore": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.getFirestore),
-/* harmony export */   "increment": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.increment),
-/* harmony export */   "initializeFirestore": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.initializeFirestore),
-/* harmony export */   "limit": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.limit),
-/* harmony export */   "limitToLast": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.limitToLast),
-/* harmony export */   "loadBundle": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.loadBundle),
-/* harmony export */   "namedQuery": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.namedQuery),
-/* harmony export */   "onSnapshot": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.onSnapshot),
-/* harmony export */   "onSnapshotsInSync": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.onSnapshotsInSync),
-/* harmony export */   "orderBy": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.orderBy),
-/* harmony export */   "query": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.query),
-/* harmony export */   "queryEqual": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.queryEqual),
-/* harmony export */   "refEqual": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.refEqual),
-/* harmony export */   "runTransaction": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.runTransaction),
-/* harmony export */   "serverTimestamp": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.serverTimestamp),
-/* harmony export */   "setDoc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.setDoc),
-/* harmony export */   "setLogLevel": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.setLogLevel),
-/* harmony export */   "snapshotEqual": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.snapshotEqual),
-/* harmony export */   "startAfter": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.startAfter),
-/* harmony export */   "startAt": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.startAt),
-/* harmony export */   "terminate": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.terminate),
-/* harmony export */   "updateDoc": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.updateDoc),
-/* harmony export */   "waitForPendingWrites": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.waitForPendingWrites),
-/* harmony export */   "where": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.where),
-/* harmony export */   "writeBatch": () => (/* reexport safe */ _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__.writeBatch)
-/* harmony export */ });
-/* harmony import */ var _firebase_firestore__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @firebase/firestore */ 17448);
-
 
 /***/ }),
 
@@ -21671,6 +22847,39 @@ webpackContext.id = 46700;
 
 /***/ }),
 
+/***/ 60999:
+/*!************************************************************************************************!*\
+  !*** ./src/app/shared/components/course/detail-course/detail-course.component.scss?ngResource ***!
+  \************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJkZXRhaWwtY291cnNlLmNvbXBvbmVudC5zY3NzIn0= */";
+
+/***/ }),
+
+/***/ 83840:
+/*!******************************************************************************************!*\
+  !*** ./src/app/shared/components/course/new-course/new-course.component.scss?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJuZXctY291cnNlLmNvbXBvbmVudC5zY3NzIn0= */";
+
+/***/ }),
+
+/***/ 41142:
+/*!***********************************************************************************!*\
+  !*** ./src/app/shared/components/new-notice/new-notice.component.scss?ngResource ***!
+  \***********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = ".rightButtonContainer {\n  text-align: center;\n}\n\n.rightButton {\n  width: 35px;\n  height: 35px;\n  margin: 3px 0px 3px -5px;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5ldy1ub3RpY2UuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvbmV3LW5vdGljZS9uZXctbm90aWNlLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0ksa0JBQUE7QUNDSjs7QURFQTtFQUNJLFdBQUE7RUFDQSxZQUFBO0VBQ0Esd0JBQUE7QUNDSiIsImZpbGUiOiJuZXctbm90aWNlLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnJpZ2h0QnV0dG9uQ29udGFpbmVye1xuICAgIHRleHQtYWxpZ246IGNlbnRlcjtcbn1cblxuLnJpZ2h0QnV0dG9ue1xuICAgIHdpZHRoOiAzNXB4OyBcbiAgICBoZWlnaHQ6IDM1cHg7IFxuICAgIG1hcmdpbjogM3B4IDBweCAzcHggLTVweDtcbn0iLCIucmlnaHRCdXR0b25Db250YWluZXIge1xuICB0ZXh0LWFsaWduOiBjZW50ZXI7XG59XG5cbi5yaWdodEJ1dHRvbiB7XG4gIHdpZHRoOiAzNXB4O1xuICBoZWlnaHQ6IDM1cHg7XG4gIG1hcmdpbjogM3B4IDBweCAzcHggLTVweDtcbn0iXX0= */";
+
+/***/ }),
+
 /***/ 90766:
 /*!**********************************************************************************!*\
   !*** ./src/app/shared/components/pets/new-pet/new-pet.component.scss?ngResource ***!
@@ -21678,7 +22887,29 @@ webpackContext.id = 46700;
 /***/ ((module) => {
 
 "use strict";
-module.exports = ".profileCircle {\n  --border-radius: 50%;\n  --size: 40pt;\n  position: relative;\n}\n\n.redImage {\n  border: 3pt solid var(--ion-color-danger);\n}\n\n.cameraButton {\n  position: absolute;\n  background-color: var(--ion-color-medium);\n  top: 25pt;\n  left: 25pt;\n  width: 20pt;\n  height: 20pt;\n  font-size: 15pt;\n  border-radius: 50%;\n  padding: 2pt;\n}\n\n.uploadingImage {\n  position: absolute;\n  top: 10pt;\n  left: 10pt;\n}\n\n.imageProfile {\n  position: absolute;\n  font-size: 36pt;\n}\n\n.loadingImage {\n  position: absolute;\n  top: 41pt;\n}\n\n.colorDisplay {\n  border: 1px solid white;\n  border-radius: 50%;\n  width: 20px;\n  height: 20px;\n}\n\n.redText {\n  color: var(--ion-color-danger);\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5ldy1wZXQuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvcGV0cy9uZXctcGV0L25ldy1wZXQuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxvQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQ0NKOztBREVBO0VBQ0kseUNBQUE7QUNDSjs7QURFQTtFQUNJLGtCQUFBO0VBQ0EseUNBQUE7RUFDQSxTQUFBO0VBQ0EsVUFBQTtFQUNBLFdBQUE7RUFDQSxZQUFBO0VBQ0EsZUFBQTtFQUNBLGtCQUFBO0VBQ0EsWUFBQTtBQ0NKOztBREVBO0VBQ0ksa0JBQUE7RUFDQSxTQUFBO0VBQ0EsVUFBQTtBQ0NKOztBREVBO0VBQ0ksa0JBQUE7RUFDQSxlQUFBO0FDQ0o7O0FERUE7RUFDSSxrQkFBQTtFQUNBLFNBQUE7QUNDSjs7QURFQTtFQUNJLHVCQUFBO0VBQ0Esa0JBQUE7RUFDQSxXQUFBO0VBQ0EsWUFBQTtBQ0NKOztBREVBO0VBQ0ksOEJBQUE7QUNDSiIsImZpbGUiOiJuZXctcGV0LmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnByb2ZpbGVDaXJjbGV7XG4gICAgLS1ib3JkZXItcmFkaXVzOiA1MCU7XG4gICAgLS1zaXplOiA0MHB0O1xuICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbn1cblxuLnJlZEltYWdle1xuICAgIGJvcmRlcjogM3B0IHNvbGlkIHZhcigtLWlvbi1jb2xvci1kYW5nZXIpO1xufVxuXG4uY2FtZXJhQnV0dG9ue1xuICAgIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1pb24tY29sb3ItbWVkaXVtKTtcbiAgICB0b3A6IDI1cHQ7XG4gICAgbGVmdDogMjVwdDtcbiAgICB3aWR0aDogMjBwdDtcbiAgICBoZWlnaHQ6IDIwcHQ7XG4gICAgZm9udC1zaXplOiAxNXB0O1xuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgICBwYWRkaW5nOiAycHQ7XG59XG5cbi51cGxvYWRpbmdJbWFnZXtcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgdG9wOiAxMHB0O1xuICAgIGxlZnQ6IDEwcHQ7XG59XG5cbi5pbWFnZVByb2ZpbGV7XG4gICAgcG9zaXRpb246IGFic29sdXRlO1xuICAgIGZvbnQtc2l6ZTogMzZwdDtcbn1cblxuLmxvYWRpbmdJbWFnZXtcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgdG9wOiA0MXB0O1xufVxuXG4uY29sb3JEaXNwbGF5e1xuICAgIGJvcmRlcjogMXB4IHNvbGlkIHdoaXRlO1xuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgICB3aWR0aDogMjBweDtcbiAgICBoZWlnaHQ6IDIwcHg7XG59XG5cbi5yZWRUZXh0e1xuICAgIGNvbG9yOiB2YXIoLS1pb24tY29sb3ItZGFuZ2VyKTtcbn0iLCIucHJvZmlsZUNpcmNsZSB7XG4gIC0tYm9yZGVyLXJhZGl1czogNTAlO1xuICAtLXNpemU6IDQwcHQ7XG4gIHBvc2l0aW9uOiByZWxhdGl2ZTtcbn1cblxuLnJlZEltYWdlIHtcbiAgYm9yZGVyOiAzcHQgc29saWQgdmFyKC0taW9uLWNvbG9yLWRhbmdlcik7XG59XG5cbi5jYW1lcmFCdXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWlvbi1jb2xvci1tZWRpdW0pO1xuICB0b3A6IDI1cHQ7XG4gIGxlZnQ6IDI1cHQ7XG4gIHdpZHRoOiAyMHB0O1xuICBoZWlnaHQ6IDIwcHQ7XG4gIGZvbnQtc2l6ZTogMTVwdDtcbiAgYm9yZGVyLXJhZGl1czogNTAlO1xuICBwYWRkaW5nOiAycHQ7XG59XG5cbi51cGxvYWRpbmdJbWFnZSB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAxMHB0O1xuICBsZWZ0OiAxMHB0O1xufVxuXG4uaW1hZ2VQcm9maWxlIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICBmb250LXNpemU6IDM2cHQ7XG59XG5cbi5sb2FkaW5nSW1hZ2Uge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHRvcDogNDFwdDtcbn1cblxuLmNvbG9yRGlzcGxheSB7XG4gIGJvcmRlcjogMXB4IHNvbGlkIHdoaXRlO1xuICBib3JkZXItcmFkaXVzOiA1MCU7XG4gIHdpZHRoOiAyMHB4O1xuICBoZWlnaHQ6IDIwcHg7XG59XG5cbi5yZWRUZXh0IHtcbiAgY29sb3I6IHZhcigtLWlvbi1jb2xvci1kYW5nZXIpO1xufSJdfQ== */";
+module.exports = ".profileCircle {\n  --border-radius: 50%;\n  --size: 40pt;\n  position: relative;\n}\n\n.redImage {\n  border: 3pt solid var(--ion-color-danger);\n}\n\n.grayScale {\n  filter: grayscale(100%);\n}\n\n.cameraButton {\n  position: absolute;\n  background-color: var(--ion-color-medium);\n  top: 25pt;\n  left: 25pt;\n  width: 20pt;\n  height: 20pt;\n  font-size: 15pt;\n  border-radius: 50%;\n  padding: 2pt;\n}\n\n.uploadingImage {\n  position: absolute;\n  top: 10pt;\n  left: 10pt;\n}\n\n.imageProfile {\n  position: absolute;\n  font-size: 36pt;\n}\n\n.loadingImage {\n  position: absolute;\n  top: 41pt;\n}\n\n.colorDisplay {\n  border: 1px solid white;\n  border-radius: 50%;\n  width: 20px;\n  height: 20px;\n}\n\n.redText {\n  color: var(--ion-color-danger);\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5ldy1wZXQuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvcGV0cy9uZXctcGV0L25ldy1wZXQuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxvQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQ0NKOztBREVBO0VBQ0kseUNBQUE7QUNDSjs7QURFQTtFQUNJLHVCQUFBO0FDQ0o7O0FERUE7RUFDSSxrQkFBQTtFQUNBLHlDQUFBO0VBQ0EsU0FBQTtFQUNBLFVBQUE7RUFDQSxXQUFBO0VBQ0EsWUFBQTtFQUNBLGVBQUE7RUFDQSxrQkFBQTtFQUNBLFlBQUE7QUNDSjs7QURFQTtFQUNJLGtCQUFBO0VBQ0EsU0FBQTtFQUNBLFVBQUE7QUNDSjs7QURFQTtFQUNJLGtCQUFBO0VBQ0EsZUFBQTtBQ0NKOztBREVBO0VBQ0ksa0JBQUE7RUFDQSxTQUFBO0FDQ0o7O0FERUE7RUFDSSx1QkFBQTtFQUNBLGtCQUFBO0VBQ0EsV0FBQTtFQUNBLFlBQUE7QUNDSjs7QURFQTtFQUNJLDhCQUFBO0FDQ0oiLCJmaWxlIjoibmV3LXBldC5jb21wb25lbnQuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi5wcm9maWxlQ2lyY2xle1xuICAgIC0tYm9yZGVyLXJhZGl1czogNTAlO1xuICAgIC0tc2l6ZTogNDBwdDtcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbi5yZWRJbWFnZXtcbiAgICBib3JkZXI6IDNwdCBzb2xpZCB2YXIoLS1pb24tY29sb3ItZGFuZ2VyKTtcbn1cblxuLmdyYXlTY2FsZXtcbiAgICBmaWx0ZXI6IGdyYXlzY2FsZSgxMDAlKTtcbn1cblxuLmNhbWVyYUJ1dHRvbntcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0taW9uLWNvbG9yLW1lZGl1bSk7XG4gICAgdG9wOiAyNXB0O1xuICAgIGxlZnQ6IDI1cHQ7XG4gICAgd2lkdGg6IDIwcHQ7XG4gICAgaGVpZ2h0OiAyMHB0O1xuICAgIGZvbnQtc2l6ZTogMTVwdDtcbiAgICBib3JkZXItcmFkaXVzOiA1MCU7XG4gICAgcGFkZGluZzogMnB0O1xufVxuXG4udXBsb2FkaW5nSW1hZ2V7XG4gICAgcG9zaXRpb246IGFic29sdXRlO1xuICAgIHRvcDogMTBwdDtcbiAgICBsZWZ0OiAxMHB0O1xufVxuXG4uaW1hZ2VQcm9maWxle1xuICAgIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgICBmb250LXNpemU6IDM2cHQ7XG59XG5cbi5sb2FkaW5nSW1hZ2V7XG4gICAgcG9zaXRpb246IGFic29sdXRlO1xuICAgIHRvcDogNDFwdDtcbn1cblxuLmNvbG9yRGlzcGxheXtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB3aGl0ZTtcbiAgICBib3JkZXItcmFkaXVzOiA1MCU7XG4gICAgd2lkdGg6IDIwcHg7XG4gICAgaGVpZ2h0OiAyMHB4O1xufVxuXG4ucmVkVGV4dHtcbiAgICBjb2xvcjogdmFyKC0taW9uLWNvbG9yLWRhbmdlcik7XG59IiwiLnByb2ZpbGVDaXJjbGUge1xuICAtLWJvcmRlci1yYWRpdXM6IDUwJTtcbiAgLS1zaXplOiA0MHB0O1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbi5yZWRJbWFnZSB7XG4gIGJvcmRlcjogM3B0IHNvbGlkIHZhcigtLWlvbi1jb2xvci1kYW5nZXIpO1xufVxuXG4uZ3JheVNjYWxlIHtcbiAgZmlsdGVyOiBncmF5c2NhbGUoMTAwJSk7XG59XG5cbi5jYW1lcmFCdXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWlvbi1jb2xvci1tZWRpdW0pO1xuICB0b3A6IDI1cHQ7XG4gIGxlZnQ6IDI1cHQ7XG4gIHdpZHRoOiAyMHB0O1xuICBoZWlnaHQ6IDIwcHQ7XG4gIGZvbnQtc2l6ZTogMTVwdDtcbiAgYm9yZGVyLXJhZGl1czogNTAlO1xuICBwYWRkaW5nOiAycHQ7XG59XG5cbi51cGxvYWRpbmdJbWFnZSB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAxMHB0O1xuICBsZWZ0OiAxMHB0O1xufVxuXG4uaW1hZ2VQcm9maWxlIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICBmb250LXNpemU6IDM2cHQ7XG59XG5cbi5sb2FkaW5nSW1hZ2Uge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHRvcDogNDFwdDtcbn1cblxuLmNvbG9yRGlzcGxheSB7XG4gIGJvcmRlcjogMXB4IHNvbGlkIHdoaXRlO1xuICBib3JkZXItcmFkaXVzOiA1MCU7XG4gIHdpZHRoOiAyMHB4O1xuICBoZWlnaHQ6IDIwcHg7XG59XG5cbi5yZWRUZXh0IHtcbiAgY29sb3I6IHZhcigtLWlvbi1jb2xvci1kYW5nZXIpO1xufSJdfQ== */";
+
+/***/ }),
+
+/***/ 87847:
+/*!****************************************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-detail/pet-detail.component.scss?ngResource ***!
+  \****************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = ".profileCircle {\n  --border-radius: 50%;\n  --size: 40pt;\n  position: relative;\n}\n\n.redImage {\n  border: 3pt solid var(--ion-color-danger);\n}\n\n.grayScale {\n  filter: grayscale(100%);\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBldC1kZXRhaWwuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvcGV0cy9wZXQtZGV0YWlsL3BldC1kZXRhaWwuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxvQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQ0NKOztBREVBO0VBQ0kseUNBQUE7QUNDSjs7QURFQTtFQUNJLHVCQUFBO0FDQ0oiLCJmaWxlIjoicGV0LWRldGFpbC5jb21wb25lbnQuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi5wcm9maWxlQ2lyY2xle1xuICAgIC0tYm9yZGVyLXJhZGl1czogNTAlO1xuICAgIC0tc2l6ZTogNDBwdDtcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbi5yZWRJbWFnZXtcbiAgICBib3JkZXI6IDNwdCBzb2xpZCB2YXIoLS1pb24tY29sb3ItZGFuZ2VyKTtcbn1cblxuLmdyYXlTY2FsZXtcbiAgICBmaWx0ZXI6IGdyYXlzY2FsZSgxMDAlKTtcbn0iLCIucHJvZmlsZUNpcmNsZSB7XG4gIC0tYm9yZGVyLXJhZGl1czogNTAlO1xuICAtLXNpemU6IDQwcHQ7XG4gIHBvc2l0aW9uOiByZWxhdGl2ZTtcbn1cblxuLnJlZEltYWdlIHtcbiAgYm9yZGVyOiAzcHQgc29saWQgdmFyKC0taW9uLWNvbG9yLWRhbmdlcik7XG59XG5cbi5ncmF5U2NhbGUge1xuICBmaWx0ZXI6IGdyYXlzY2FsZSgxMDAlKTtcbn0iXX0= */";
+
+/***/ }),
+
+/***/ 41294:
+/*!************************************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-item/pet-item.component.scss?ngResource ***!
+  \************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = ".profileCircle {\n  --border-radius: 50%;\n  --size: 40pt;\n  position: relative;\n}\n\n.redImage {\n  border: 3pt solid var(--ion-color-danger);\n}\n\n.grayScale {\n  filter: grayscale(100%);\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBldC1pdGVtLmNvbXBvbmVudC5zY3NzIiwiLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vSW5nZW5pZXJpJUNDJTgxYSUyMGRlJTIwU29mdHdhcmUvUGV0Ym9vay9zcmMvYXBwL3NoYXJlZC9jb21wb25lbnRzL3BldHMvcGV0LWl0ZW0vcGV0LWl0ZW0uY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxvQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQ0NKOztBREVBO0VBQ0kseUNBQUE7QUNDSjs7QURFQTtFQUNJLHVCQUFBO0FDQ0oiLCJmaWxlIjoicGV0LWl0ZW0uY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIucHJvZmlsZUNpcmNsZXtcbiAgICAtLWJvcmRlci1yYWRpdXM6IDUwJTtcbiAgICAtLXNpemU6IDQwcHQ7XG4gICAgcG9zaXRpb246IHJlbGF0aXZlO1xufVxuXG4ucmVkSW1hZ2V7XG4gICAgYm9yZGVyOiAzcHQgc29saWQgdmFyKC0taW9uLWNvbG9yLWRhbmdlcik7XG59XG5cbi5ncmF5U2NhbGV7XG4gICAgZmlsdGVyOiBncmF5c2NhbGUoMTAwJSk7XG59IiwiLnByb2ZpbGVDaXJjbGUge1xuICAtLWJvcmRlci1yYWRpdXM6IDUwJTtcbiAgLS1zaXplOiA0MHB0O1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbi5yZWRJbWFnZSB7XG4gIGJvcmRlcjogM3B0IHNvbGlkIHZhcigtLWlvbi1jb2xvci1kYW5nZXIpO1xufVxuXG4uZ3JheVNjYWxlIHtcbiAgZmlsdGVyOiBncmF5c2NhbGUoMTAwJSk7XG59Il19 */";
 
 /***/ }),
 
@@ -21748,6 +22979,50 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 
 /***/ }),
 
+/***/ 31402:
+/*!******************************************************************************************************!*\
+  !*** ./src/app/shared/components/view/notice-bottom-bar/notice-bottom-bar.component.scss?ngResource ***!
+  \******************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJub3RpY2UtYm90dG9tLWJhci5jb21wb25lbnQuc2NzcyJ9 */";
+
+/***/ }),
+
+/***/ 59710:
+/*!************************************************************************************************!*\
+  !*** ./src/app/shared/components/course/detail-course/detail-course.component.html?ngResource ***!
+  \************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<p>\n  detail-course works!\n</p>\n";
+
+/***/ }),
+
+/***/ 14489:
+/*!******************************************************************************************!*\
+  !*** ./src/app/shared/components/course/new-course/new-course.component.html?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!course\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editCourseForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editCourse()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{course ? course.title: 'Nuevo Curso'}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!course || editCourseForm\" color=\"success\" (click)=\"createCourse()\" \n        [disabled]=\"loading || newExamen.questions.length < 5 || \n        (myCourse?.title.length === 0 || !myCourse?.title) || \n        (myCourse?.description.length === 0 || !myCourse?.description) ||\n        (myCourse?.video.length === 0 || !myCourse?.video) \">\n          Guardar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm && (user.uid === course.author?.uid)\" color=\"dark\" (click)=\"editCourse()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!course || editCourseForm)\">\n  <ion-card>\n\n    <ion-item>\n      <ion-label>Título:</ion-label>\n      <ion-input type=\"text\" [value]=\"myCourse.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.title.length === 0 || !myCourse?.title\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el título de este curso\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Contenido:</ion-label>\n      <ion-textarea rows=\"3\" [value]=\"myCourse.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.description.length === 0 || !myCourse?.description\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa una descripción corta de este curso\n    </ion-text>\n    <ion-item>\n      <ion-label>Video:</ion-label>\n      <ion-input type=\"text\" [value]=\"myCourse.video\" (ionChange)=\"videoListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.video.length === 0 || !myCourse?.video\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el url del video de este curso\n    </ion-text>\n  </ion-card>\n  \n  <ion-list class=\"ion-padding\">\n    <ion-header-list>\n      <ion-label>Preguntas {{newExamen.questions.length + 1}}/10</ion-label>\n    </ion-header-list>\n    <ion-grid *ngFor=\"let question of newExamen.questions; index as i\">\n      <ion-row>\n        <ion-col size=\"10\">\n          <ion-text> Pregunta {{i+1}}: {{question.question}} </ion-text>\n        </ion-col>\n        <ion-col size=\"2\">\n          <ion-icon size=\"large\" color=\"danger\" name=\"close-circle\"></ion-icon>\n        </ion-col>\n      </ion-row>\n      <ion-row *ngFor=\"let item of question.answers; index as j\" class=\"ion-text-center\">\n        <ion-col size=\"9\">\n          <ion-text>\n            {{j==0?'a':(j==1?'b':'c')}}). {{item.text}}\n          </ion-text>\n        </ion-col>\n        <ion-col size=\"3\">\n          <ion-icon color=\"success\" size=\"small\" *ngIf=\"item.correct\" name=\"checkbox\"></ion-icon>\n        </ion-col>\n      </ion-row>\n    </ion-grid>\n    <ion-item>\n      <ion-label>Pregunta {{newExamen.questions.length + 1}}:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.question\" (ionChange)=\"questionListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.question.length === 0 || !newQuestion?.question\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la pregunta 1\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Respuesta A:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[0].text\" (ionChange)=\"answerListener(0,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(0,$event)\" [checked]=\"newQuestion?.answers[0].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[0].text.length === 0 || !newQuestion?.answers[0].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta a\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta B:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[1].text\" (ionChange)=\"answerListener(1,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(1,$event)\" [checked]=\"newQuestion?.answers[1].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[1].text.length === 0 || !newQuestion?.answers[1].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta b\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta C:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[2].text\" (ionChange)=\"answerListener(2,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(2,$event)\" [checked]=\"newQuestion?.answers[2].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[2].text.length === 0 || !newQuestion?.answers[2].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta c\n    </ion-text>\n  </ion-list>\n  <ion-row>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newExamen.questions.length < 5\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Se necesitan 5 preguntas mínimo para crear un examen\n    </ion-text>\n    <app-big-button *ngIf=\"newExamen.questions.length < 10\" LABEL=\"Guardar Pregunta\" buttonType=\"\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"saveQuestion()\"></app-big-button>\n  </ion-row>\n</ion-content>";
+
+/***/ }),
+
+/***/ 49578:
+/*!***********************************************************************************!*\
+  !*** ./src/app/shared/components/new-notice/new-notice.component.html?ngResource ***!
+  \***********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!notice\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editNoticeForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editNotice()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{notice ? notice.type.name: (pet? 'Animal Perdido' : 'Nuevo Anuncio')}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!notice || editNoticeForm\" color=\"success\" (click)=\"createNotice()\" \n        [disabled]=\"loading && (!newImage && myNotice.photo)\">\n          Enviar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm && ((user.uid === notice.writer?.uid) || this.user.manager)\" color=\"dark\" (click)=\"editNotice()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content *ngIf=\"!loading && notice && !editNoticeForm\" fullscreen  #ionScroll [scrollEvents]=\"true\" (ionScroll)=\"checkScroll($event, ionScroll)\">\n  <ion-row class=\"ion-float-right\">\n      <ion-text color=\"secondary\">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>\n  </ion-row>\n  <ion-card>\n    <img *ngIf=\"notice.photo\" [src]=\"notice.photo\" />\n    <ion-card-header>\n      <ion-card-subtitle>\n        Por: {{notice.writer.name}}\n      </ion-card-subtitle>\n      <ion-card-title>Título: {{notice.title}}</ion-card-title>\n    </ion-card-header>\n    <ion-card-content>\n      {{notice.description}}\n      <app-pet-item *ngIf=\"notice.pet\" [shortPet]=\"notice.pet\"></app-pet-item>\n    </ion-card-content>\n    <ion-footer>\n      <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"user.uid\"></app-notice-bottom-bar>\n    </ion-footer>\n  </ion-card>\n  <ion-list *ngIf=\"this.notice.comments.length > 0\">\n    <div *ngFor=\"let comment of this.notice.comments\">\n      <ion-item>\n        <ion-avatar slot=\"start\"><img src=\"{{comment.user.photo ? comment.user.photo : defaultUser}}\"></ion-avatar>\n        <ion-labe>\n          <h4>{{comment.user.name}}</h4>\n          <p>{{comment.text}}</p>\n        </ion-labe>\n      </ion-item>\n      <ion-row *ngIf=\"comment.photo\">\n        <img [src]=\"comment.photo\">\n      </ion-row>\n    </div>\n  </ion-list>\n  <ion-fab vertical=\"bottom\" horizontal=\"end\" slot=\"fixed\" style=\"bottom: 50px; right: 20px;\" *ngIf=\"showScroll > 400\">\n    <ion-fab-button color=\"light\" size=\"small\" (click)=\"scrollDown()\" close-icon=\"close-outline\">\n      <ion-icon name=\"chevron-down-outline\"></ion-icon>\n    </ion-fab-button>\n  </ion-fab>\n</ion-content>\n<ion-footer *ngIf=\"!loading && notice && !editNoticeForm\">\n  <ion-toolbar>\n    <ion-row class=\"inputMargin\" *ngIf=\"!loading\">\n      <ion-col size=\"11\">\n        <ion-textarea placeholder=\"Escribe un comentario...\" style=\"background-color: white; color:black; border-radius: 7pt; padding-left: 7px;\" rows=\"1\" [disabled]=\"sending\" [value]=\"newComment.text\" (ionChange)=\"commentListener($event)\"></ion-textarea>\n      </ion-col>\n      <ion-col size=\"1\" class=\"rightButtonContainer\"> \n        <ion-icon *ngIf=\"!sending\" color=\"dark\" name=\"arrow-up-circle\" class=\"rightButton\" (click)=\"pressSend()\"></ion-icon>\n        <ion-icon *ngIf=\"sending\" color=\"tertiary\" name=\"arrow-up-circle\" class=\"rightButton\"></ion-icon>\n      </ion-col>\n      <div>\n      </div>\n    </ion-row>\n  </ion-toolbar>\n</ion-footer>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!notice || editNoticeForm)\">\n  <ion-card>\n    <img *ngIf=\"!newImage && notice\" src=\"{{myNotice.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"!newImage && pet\" src=\"{{pet.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"newImage\" src=\"{{newImage.webPath}}\" (click)=\"addPhoto()\">\n    <ion-list>\n      <ion-item *ngIf=\"!newImage && !notice && !pet\" (click)=\"addPhoto()\">\n        <ion-label>Agregue una imagen:</ion-label>\n        <ion-button color=\"secondary\"><ion-icon name=\"camera-outline\" color=\"light\"></ion-icon></ion-button>\n      </ion-item>\n\n      <ion-item>\n        <ion-icon slot=\"start\" *ngIf=\"myNotice.type\" color=\"tertiary\" size=\"large\" [name]=\"myNotice.type.icon\"></ion-icon>\n        <ion-label position=\"stacked\">Tipo:</ion-label>\n        <ion-select mode='ios' [value]=\"noticeType\" (ionChange)=\"handleType($event)\" [disabled]=\"pet\">\n          <ion-select-option *ngFor=\"let type of typeList\" [value]=\"type.name\"> {{type.name}}</ion-select-option>\n        </ion-select>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!noticeType\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione un tipo de anuncio\n      </ion-text>\n\n      <ion-item>\n        <ion-label position=\"stacked\">Título:</ion-label>\n        <ion-input type=\"text\" [value]=\"myNotice.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.title.length === 0 || !myNotice?.title\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el título de este anuncio\n      </ion-text>\n      \n      <ion-item>\n        <ion-label position=\"stacked\">Contenido:</ion-label>\n        <ion-textarea rows=\"10\" placeholder=\"Ingrese el contenido de tu anuncio aquí...\" [value]=\"myNotice.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.description.length === 0 || !myNotice?.description\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el contenido de este anuncio\n      </ion-text>\n    </ion-list>\n  </ion-card>\n</ion-content>";
+
+/***/ }),
+
 /***/ 23342:
 /*!**********************************************************************************!*\
   !*** ./src/app/shared/components/pets/new-pet/new-pet.component.html?ngResource ***!
@@ -21755,7 +23030,29 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{pet ? pet.name: 'Nueva Mascota'}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button color=\"success\" (click)=\"createPet()\" \n        [disabled]=\"loading || needDate || !myPetData.specie || !myPetData.color1 ||\n        (myPetData?.name.length === 0 || !myPetData?.name) || (myPetData?.photo.length === 0 || !myPetData?.photo)\n      \">\n          Guardar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading\">\n  <ion-list>\n    <ion-item>\n      <ion-thumbnail *ngIf=\"!newImage && !pet\" slot=\"start\" class=\"profileCircle redImage\" (click)=\"addPhoto()\">\n        <ion-icon *ngIf=\"\" class=\"imageProfile\" name=\"paw-outline\"></ion-icon>\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"!newImage && pet\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img *ngIf=\"pet\" src=\"{{pet.photo}}\">\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"newImage\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img src=\"{{newImage.webPath}}\">\n        <ion-spinner *ngIf=\"progress > 0\" class=\"uploadingImage\" size=\"large\" name=\"circles\"></ion-spinner>\n      </ion-thumbnail>\n      <ion-label>Nombre:</ion-label>\n      <ion-input slot=\"end\" type=\"text\" placeholder=\"Mascota\" [value]=\"myPetData.name\" (ionChange)=\"nameListener($event)\"></ion-input>\n    </ion-item>\n    <div class=\"error-message\" *ngIf=\"myPetData?.name.length === 0 || !myPetData?.name\">\n      <ion-text class=\"ion-padding-start\" color=\"danger\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el nombre de tu mascota\n      </ion-text>\n    </div>\n    <div class=\"error-message\" *ngIf=\"myPetData?.photo.length === 0 || !myPetData?.photo\">\n      <ion-text class=\"ion-padding-start\" color=\"danger\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Selecciona la foto de tu mascota\n      </ion-text>\n    </div>\n    <ion-row *ngIf=\"progress > 0\" style=\"margin-top: 8px;\">\n      <ion-progress-bar color=\"primary\" [value]=\"progress\"></ion-progress-bar>\n      <ion-text class=\"ion-padding-start\" color=\"warning\"> \n        <ion-icon class=\"vertical-align\" color=\"warning\" name=\"alert-circle-outline\"> </ion-icon>\n        Guardando imagen {{progress * 100}}%\n      </ion-text>\n    </ion-row>\n\n    <ion-item>\n      <ion-label>Especie:</ion-label>\n      <ion-select slot=\"end\" [value]=\"myPetData.specie\" (ionChange)=\"handleSpecie($event)\">\n        <ion-select-option *ngFor=\"let specie of speciesList\" [value]=\"specie.name\">{{specie.name}}</ion-select-option>\n      </ion-select>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!myPetData.specie\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione una especie\n    </ion-text>\n\n    <ion-item *ngIf=\"myPetData.specie.length > 0\">\n      <ion-label>Raza:</ion-label>\n      <ion-input slot=\"end\" type=\"text\" placeholder=\"(Opcional)\" [value]=\"myPetData.breed\" (ionChange)=\"handleBreed($event)\"></ion-input>\n    </ion-item>\n\n    <ion-item (click)=\"showHideCalendar()\">\n      <ion-label>Fecha de Nacimiento: {{myPetData.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>\n      <ion-button size=\"small\" slot=\"end\" color=\"secondary\"><ion-icon color=\"light\" name=\"calendar-outline\"></ion-icon></ion-button>\n    </ion-item>\n    <ion-row *ngIf=\"showCalendar\" class=\"ion-align-center {{needDate? 'redText': ''}}\">\n      <ion-datetime style=\"margin: auto;\"\n      locale=\"es-EC\"\n      [(ngModel)]=\"birthDate\"\n      [min]=\"minDate\"\n      [max]=\"maxDate\"\n      (ionChange)=\"handleCalendar($event)\"\n      presentation=\"date\"\n      ></ion-datetime>\n    </ion-row>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"needDate\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese la fecha de nacimiento\n    </ion-text>\n\n    <ion-item>\n      <ion-label>Microchip:</ion-label>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"ckeckboxChange($event)\" [checked]=\"myPetData.microchip\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n  </ion-list>\n\n  <ion-item>\n    <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"myPetData.color1?.rgbCode\" [ngStyle]=\"{ 'background-color': myPetData.color1.rgbCode }\">\n    </ion-avatar>\n    <ion-label>Color Dominante:</ion-label>\n    <ion-select mode='ios' [value]=\"newPetColor1\" (ionChange)=\"handleColor1($event)\" >\n      <ion-select-option *ngFor=\"let color of colorList\" [value]=\"color.uid\">\n        {{color.name}} ({{color.color}})\n      </ion-select-option>\n    </ion-select>\n  </ion-item>\n  <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newPetColor1\"> \n    <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione un color dominante\n  </ion-text>\n    \n  <ion-item *ngIf=\"myPetData.color1\">\n    <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"myPetData.color2?.rgbCode && myPetData.color2.color === 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color2.rgbCode }\"></ion-avatar>\n    <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"myPetData.color2?.rgbCode && myPetData.color2.color !== 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color2.rgbCode }\"></ion-avatar>\n    <ion-label>Color secundario:</ion-label>\n    <ion-select mode='ios' placeholder=\"(Opcional)\" [value]=\"newPetColor2\" (ionChange)=\"handleColor2($event)\">\n      <ion-select-option *ngFor=\"let color of colorList\" [value]=\"color.uid\">\n        {{color.name}} ({{color.color}})\n      </ion-select-option>\n    </ion-select>\n  </ion-item>\n</ion-content>\n\n<!-- \n\n\n    <form #myPetForm1=\"ngForm\" [formGroup]=\"myPetForm\" novalidate *ngIf=\"!hide\">\n\n    <ion-item *ngIf=\"myPetData.specie\">\n      <ion-label>Raza:</ion-label>\n      <ion-input color=\"dark\" placeholder=\"(Opcional)\" formControlName=\"breed\" type=\"text\" clearInput=\"true\"></ion-input>\n    </ion-item>\n    \n    <ion-item *ngIf=\"myPetData.color1\">\n      <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"myPetData.color2?.rgbCode\" [ngStyle]=\"{ 'background-color': myPetData.color2.rgbCode }\">\n      </ion-avatar>\n      <ion-label>Color secundario:</ion-label>\n      <ion-select mode='ios' placeholder=\"(Opcional)\" [(ngModel)]=\"newPetColor2\" (ionChange)=\"handleColor2($event)\">\n        <ion-select-option *ngFor=\"let color of colorList\" [value]=\"color.uid\">\n          {{color.name}} ({{color.color}})\n        </ion-select-option>\n      </ion-select>\n    </ion-item>\n      \n    </form>\n-->";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!pet\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editPetForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editPet()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"pet && !editPetForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{pet ? pet.name: 'Nueva Mascota'}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!pet || editPetForm\" color=\"success\" (click)=\"createPet()\" \n        [disabled]=\"loading || needDate || !myPetData.specie || !myPetData.color1 ||\n        (myPetData?.name.length === 0 || !myPetData?.name) || (myPetData?.photo.length === 0 || !myPetData?.photo)\n      \">\n          Guardar\n      </ion-button>\n      <ion-button *ngIf=\"pet && !editPetForm && (userData.uid === pet.ownerUid)\" color=\"dark\" (click)=\"editPet()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"!loading && pet && !editPetForm\">\n  <app-pet-detail [pet]=\"pet\" [ownerData]=\"ownerData\"></app-pet-detail>\n</ion-content>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!pet || editPetForm)\">\n  <ion-list>\n    <ion-item>\n      <ion-thumbnail *ngIf=\"!newImage && !pet\" slot=\"start\" class=\"profileCircle redImage\" (click)=\"addPhoto()\">\n        <ion-icon class=\"imageProfile\" name=\"paw-outline\"></ion-icon>\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"!newImage && pet\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img *ngIf=\"pet\" src=\"{{pet.photo}}\">\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"newImage\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img src=\"{{newImage.webPath}}\">\n        <ion-spinner *ngIf=\"progress > 0\" class=\"uploadingImage\" size=\"large\" name=\"circles\"></ion-spinner>\n      </ion-thumbnail>\n      <ion-label>Nombre:</ion-label>\n      <ion-input slot=\"end\" type=\"text\" placeholder=\"Mascota\" [value]=\"myPetData.name\" (ionChange)=\"nameListener($event)\"></ion-input>\n    </ion-item>\n    <div class=\"error-message\" *ngIf=\"myPetData?.name.length === 0 || !myPetData?.name\">\n      <ion-text class=\"ion-padding-start\" color=\"danger\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el nombre de tu mascota\n      </ion-text>\n    </div>\n    <div class=\"error-message\" *ngIf=\"myPetData?.photo.length === 0 || !myPetData?.photo\">\n      <ion-text class=\"ion-padding-start\" color=\"danger\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Selecciona la foto de tu mascota\n      </ion-text>\n    </div>\n    <ion-row *ngIf=\"progress > 0\" style=\"margin-top: 8px;\">\n      <ion-progress-bar color=\"primary\" [value]=\"progress\"></ion-progress-bar>\n      <ion-text class=\"ion-padding-start\" color=\"warning\"> \n        <ion-icon class=\"vertical-align\" color=\"warning\" name=\"alert-circle-outline\"> </ion-icon>\n        Guardando imagen {{progress * 100}}%\n      </ion-text>\n    </ion-row>\n\n    <ion-item>\n      <ion-label>Especie:</ion-label>\n      <ion-select slot=\"end\" [value]=\"myPetData.specie\" (ionChange)=\"handleSpecie($event)\">\n        <ion-select-option *ngFor=\"let specie of speciesList\" [value]=\"specie.name\">{{specie.name}}</ion-select-option>\n      </ion-select>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!myPetData.specie\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione una especie\n    </ion-text>\n\n    <ion-item *ngIf=\"myPetData.specie.length > 0\">\n      <ion-label>Raza:</ion-label>\n      <ion-input slot=\"end\" type=\"text\" placeholder=\"(Opcional)\" [value]=\"myPetData.breed\" (ionChange)=\"handleBreed($event)\"></ion-input>\n    </ion-item>\n\n    <ion-item (click)=\"showHideCalendar()\">\n      <ion-label>Fecha de Nacimiento: {{myPetData.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>\n      <ion-button size=\"small\" slot=\"end\" color=\"secondary\"><ion-icon color=\"light\" name=\"calendar-outline\"></ion-icon></ion-button>\n    </ion-item>\n    <ion-row *ngIf=\"showCalendar\" class=\"ion-align-center {{needDate? 'redText': ''}}\">\n      <ion-datetime style=\"margin: auto;\"\n      locale=\"es-EC\"\n      [(ngModel)]=\"birthDate\"\n      [min]=\"minDate\"\n      [max]=\"maxDate\"\n      (ionChange)=\"handleCalendar($event)\"\n      presentation=\"date\"\n      ></ion-datetime>\n    </ion-row>\n\n    <ion-item (click)=\"showHideCalendar2()\">\n      <ion-label>Fecha de Deceso: {{myPetData.deceaseDate ? (myPetData.deceaseDate | timeFormat:'DD/MM/YYYY') : ''}} </ion-label>\n      <ion-button size=\"small\" slot=\"end\" color=\"secondary\"><ion-icon color=\"light\" name=\"calendar-outline\"></ion-icon></ion-button>\n    </ion-item>\n    <ion-row *ngIf=\"showCalendar2\" class=\"ion-align-center {{needDate? 'redText': ''}}\">\n      <ion-datetime style=\"margin: auto;\"\n      locale=\"es-EC\"\n      [(ngModel)]=\"birthDate\"\n      [min]=\"minDate\"\n      [max]=\"maxDate\"\n      (ionChange)=\"handleCalendar2($event)\"\n      presentation=\"date\"\n      ></ion-datetime>\n    </ion-row>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"needDate\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese la fecha de nacimiento\n    </ion-text>\n\n    <ion-item>\n      <ion-label>Microchip:</ion-label>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"ckeckboxChange($event)\" [checked]=\"myPetData.microchip\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n\n    <ion-list-header>\n      <ion-label>Colores de Pelaje</ion-label>\n    </ion-list-header>\n\n    <ion-item>\n      <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"myPetData.color1?.rgbCode && myPetData.color1.color === 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color1.rgbCode }\"></ion-avatar>\n      <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"myPetData.color1?.rgbCode && myPetData.color1.color !== 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color1.rgbCode }\"></ion-avatar>\n      <ion-label>Dominante:</ion-label>\n      <ion-select mode='ios' [value]=\"newPetColor1\" (ionChange)=\"handleColor1($event)\" >\n        <ion-select-option *ngFor=\"let color of colorList\" [value]=\"color.uid\">\n          {{color.name}} ({{color.color}})\n        </ion-select-option>\n      </ion-select>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newPetColor1\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione un color dominante\n    </ion-text>\n      \n    <ion-item *ngIf=\"myPetData.color1\">\n      <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"myPetData.color2?.rgbCode && myPetData.color2.color === 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color2.rgbCode }\"></ion-avatar>\n      <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"myPetData.color2?.rgbCode && myPetData.color2.color !== 'Blanco'\" [ngStyle]=\"{ 'background-color': myPetData.color2.rgbCode }\"></ion-avatar>\n      <ion-label>Secundario:</ion-label>\n      <ion-select mode='ios' placeholder=\"(Opcional)\" [value]=\"newPetColor2\" (ionChange)=\"handleColor2($event)\">\n        <ion-select-option *ngFor=\"let color of colorList\" [value]=\"color.uid\">\n          {{color.name}} ({{color.color}})\n        </ion-select-option>\n      </ion-select>\n    </ion-item>\n  </ion-list>\n</ion-content>\n<ion-footer *ngIf=\"pet && !editPetForm && (userData.uid === pet.ownerUid) && !pet.deceaseDate\" class=\"ion-margin-top\">\n  <ion-toolbar *ngIf=\"pet.status === 'good'\">\n    <app-big-button LABEL=\"Reportar Perdido\" buttonType=\"'RED'\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"reportLost()\"></app-big-button>\n  </ion-toolbar>\n  <ion-toolbar *ngIf=\"pet.status === 'lost'\">\n    <app-big-button LABEL=\"Reportar Encontrado\" buttonType=\"'SECONDARY'\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"reportFound()\"></app-big-button>\n  </ion-toolbar>\n</ion-footer>\n";
+
+/***/ }),
+
+/***/ 24758:
+/*!****************************************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-detail/pet-detail.component.html?ngResource ***!
+  \****************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-list>\n  <ion-item>\n    <ion-thumbnail slot=\"start\" class=\"profileCircle\"ngClass = \"{{ pet.status === 'dead'?'grayScale': (pet.status === 'lost'?'redImage':'') }}\" >\n      <img *ngIf=\"pet\" src=\"{{pet.photo}}\">\n    </ion-thumbnail>\n    <ion-label>Nombre: {{pet.name}}</ion-label>\n  </ion-item>\n\n  <ion-item>\n    <ion-label>Especie: {{pet.specie}}</ion-label>\n  </ion-item>\n\n  <ion-item *ngIf=\"pet.breed?.length > 0\">\n    <ion-label>Raza: {{pet.breed}}</ion-label>\n  </ion-item>\n\n  <ion-item>\n    <ion-label>Fecha de Nacimiento: {{pet.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>\n  </ion-item>\n\n  <ion-item *ngIf=\"pet.deceaseDate\">\n    <ion-label>Fecha de Defunción: {{pet.deceaseDate| timeFormat:'DD/MM/YYYY'}} </ion-label>\n  </ion-item>\n\n  <ion-item>\n    <ion-label>Microchip:</ion-label>\n    <ion-checkbox slot=\"end\" mode='md' [checked]=\"pet.microchip\" color=\"primary\" [disabled]=\"true\"></ion-checkbox>\n  </ion-item>\n\n  <ion-item *ngIf=\"pet.status === 'lost'\">\n    <ion-label>Estado: <ion-text class=\"ion-text-uppercase\" color=\"danger\">Perdido</ion-text></ion-label>\n  </ion-item>\n\n  <ion-list-header>\n    <ion-label>Colores de Pelaje</ion-label>\n  </ion-list-header>\n\n  <ion-item>\n    <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"pet.color1?.rgbCode && pet.color1.color === 'Blanco'\" [ngStyle]=\"{ 'background-color': pet.color1.rgbCode }\"></ion-avatar>\n    <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"pet.color1?.rgbCode && pet.color1.color !== 'Blanco'\" [ngStyle]=\"{ 'background-color': pet.color1.rgbCode }\"></ion-avatar>\n    <ion-label>Dominante: {{pet.color1.name}} ({{pet.color1.color}})</ion-label>\n  </ion-item>\n    \n  <ion-item *ngIf=\"pet.color2\">\n    <ion-avatar style=\"border: 1px solid black;\" slot=\"start\" *ngIf=\"pet.color2?.rgbCode && pet.color2.color === 'Blanco'\" [ngStyle]=\"{ 'background-color': pet.color2.rgbCode }\"></ion-avatar>\n    <ion-avatar style=\"border: 1px solid white;\" slot=\"start\" *ngIf=\"pet.color2?.rgbCode && pet.color2.color !== 'Blanco'\" [ngStyle]=\"{ 'background-color': pet.color2.rgbCode }\"></ion-avatar>\n    <ion-label>Secundario: {{pet.color2.name}} ({{pet.color2.color}})</ion-label>\n  </ion-item>\n\n  <ion-list-header *ngIf=\"ownerData\">\n    <ion-label>Dueño</ion-label>\n  </ion-list-header>\n</ion-list>\n<app-user-profile *ngIf=\"ownerData\" [user]=\"ownerData\"></app-user-profile>\n";
+
+/***/ }),
+
+/***/ 17398:
+/*!************************************************************************************!*\
+  !*** ./src/app/shared/components/pets/pet-item/pet-item.component.html?ngResource ***!
+  \************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-item *ngIf=\"pet\"  detail>\n  <ion-avatar slot=\"start\"ngClass = \"{{ pet.status === 'dead'?'grayScale': (pet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"pet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{pet.name}} </h3>\n    <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n  </ion-label>\n</ion-item>\n\n<ion-item *ngIf=\"shortPet\" >\n  <ion-avatar slot=\"start\"ngClass = \"{{ shortPet.status === 'dead'?'grayScale': (shortPet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"shortPet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{shortPet.name}} </h3>\n    <ion-text color=\"secondary\"[ngSwitch]=\"shortPet.status\">\n      <p *ngSwitchCase=\"'good'\">Status: Encontrado</p>\n      <p *ngSwitchCase=\"'lost'\" color=\"danger\">Status: Perdido</p>\n      <p *ngSwitchCase=\"'dead'\" color=\"dark\">Status: Fallecido</p>\n    </ion-text>\n  </ion-label>\n</ion-item>";
 
 /***/ }),
 
@@ -21766,7 +23063,7 @@ module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons s
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-content>\n  <ion-card>\n    <ion-item>\n      <ion-thumbnail slot=\"start\" class=\"profileCircle\">\n        <img src=\"{{user?.photoURL ? user?.photoURL : defaultUser}}\">\n      </ion-thumbnail>\n      <ion-card-header>\n        <ion-card-title>{{user?.displayName ? user?.displayName : 'Username'}}</ion-card-title>\n        <ion-card-subtitle>{{user?.email ? user?.email : 'User Email'}}</ion-card-subtitle>\n      </ion-card-header>\n    </ion-item>\n  </ion-card>\n</ion-content>";
+module.exports = "<ion-card *ngIf=\"user\">\n  <ion-item>\n    <ion-avatar slot=\"start\" class=\"profileCircle\">\n      <img src=\"{{user?.photo ? user?.photo : defaultUser}}\">\n    </ion-avatar>\n    <ion-label>\n      <h2>{{user.name}} {{user.lastName}}</h2>\n      <ion-text color=\"secondary\"><p>{{user.email}}</p></ion-text>\n    </ion-label>\n  </ion-item>\n</ion-card>\n\n<ion-card *ngIf=\"shortUser\">\n  <ion-item>\n    <ion-avatar slot=\"start\" class=\"profileCircle\">\n      <img src=\"{{shortUser?.photo ? shortUser.photo : defaultUser}}\">\n    </ion-avatar>\n    <ion-label>\n      <h2>{{shortUser.name}}</h2>\n      <ion-text color=\"secondary\"><p>{{shortUser.email}}</p></ion-text>\n    </ion-label>\n  </ion-item>\n</ion-card>";
 
 /***/ }),
 
@@ -21777,7 +23074,7 @@ module.exports = "<ion-content>\n  <ion-card>\n    <ion-item>\n      <ion-thumbn
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-row [ngSwitch]=\"buttonType\" class=\"rowStyle\">\n  <ion-button *ngSwitchDefault class='buttonStyle' color=\"primary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button>\n\n  <ion-button *ngSwitchCase=\"'SECONDARY'\" class='buttonStyle' color=\"secondary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'RED'\" class='buttonStyle' color=\"danger\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'GRAY'\" class='buttonStyle' color=\"medium\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"dark\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"dark\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n</ion-row>";
+module.exports = "<ion-row [ngSwitch]=\"buttonType\" class=\"rowStyle\">\n  <ion-button *ngSwitchDefault class='buttonStyle' color=\"primary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button>\n  \n  <ion-button *ngSwitchCase=\"'SECONDARY'\" class='buttonStyle' color=\"secondary\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'RED'\" class='buttonStyle' color=\"danger\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"light\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n\n  <ion-button *ngSwitchCase=\"'GRAY'\" class='buttonStyle' color=\"medium\" [disabled]=\"disabled\">\n    <ion-label>\n      <ion-spinner *ngIf=\"loading\" style=\"margin-left: 10px;\" color=\"dark\" name=\"dots\"></ion-spinner>\n      <ion-text *ngIf=\"!loading\" class=\"ion-text-uppercase\" color=\"dark\">{{LABEL}}</ion-text>\n    </ion-label>\n  </ion-button> \n</ion-row>";
 
 /***/ }),
 
@@ -21810,7 +23107,7 @@ module.exports = "<ion-grid>\n  <ion-row>\n    <ion-col>\n      <div class=\"ion
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-title class=\"ion-text-uppercase\">{{title}}</ion-title>\n    <ion-buttons [ngSwitch]=\"title\" slot=\"end\">\n      <ion-button *ngSwitchCase=\"'Mi Perfil'\" color=\"danger\" (click)=\"cerrarSesion()\">\n        Cerrar Sesión\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Cursos'\" (click)=\"cerrarSesion()\">\n        Nuevo Curso\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Anuncios'\" (click)=\"cerrarSesion()\">\n        Nuevo Anuncio\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Mis Mascotas'\" (click)=\"cerrarSesion()\">\n        Agregar Mascota\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Usuarios'\" (click)=\"cerrarSesion()\">Ascender</ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-title class=\"ion-text-uppercase\">{{title}}</ion-title>\n    <ion-buttons [ngSwitch]=\"title\" slot=\"end\">\n      <ion-button *ngSwitchCase=\"'Mi Perfil'\" color=\"danger\" (click)=\"cerrarSesion()\">\n        Cerrar Sesión\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Cursos'\" (click)=\"createCourse()\">\n        Nuevo Curso\n      </ion-button>\n      <ion-button *ngSwitchCase=\"'Anuncios'\" (click)=\"createNotice()\">\n        Nuevo Anuncio\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>";
 
 /***/ }),
 
@@ -21822,6 +23119,17 @@ module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-title cla
 
 "use strict";
 module.exports = "<div class=\"positionTop\">\n  <ion-row>\n    <div class=\"ion-text-center positionTop\">\n      <ion-icon name=\"{{icon ? icon:'information-circle-outline'}}\"></ion-icon>\n    </div>\n  </ion-row>\n  <ion-row>\n    <div class=\"ion-text-center ion-text-uppercase positionTop\">{{text}}</div>\n  </ion-row>\n</div>";
+
+/***/ }),
+
+/***/ 63152:
+/*!******************************************************************************************************!*\
+  !*** ./src/app/shared/components/view/notice-bottom-bar/notice-bottom-bar.component.html?ngResource ***!
+  \******************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-row>\n  <ion-col class=\"ion-text-center\">\n    <div (click)=\"addLike()\">\n      <ion-icon *ngIf=\"!this.myLike\" name=\"paw-outline\"></ion-icon>\n      <ion-icon *ngIf=\"this.myLike\" color=\"primary\" name=\"paw\"></ion-icon>\n      Me Importa {{notice.likes.length}}\n    </div>\n  </ion-col>\n  <ion-col class=\"ion-text-center\">\n    <ion-icon name=\"chatbubble-ellipses-outline\"></ion-icon> Comentarios {{notice.comments.length}}\n  </ion-col>\n</ion-row>";
 
 /***/ }),
 

@@ -11,13 +11,13 @@
         Atrás
       </ion-button>
     </ion-buttons>
-    <ion-title class="ion-text-uppercase">{{notice ? notice.title: 'Nuevo Anuncio'}}</ion-title>
+    <ion-title class="ion-text-uppercase">{{notice ? notice.type.name: (pet? 'Animal Perdido' : 'Nuevo Anuncio')}}</ion-title>
     <ion-buttons slot="end">
       <ion-button *ngIf="!notice || editNoticeForm" color="success" (click)="createNotice()" 
-        [disabled]="loading">
-          Guardar
+        [disabled]="loading && (!newImage && myNotice.photo)">
+          Enviar
       </ion-button>
-      <ion-button *ngIf="notice && !editNoticeForm && (user.uid === notice.writer?.uid)" color="dark" (click)="editNotice()">
+      <ion-button *ngIf="notice && !editNoticeForm && ((user.uid === notice.writer?.uid) || this.user.manager)" color="dark" (click)="editNotice()">
           Editar
       </ion-button>
     </ion-buttons>
@@ -28,7 +28,10 @@
   <app-loading-view></app-loading-view>
 </ion-content>
 
-<ion-content *ngIf="!loading && notice && !editNoticeForm" fullscreen>
+<ion-content *ngIf="!loading && notice && !editNoticeForm" fullscreen  #ionScroll [scrollEvents]="true" (ionScroll)="checkScroll($event, ionScroll)">
+  <ion-row class="ion-float-right">
+      <ion-text color="secondary">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>
+  </ion-row>
   <ion-card>
     <img *ngIf="notice.photo" [src]="notice.photo" />
     <ion-card-header>
@@ -39,26 +42,16 @@
     </ion-card-header>
     <ion-card-content>
       {{notice.description}}
+      <app-pet-item *ngIf="notice.pet" [shortPet]="notice.pet"></app-pet-item>
     </ion-card-content>
     <ion-footer>
-      <ion-row>
-        <ion-col class="ion-text-center">
-          <div (click)="addLike()">
-            <ion-icon *ngIf="!this.myLike" name="thumbs-up-outline"></ion-icon>
-            <ion-icon *ngIf="this.myLike" color="primary" name="thumbs-up-outline"></ion-icon>
-             Likes {{notice.likes.length}}
-          </div>
-        </ion-col>
-        <ion-col class="ion-text-center">
-          <ion-icon name="chatbubble-ellipses-outline"></ion-icon> Comentarios {{notice.comments.length}}
-        </ion-col>
-      </ion-row>
+      <app-notice-bottom-bar [likes]="notice.likes.length" [comments]="notice.comments.length" [notice]="notice" [userUID]="user.uid"></app-notice-bottom-bar>
     </ion-footer>
   </ion-card>
   <ion-list *ngIf="this.notice.comments.length > 0">
     <div *ngFor="let comment of this.notice.comments">
       <ion-item>
-        <ion-avatar slot="start"><img [src]="comment.user.photo"></ion-avatar>
+        <ion-avatar slot="start"><img src="{{comment.user.photo ? comment.user.photo : defaultUser}}"></ion-avatar>
         <ion-labe>
           <h4>{{comment.user.name}}</h4>
           <p>{{comment.text}}</p>
@@ -69,12 +62,17 @@
       </ion-row>
     </div>
   </ion-list>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="bottom: 50px; right: 20px;" *ngIf="showScroll > 400">
+    <ion-fab-button color="light" size="small" (click)="scrollDown()" close-icon="close-outline">
+      <ion-icon name="chevron-down-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
 <ion-footer *ngIf="!loading && notice && !editNoticeForm">
   <ion-toolbar>
     <ion-row class="inputMargin" *ngIf="!loading">
       <ion-col size="11">
-        <ion-textarea style="background-color: white; color:black; border-radius: 7pt;" rows="1" [disabled]="sending" [value]="newComment.text" (ionChange)="commentListener($event)"></ion-textarea>
+        <ion-textarea placeholder="Escribe un comentario..." style="background-color: white; color:black; border-radius: 7pt; padding-left: 7px;" rows="1" [disabled]="sending" [value]="newComment.text" (ionChange)="commentListener($event)"></ion-textarea>
       </ion-col>
       <ion-col size="1" class="rightButtonContainer"> 
         <ion-icon *ngIf="!sending" color="dark" name="arrow-up-circle" class="rightButton" (click)="pressSend()"></ion-icon>
@@ -89,9 +87,10 @@
 <ion-content class="ion-padding" *ngIf="!loading && (!notice || editNoticeForm)">
   <ion-card>
     <img *ngIf="!newImage && notice" src="{{myNotice.photo}}" (click)="addPhoto()">
+    <img *ngIf="!newImage && pet" src="{{pet.photo}}" (click)="addPhoto()">
     <img *ngIf="newImage" src="{{newImage.webPath}}" (click)="addPhoto()">
     <ion-list>
-      <ion-item *ngIf="!newImage && !notice" (click)="addPhoto()">
+      <ion-item *ngIf="!newImage && !notice && !pet" (click)="addPhoto()">
         <ion-label>Agregue una imagen:</ion-label>
         <ion-button color="secondary"><ion-icon name="camera-outline" color="light"></ion-icon></ion-button>
       </ion-item>
@@ -99,7 +98,7 @@
       <ion-item>
         <ion-icon slot="start" *ngIf="myNotice.type" color="tertiary" size="large" [name]="myNotice.type.icon"></ion-icon>
         <ion-label position="stacked">Tipo:</ion-label>
-        <ion-select mode='ios' [value]="noticeType" (ionChange)="handleType($event)" >
+        <ion-select mode='ios' [value]="noticeType" (ionChange)="handleType($event)" [disabled]="pet">
           <ion-select-option *ngFor="let type of typeList" [value]="type.name"> {{type.name}}</ion-select-option>
         </ion-select>
       </ion-item>

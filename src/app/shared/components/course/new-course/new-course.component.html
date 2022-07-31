@@ -1,0 +1,132 @@
+<ion-header>
+  <ion-toolbar mode="ios">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!course" color="danger" [disabled]="loading" (click)="modal.dismiss(false)">
+        Cancelar
+      </ion-button>
+      <ion-button *ngIf="editCourseForm" color="danger" [disabled]="loading" (click)="editCourse()">
+        Cancelar
+      </ion-button>
+      <ion-button *ngIf="course && !editCourseForm" color="primary" [disabled]="loading" (click)="modal.dismiss(false)">
+        Atrás
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-uppercase">{{course ? course.title: 'Nuevo Curso'}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!course || editCourseForm" color="success" (click)="createCourse()" 
+        [disabled]="loading || newExamen.questions.length < 5 || 
+        (myCourse?.title.length === 0 || !myCourse?.title) || 
+        (myCourse?.description.length === 0 || !myCourse?.description) ||
+        (myCourse?.video.length === 0 || !myCourse?.video) ">
+          Guardar
+      </ion-button>
+      <ion-button *ngIf="course && !editCourseForm && (user.uid === course.author?.uid)" color="dark" (click)="editCourse()">
+          Editar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding"  *ngIf="loading">
+  <app-loading-view></app-loading-view>
+</ion-content>
+
+<ion-content class="ion-padding" *ngIf="!loading && (!course || editCourseForm)">
+  <ion-card>
+
+    <ion-item>
+      <ion-label>Título:</ion-label>
+      <ion-input type="text" [value]="myCourse.title" (ionChange)="titleListener($event)"></ion-input>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="myCourse?.title.length === 0 || !myCourse?.title"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa el título de este curso
+    </ion-text>
+    
+    <ion-item>
+      <ion-label>Contenido:</ion-label>
+      <ion-textarea rows="3" [value]="myCourse.description" (ionChange)="descriptionListener($event)"></ion-textarea>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="myCourse?.description.length === 0 || !myCourse?.description"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa una descripción corta de este curso
+    </ion-text>
+    <ion-item>
+      <ion-label>Video:</ion-label>
+      <ion-input type="text" [value]="myCourse.video" (ionChange)="videoListener($event)"></ion-input>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="myCourse?.video.length === 0 || !myCourse?.video"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa el url del video de este curso
+    </ion-text>
+  </ion-card>
+  
+  <ion-list class="ion-padding">
+    <ion-header-list>
+      <ion-label>Preguntas {{newExamen.questions.length + 1}}/10</ion-label>
+    </ion-header-list>
+    <ion-grid *ngFor="let question of newExamen.questions; index as i">
+      <ion-row>
+        <ion-col size="10">
+          <ion-text> Pregunta {{i+1}}: {{question.question}} </ion-text>
+        </ion-col>
+        <ion-col size="2">
+          <ion-icon size="large" color="danger" name="close-circle"></ion-icon>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let item of question.answers; index as j" class="ion-text-center">
+        <ion-col size="9">
+          <ion-text>
+            {{j==0?'a':(j==1?'b':'c')}}). {{item.text}}
+          </ion-text>
+        </ion-col>
+        <ion-col size="3">
+          <ion-icon color="success" size="small" *ngIf="item.correct" name="checkbox"></ion-icon>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-item>
+      <ion-label>Pregunta {{newExamen.questions.length + 1}}:</ion-label>
+      <ion-input type="text" [value]="newQuestion?.question" (ionChange)="questionListener($event)"></ion-input>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="newQuestion?.question.length === 0 || !newQuestion?.question"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa la pregunta 1
+    </ion-text>
+    
+    <ion-item>
+      <ion-label>Respuesta A:</ion-label>
+      <ion-input type="text" [value]="newQuestion?.answers[0].text" (ionChange)="answerListener(0,$event)"></ion-input>
+      <ion-checkbox slot="end" mode='md' (ionChange)="checkBoxListener(0,$event)" [checked]="newQuestion?.answers[0].correct" color="primary"></ion-checkbox>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="newQuestion?.answers[0].text.length === 0 || !newQuestion?.answers[0].text"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa la repuesta a
+    </ion-text>
+    <ion-item>
+      <ion-label>Respuesta B:</ion-label>
+      <ion-input type="text" [value]="newQuestion?.answers[1].text" (ionChange)="answerListener(1,$event)"></ion-input>
+      <ion-checkbox slot="end" mode='md' (ionChange)="checkBoxListener(1,$event)" [checked]="newQuestion?.answers[1].correct" color="primary"></ion-checkbox>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="newQuestion?.answers[1].text.length === 0 || !newQuestion?.answers[1].text"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa la repuesta b
+    </ion-text>
+    <ion-item>
+      <ion-label>Respuesta C:</ion-label>
+      <ion-input type="text" [value]="newQuestion?.answers[2].text" (ionChange)="answerListener(2,$event)"></ion-input>
+      <ion-checkbox slot="end" mode='md' (ionChange)="checkBoxListener(2,$event)" [checked]="newQuestion?.answers[2].correct" color="primary"></ion-checkbox>
+    </ion-item>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="newQuestion?.answers[2].text.length === 0 || !newQuestion?.answers[2].text"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Ingresa la repuesta c
+    </ion-text>
+  </ion-list>
+  <ion-row>
+    <ion-text class="ion-padding-start" color="danger" *ngIf="newExamen.questions.length < 5"> 
+      <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon>
+      Se necesitan 5 preguntas mínimo para crear un examen
+    </ion-text>
+    <app-big-button *ngIf="newExamen.questions.length < 10" LABEL="Guardar Pregunta" buttonType="" [loading]="loading" [disabled]="loading" (click)="saveQuestion()"></app-big-button>
+  </ion-row>
+</ion-content>

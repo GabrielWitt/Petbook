@@ -1,3 +1,4 @@
+import { shortPet } from "./species";
 import { shortUser } from "./user";
 
 export interface Notice {
@@ -9,6 +10,8 @@ export interface Notice {
     writer: shortUser;
     comments: Comments[];
     likes?: string[];
+    pet?: shortPet;
+    createdAt?: string;
 }
 
 export interface NoticeType {

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Router } from '@angular/router';
+import { rejects } from 'assert';
+import { resolve } from 'dns';
 import { ErrorHandlerService } from 'src/app/shared/utilities/error-handler.service';
 import { User, userFormData } from '../../models/user';
 import { FirestoreActionsService } from '../firestore-actions.service';
@@ -11,6 +13,8 @@ import { MyStoreService } from '../my-store.service';
 })
 export class FireAuthService {
   user: User;
+  session: 'session';
+  credentials: 'credentials';
 
   constructor(
     private router: Router,
@@ -22,11 +26,74 @@ export class FireAuthService {
     this.auth.authState.subscribe((user) => {
       if (user) {
         this.user = this.setUser(user);
-        this.store.setData('session',user);
+        this.store.setData(this.session,user);
       } else {
-        this.store.removeFile('session');
+        this.store.removeFile(this.session);
       }
     });
+  }
+
+  async loginSavedUser(){
+    return new Promise((resolve, reject) => {
+      try {
+        this.store.readFile('savedUser').then((data: any) => {
+          console.log(data)
+          if(data){
+            this.login(data.email, data.password).then((user:any) => {
+              resolve(user);
+            })
+          } else {
+            resolve(false);
+          }
+        })
+      } catch (error) {
+        console.log(error);
+        reject(false);
+      }
+    })
+  }
+
+  loginProcessUser() {
+    return new Promise((resolve, reject) => {
+      this.getUser().then((data: any) =>{
+        if(data?.user){
+          this.routerCheck(data.user).then(answer => {resolve(answer);})
+        } else{
+          this.loginSavedUser().then(user => {
+            this.routerCheck(user).then(answer => {resolve(answer);})
+          }).catch(error => {
+            console.log(error);
+            reject(false);
+          });
+        }
+      }).catch(error => {
+        console.log(error);
+        reject(false);
+      });
+    })
+  }
+
+  async routerCheck(user){
+    if(user.email){
+      if(user.emailVerified){ 
+        switch(user.displayName){
+          case 'administrador':
+            this.router.navigateByUrl('administrator');
+            return true;
+          case 'cliente':
+            this.router.navigateByUrl('client');
+            return true;
+          default:
+            this.router.navigateByUrl('client');
+            return true;
+        } 
+      } else { 
+        this.router.navigateByUrl('general/verify-email/'+user.email);
+        return true;
+      }
+    }else{
+      return false;
+    }
   }
 
   async checkUser() {
@@ -46,10 +113,11 @@ export class FireAuthService {
     return new Promise((resolve,reject) => {
       this.auth.signInWithEmailAndPassword(email, password)
       .then(async (userCredential) => {
+        this.store.setData('savedCredentials', { email:email, password:password })
         // Signed in 
         const user = userCredential.user;
         this.user = this.setUser(user);
-        this.store.setData('session',this.user);
+        this.store.setData(this.session, this.user);
         this.getUser().then((myData: any) => {
           this.uploadUserForm(myData.user.uid, {
             uid: user.uid, 
@@ -116,7 +184,7 @@ export class FireAuthService {
   async getUser(){
     return new Promise((resolve, reject) => {
       try {
-        this.store.readFile('session').then(session => {
+        this.store.readFile(this.session).then(session => {
           if (session) { 
             this.readUserForm(session.uid).then((data:userFormData) => {
               resolve({user: this.user, data});
@@ -161,7 +229,7 @@ export class FireAuthService {
   signOut(){
     return new Promise((resolve,reject) => {
       this.auth.signOut().then(() => {
-        this.store.removeFile('session');
+        this.store.removeFile(this.session);
         // Sign-out successful.
         resolve('Se ha cerrado sesión');
       })

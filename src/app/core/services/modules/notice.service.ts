@@ -42,7 +42,7 @@ export class NoticeService {
 
   readNoticeList(){
     return new Promise<Notice[]>((resolve,reject) => {
-      this.firestore.readCollection(this.noticeFolder)
+      this.firestore.readCollectionOrderBy(this.noticeFolder,'createdAt', 'desc')
       .then((docs: any[]) => { resolve(docs) })
       .catch((error) => { reject(this.error.handle(error)); });
     });

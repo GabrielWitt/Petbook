@@ -4,7 +4,7 @@ import { BreedColor } from 'src/app/core/models/species';
 import { User, userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
-import { NewPetComponent } from 'src/app/shared/components/new-pet/new-pet.component';
+import { NewPetComponent } from 'src/app/shared/components/pets/new-pet/new-pet.component';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { NewSpecieComponent } from './new-specie/new-specie.component';
 import { SpecieDetailComponent } from './specie-detail/specie-detail.component';

@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { attachmentOptions } from 'src/app/core/models/images';
 import { BreedColor, Pet, Species } from 'src/app/core/models/species';
@@ -29,6 +30,7 @@ export class NewPetComponent implements OnInit {
     name: '',
     photo: '',
     birthDate: new Date(),
+    deceaseDate: null,
     specie: '',
     breed: '',
     microchip: false,
@@ -40,6 +42,7 @@ export class NewPetComponent implements OnInit {
 
   loading = true;
   showCalendar = false;
+  showCalendar2 = false;
   needDate = false;
   editPetForm = false;
   progress = 0;
@@ -130,12 +133,11 @@ export class NewPetComponent implements OnInit {
     }
   }
 
-  editPet(){
-    if(this.editPetForm){
-      this.myPetData = this.pet;
-      this.editPetForm = false;
+  showHideCalendar2(){
+    if(this.showCalendar2){
+      this.showCalendar2 = false;
     } else {
-      this.editPetForm= true;
+      this.showCalendar2 = true;
     }
   }
 
@@ -146,6 +148,25 @@ export class NewPetComponent implements OnInit {
       this.showCalendar = false;
     } else {
       this.showCalendar = true;
+    }
+  }
+
+  handleCalendar2(e){
+    const fecha = this.time.dateTransform(e.detail.value)
+    if(this.showCalendar2){
+      if(this.myPetData.deceaseDate !== fecha){ this.myPetData.deceaseDate = fecha;}
+      this.showCalendar2 = false;
+    } else {
+      this.showCalendar2 = true;
+    }
+  }
+
+  editPet(){
+    if(this.editPetForm){
+      this.myPetData = this.pet;
+      this.editPetForm = false;
+    } else {
+      this.editPetForm= true;
     }
   }
 
@@ -186,9 +207,9 @@ export class NewPetComponent implements OnInit {
       this.loading = true;
       this.myPetData.ownerUid = this.userData.uid;
       if(this.newImage){ this.myPetData.photo =  await this.uploadPhoto(); }
-      console.log(this.myPetData);
+      if(this.myPetData.deceaseDate){this.myPetData.status = 'dead';}
+      else{this.myPetData.status = this.pet?.status ? this.pet?.status : 'good';}
       if(this.pet){
-        console.log('updatePet');
         await this.pets.updateMyPet(this.myPetData);
       }else{
         await this.pets.createMyPet(this.myPetData);
@@ -196,11 +217,26 @@ export class NewPetComponent implements OnInit {
       this.alerts.showAlert( 'MASCOTAS', 
       this.pet? 'Datos de '+ this.myPetData.name + ' actualizados' : 'Nueva mascota agregada', 'OK');
       this.loading = false;
-      this.modal.dismiss(true);
+      this.modal.dismiss({action: 'update'});
     } catch (error) {
       console.log(error);
       this.loading = false;
     }
+  }
+
+  async reportLost(){
+    this.alerts.AlertConfirm('REPORTAR PERDIDO', 'Esta seguro de reportar perdido a ' + this.pet.name + '?')
+    .then(answer => {
+      if(answer){
+        this.modal.dismiss({action: 'report', pet: this.pet});
+      }
+    })
+  }
+
+  async reportFound(){
+    this.pets.statusMyPet(this.pet, 'good')
+    .then(data => { this.modal.dismiss({action: 'update'});})
+    .catch(error => {console.log(error)})
   }
 
 }

@@ -6,7 +6,7 @@ import { shortUser, userFormData } from 'src/app/core/models/user';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
 import { CoursesService } from 'src/app/core/services/modules/courses.service';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
-import { AlertsService } from '../../utilities/alerts';
+import { AlertsService } from '../../../utilities/alerts';
 
 @Component({
   selector: 'app-new-course',
@@ -30,13 +30,15 @@ export class NewCourseComponent implements OnInit {
   }
 
   newExamen: Exam = {
-    questions: [ this.newQuestion, this.newQuestion, this.newQuestion, this.newQuestion, this.newQuestion ]
+    questions: []
   }
 
   loading = false;
   editCourseForm = false;
   progress = 0;
   newImage;
+
+  QuestionNumber = 0;
 
   constructor(
     public modal: ModalController,
@@ -57,6 +59,7 @@ export class NewCourseComponent implements OnInit {
         name: this.user.name + ' ' + this.user.lastName
       }
     }
+    console.log(this.newQuestion)
   }
 
   titleListener(e){
@@ -66,26 +69,31 @@ export class NewCourseComponent implements OnInit {
   descriptionListener(e){
     this.myCourse.description = e.detail.value;
   }
-  
-  questionListener(index, e){
-    this.newExamen.questions[index].question = e.detail.value;
+
+  videoListener(e){
+    this.myCourse.video = e.detail.value;
   }
   
-  answerListener(index, number, e){
-    this.newExamen.questions[index].answers[number].text = e.detail.value;
+  questionListener(e){
+    this.newQuestion.question = e.detail.value;
   }
   
-  checkBoxListener(index, iNumber, e){
-    console.log(index, iNumber)
+  answerListener(iNumber, e){
+    this.newQuestion.answers[iNumber].text = e.detail.value;
+  }
+  
+  checkBoxListener(iNumber, e){
     if(e.detail.checked){
-      let count = 0;
-      this.newExamen.questions[index].answers.forEach(correct => {
-        if(count === iNumber){this.newExamen.questions[index].answers[iNumber].correct = e.detail.checked;}
-        else{this.newExamen.questions[index].answers[count].correct = false;}
-        count++;
-      })
-    } else {
-      this.newExamen.questions[index].answers[iNumber].correct = e.detail.checked;
+      this.newQuestion.answers.forEach(item => { item.correct = false; })
+    }
+    this.newQuestion.answers[iNumber].correct = e.detail.checked;
+  }
+
+  saveQuestion(){
+    this.newExamen.questions.push(this.newQuestion);
+    this.newQuestion = {
+      question: '',
+      answers: [{text:'', correct: false},{text:'', correct: false},{text:'', correct: false}]
     }
   }
 
@@ -101,7 +109,6 @@ export class NewCourseComponent implements OnInit {
   async createCourse(){
     this.myCourse.exam = this.newExamen;
     console.log(this.myCourse);
-    /*
     try {
       this.loading = true;
       console.log(this.myCourse);
@@ -118,7 +125,6 @@ export class NewCourseComponent implements OnInit {
       console.log(error);
       this.loading = false;
     }
-    */
   }
 
   // IMAGE SYSTEM

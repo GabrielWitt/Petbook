@@ -50,7 +50,7 @@ export class NoticeManagerPage implements OnInit {
   async detailNotice(notice){
     const modal = await this.modal.create({
       component: NewNoticeComponent,
-      componentProps: {notice, user: this.userData},
+      componentProps: {notice, user: this.userData, delete: true},
       mode: 'ios',
       presentingElement: this.routerOutlet.nativeEl
     });

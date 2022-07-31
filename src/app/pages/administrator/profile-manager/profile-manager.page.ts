@@ -7,11 +7,12 @@ import { VerificationFuncService } from 'src/app/shared/utilities/verificationFu
 import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
-import { NewPetComponent } from 'src/app/shared/components/new-pet/new-pet.component';
+import { NewPetComponent } from 'src/app/shared/components/pets/new-pet/new-pet.component';
 import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Pet } from 'src/app/core/models/species';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
+import { NewNoticeComponent } from 'src/app/shared/components/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-profile-manager',
@@ -36,8 +37,13 @@ export class ProfileManagerPage implements OnInit {
     birthday:[ {type: 'required', message: ' Ingresa tu fecha de nacimiento'},]
   };
 
+  // DARK MODE
+  prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  darkModeToggle = false;
+
   constructor(
     private pets: PetService,
+    private router: Router,
     private alerts: AlertsService,
     private modal: ModalController,
     private upload: ImageUploaderService,
@@ -46,7 +52,12 @@ export class ProfileManagerPage implements OnInit {
     private formBuilder: FormBuilder,
     private auth: FireAuthService,
     private verification: VerificationFuncService,
-  ) { }
+  ) { 
+    console.log(this.prefersDark)
+    console.log(this.prefersDark.matches)
+    this.darkModeToggle = this.prefersDark.matches;
+    this.prefersDark.addListener((e) => console.log(e.matches));
+   }
 
   ngOnInit() {
     this.registerForm = this.formBuilder.group({
@@ -153,6 +164,8 @@ export class ProfileManagerPage implements OnInit {
     (progress)=>{ this.progress = progress })
     .then((data:any) => {
       this.auth.updateUser('administrador', data.url).then(done => {
+        this.userData.photo = data.url;
+        this.auth.uploadUserForm(this.user.uid, this.userData)
         this.alerts.showAlert('PERFIL','Tus imagen de perfil ha sido actualizada','OK');
         this.upload.deletePicture();
         this.newImage = null;
@@ -202,7 +215,25 @@ export class ProfileManagerPage implements OnInit {
     });
     modal.present();
     const modalResult = await modal.onWillDismiss();
-    if(modalResult.data){ this.loadMyPets(); }
+    if(modalResult.data){
+      console.log(modalResult.data.action)
+      if(modalResult.data.action === 'update'){
+        this.loadMyPets(); 
+      } else if(modalResult.data.action === 'report') {
+        this.newReport(modalResult.data.pet);
+      }
+    }
   }
 
+  async newReport(pet){
+    const modal = await this.modal.create({
+      component: NewNoticeComponent,
+      componentProps: {notice: null, user: this.userData, pet},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.router.navigateByUrl('administrator/news'); }
+  }
 }

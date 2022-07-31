@@ -6,12 +6,13 @@ import { VerificationFuncService } from 'src/app/shared/utilities/verificationFu
 import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
-import { NewPetComponent } from 'src/app/shared/components/new-pet/new-pet.component';
+import { NewPetComponent } from 'src/app/shared/components/pets/new-pet/new-pet.component';
 import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Pet } from 'src/app/core/models/species';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
+import { NewNoticeComponent } from 'src/app/shared/components/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-profile-client',
@@ -203,6 +204,25 @@ export class ProfileClientPage implements OnInit {
     });
     modal.present();
     const modalResult = await modal.onWillDismiss();
-    if(modalResult.data){ this.loadMyPets(); }
+    if(modalResult.data){
+      console.log(modalResult.data.action)
+      if(modalResult.data.action === 'update'){
+        this.loadMyPets(); 
+      } else if(modalResult.data.action === 'report') {
+        this.newReport(modalResult.data.pet);
+      }
+    }
+  }
+
+  async newReport(pet){
+    const modal = await this.modal.create({
+      component: NewNoticeComponent,
+      componentProps: {notice: null, user: this.userData, pet},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.router.navigateByUrl('client/news'); }
   }
 }

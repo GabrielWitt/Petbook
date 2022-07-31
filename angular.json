@@ -38,11 +38,7 @@
             "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true,
-            "allowedCommonJsDependencies": [
-              "moment-timezone",
-              "moment"
-            ]
+            "namedChunks": true
           },
           "configurations": {
             "production": {

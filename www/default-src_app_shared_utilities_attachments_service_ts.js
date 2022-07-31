@@ -15,11 +15,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @capacitor/storage */ 460);
-/* harmony import */ var _capacitor_filesystem__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @capacitor/filesystem */ 91662);
+/* harmony import */ var _capacitor_filesystem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @capacitor/filesystem */ 91662);
 /* harmony import */ var ngx_image_compress__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ngx-image-compress */ 32568);
-/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
-/* harmony import */ var firebase_storage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! firebase/storage */ 19058);
+/* harmony import */ var src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/shared/utilities/error-handler.service */ 43570);
+/* harmony import */ var firebase_storage__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! firebase/storage */ 19058);
+/* harmony import */ var _my_store_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./my-store.service */ 30259);
 
 
 
@@ -30,8 +30,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let ImageUploaderService = class ImageUploaderService {
-  constructor(router, error, imageCompress) {
+  constructor(router, store, error, imageCompress) {
     this.router = router;
+    this.store = store;
     this.error = error;
     this.imageCompress = imageCompress;
     this.photo = [];
@@ -40,10 +41,10 @@ let ImageUploaderService = class ImageUploaderService {
 
   uploadFile(folder, filename, file, progressState) {
     return new Promise((resolve, reject) => {
-      const storage = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.getStorage)(); // Create a reference to 'folder/image.format'
+      const storage = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.getStorage)(); // Create a reference to 'folder/image.format'
 
-      const storageRef = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.ref)(storage, folder + '/' + filename);
-      const uploadTask = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.uploadBytesResumable)(storageRef, file); // Listen for state changes, errors, and completion of the upload.
+      const storageRef = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.ref)(storage, folder + '/' + filename);
+      const uploadTask = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.uploadBytesResumable)(storageRef, file); // Listen for state changes, errors, and completion of the upload.
 
       uploadTask.on('state_changed', snapshot => {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
@@ -97,7 +98,7 @@ let ImageUploaderService = class ImageUploaderService {
         }
       }, () => {
         // Upload completed successfully, now we can get the download URL
-        (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.getDownloadURL)(uploadTask.snapshot.ref).then(downloadURL => {
+        (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.getDownloadURL)(uploadTask.snapshot.ref).then(downloadURL => {
           console.log('File available at', downloadURL);
           resolve({
             message: 'Archivo transferido',
@@ -105,7 +106,7 @@ let ImageUploaderService = class ImageUploaderService {
           });
         });
       });
-      (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.uploadBytes)(storageRef, file).then(snapshot => {
+      (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.uploadBytes)(storageRef, file).then(snapshot => {
         console.log(snapshot);
       });
     });
@@ -113,10 +114,10 @@ let ImageUploaderService = class ImageUploaderService {
 
   uploadBase64(folder, filename, base64) {
     return new Promise((resolve, reject) => {
-      const storage = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.getStorage)(); // Create a reference to 'folder/image.format'
+      const storage = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.getStorage)(); // Create a reference to 'folder/image.format'
 
-      const storageRef = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.ref)(storage, folder + '/' + filename);
-      (0,firebase_storage__WEBPACK_IMPORTED_MODULE_4__.uploadString)(storageRef, base64, 'data_url').then(snapshot => {
+      const storageRef = (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.ref)(storage, folder + '/' + filename);
+      (0,firebase_storage__WEBPACK_IMPORTED_MODULE_3__.uploadString)(storageRef, base64, 'data_url').then(snapshot => {
         console.log(snapshot);
         resolve({
           message: 'Archivo transferido',
@@ -135,12 +136,8 @@ let ImageUploaderService = class ImageUploaderService {
     photos[0].route = route;
     photos[0].type = type;
     photos[0].data = data;
-    if (pdfName) photos[0].pdf; // Cache all photo data for future retrieval
-
-    _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(photos)
-    }); // .then(done => console.log('saved'));
+    if (pdfName) photos[0].pdf;
+    this.store.setData(this.PHOTO_STORAGE, photos);
   } // Delete picture by removing it from reference data and the filesystem
 
 
@@ -150,10 +147,8 @@ let ImageUploaderService = class ImageUploaderService {
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.photo = [];
       _this.data = undefined;
-      _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.set({
-        key: _this.PHOTO_STORAGE,
-        value: JSON.stringify(_this.photo)
-      }).then(done => console.log('clean photos'));
+
+      _this.store.removeFile(_this.PHOTO_STORAGE);
     })();
   }
 
@@ -164,12 +159,10 @@ let ImageUploaderService = class ImageUploaderService {
       var _ref = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve) {
         try {
           // Retrieve cached photo array data
-          const photoList = yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.get({
-            key: _this2.PHOTO_STORAGE
-          });
-          _this2.photo = photoList ? JSON.parse(photoList.value) : [];
+          const photoList = yield _this2.store.readFile(_this2.PHOTO_STORAGE);
+          _this2.photo = photoList ? photoList : [];
 
-          if (_this2.photo?.length) {
+          if (_this2.photo.length > 0) {
             if (_this2.photo[0].route !== _this2.router.url) {
               if (_this2.photo[0].route === '') {
                 _this2.deletePicture();
@@ -184,7 +177,7 @@ let ImageUploaderService = class ImageUploaderService {
 
               for (let i = 0; i < _this2.photo.length; i++) {
                 if (_this2.photo[0].type == 'Filesystem') {
-                  let contents = yield _capacitor_filesystem__WEBPACK_IMPORTED_MODULE_2__.Filesystem.readFile({
+                  let contents = yield _capacitor_filesystem__WEBPACK_IMPORTED_MODULE_1__.Filesystem.readFile({
                     path: _this2.photo[i].webPath
                   });
                   _this2.photo[i].webPath = 'data:image/jpeg;base64,' + contents.data;
@@ -317,7 +310,9 @@ let ImageUploaderService = class ImageUploaderService {
 ImageUploaderService.ctorParameters = () => [{
   type: _angular_router__WEBPACK_IMPORTED_MODULE_5__.Router
 }, {
-  type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_3__.ErrorHandlerService
+  type: _my_store_service__WEBPACK_IMPORTED_MODULE_4__.MyStoreService
+}, {
+  type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_2__.ErrorHandlerService
 }, {
   type: ngx_image_compress__WEBPACK_IMPORTED_MODULE_6__.NgxImageCompressService
 }];
@@ -325,6 +320,84 @@ ImageUploaderService.ctorParameters = () => [{
 ImageUploaderService = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Injectable)({
   providedIn: 'root'
 })], ImageUploaderService);
+
+
+/***/ }),
+
+/***/ 30259:
+/*!***************************************************!*\
+  !*** ./src/app/core/services/my-store.service.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MyStoreService": () => (/* binding */ MyStoreService)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @capacitor/storage */ 460);
+
+
+
+
+let MyStoreService = class MyStoreService {
+  constructor() {}
+
+  setData(filename, data) {
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        const lockData = JSON.stringify(data);
+        yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.set({
+          key: filename,
+          value: lockData
+        });
+        return 'ok';
+      } catch (error) {
+        console.log(error);
+        return 'data not saved';
+      }
+    })();
+  }
+
+  readFile(filename) {
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        const {
+          value
+        } = yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.get({
+          key: filename
+        });
+        return JSON.parse(value);
+      } catch (error) {
+        console.log(error);
+        return 'file not found';
+      }
+    })();
+  }
+
+  removeFile(filename) {
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.remove({
+          key: filename
+        });
+        return 'file removed';
+      } catch (error) {
+        console.log(error);
+        return 'file not found';
+      }
+    })();
+  }
+
+};
+
+MyStoreService.ctorParameters = () => [];
+
+MyStoreService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+  providedIn: 'root'
+})], MyStoreService);
 
 
 /***/ }),

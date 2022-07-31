@@ -24,13 +24,7 @@
   ></app-not-data-yet-message>
 
   <ion-list *ngIf="selectedTab === 'list' && petList.length>0">
-    <ion-item *ngFor="let pet of petList" (click)="editPet(pet)" detail>
-      <ion-avatar slot="start">  <img [src]="pet.photo"> </ion-avatar>
-      <ion-label>
-        <h3> {{pet.name}} </h3>
-        <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>
-      </ion-label>
-    </ion-item>
+    <app-pet-item *ngFor="let pet of petList" (click)="editPet(pet)" [pet]="pet"></app-pet-item>
   </ion-list>
 
   <ion-list *ngIf="selectedTab === 'types' && (speciesList.length > 0 || colorList.length>0)">

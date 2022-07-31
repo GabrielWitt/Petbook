@@ -17,7 +17,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 /* harmony import */ var src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/route-history */ 46147);
 /* harmony import */ var src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/verificationFunc */ 94264);
@@ -79,7 +79,7 @@ let ForgotPasswordComponent = class ForgotPasswordComponent {
 ForgotPasswordComponent.ctorParameters = () => [
     { type: _angular_forms__WEBPACK_IMPORTED_MODULE_6__.FormBuilder },
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.Router },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
+    { type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
     { type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_5__.VerificationFuncService },
     { type: src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_4__.RouteHistoryService },
     { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService }
@@ -225,7 +225,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 /* harmony import */ var src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/route-history */ 46147);
 /* harmony import */ var src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/verificationFunc */ 94264);
 
@@ -270,10 +270,10 @@ let LoginComponent = class LoginComponent {
     }
     checkUser() {
         this.loading = true;
-        this.auth.getUser().then((user) => {
-            if (user.email) {
-                if (user.emailVerified) {
-                    switch (user.displayName) {
+        this.auth.getUser().then((data) => {
+            if (data.user && data.user.email) {
+                if (data.user.emailVerified) {
+                    switch (data.user.displayName) {
                         case 'administrador':
                             this.router.navigateByUrl('administrator');
                             this.loading = false;
@@ -289,7 +289,7 @@ let LoginComponent = class LoginComponent {
                     }
                 }
                 else {
-                    this.router.navigateByUrl('general/verify-email/' + user.email);
+                    this.router.navigateByUrl('general/verify-email/' + data.user.email);
                     this.loading = false;
                 }
             }
@@ -310,9 +310,8 @@ let LoginComponent = class LoginComponent {
     }
     loginProcess(form) {
         this.loading = true;
-        console.log(this.loginForm.value);
         this.auth.login(this.loginForm.value.email, this.loginForm.value.password)
-            .then((user) => { console.log(user); this.checkUser(); })
+            .then(() => { this.checkUser(); })
             .catch(error => {
             this.messageError = error;
             this.loading = false;
@@ -328,7 +327,7 @@ let LoginComponent = class LoginComponent {
 LoginComponent.ctorParameters = () => [
     { type: _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormBuilder },
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.Router },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
+    { type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
     { type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__.VerificationFuncService },
     { type: src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_3__.RouteHistoryService }
 ];
@@ -360,7 +359,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 /* harmony import */ var src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/route-history */ 46147);
 /* harmony import */ var src_app_shared_utilities_validators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/validators */ 57916);
@@ -443,7 +442,7 @@ SignUpComponent.ctorParameters = () => [
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_8__.Router },
     { type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_6__.VerificationFuncService },
     { type: src_app_shared_utilities_route_history__WEBPACK_IMPORTED_MODULE_4__.RouteHistoryService },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
+    { type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
     { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService }
 ];
 SignUpComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([
@@ -473,7 +472,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _verify_email_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./verify-email.component.scss?ngResource */ 66887);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 60124);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 
 
@@ -557,7 +556,7 @@ let VerifyEmailComponent = class VerifyEmailComponent {
 VerifyEmailComponent.ctorParameters = () => [
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.ActivatedRoute },
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router },
-    { type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
+    { type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_2__.FireAuthService },
     { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService }
 ];
 VerifyEmailComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([

@@ -1,0 +1,54 @@
+<ion-list>
+  <ion-item>
+    <ion-thumbnail slot="start" class="profileCircle"ngClass = "{{ pet.status === 'dead'?'grayScale': (pet.status === 'lost'?'redImage':'') }}" >
+      <img *ngIf="pet" src="{{pet.photo}}">
+    </ion-thumbnail>
+    <ion-label>Nombre: {{pet.name}}</ion-label>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Especie: {{pet.specie}}</ion-label>
+  </ion-item>
+
+  <ion-item *ngIf="pet.breed?.length > 0">
+    <ion-label>Raza: {{pet.breed}}</ion-label>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Fecha de Nacimiento: {{pet.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>
+  </ion-item>
+
+  <ion-item *ngIf="pet.deceaseDate">
+    <ion-label>Fecha de Defunción: {{pet.deceaseDate| timeFormat:'DD/MM/YYYY'}} </ion-label>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Microchip:</ion-label>
+    <ion-checkbox slot="end" mode='md' [checked]="pet.microchip" color="primary" [disabled]="true"></ion-checkbox>
+  </ion-item>
+
+  <ion-item *ngIf="pet.status === 'lost'">
+    <ion-label>Estado: <ion-text class="ion-text-uppercase" color="danger">Perdido</ion-text></ion-label>
+  </ion-item>
+
+  <ion-list-header>
+    <ion-label>Colores de Pelaje</ion-label>
+  </ion-list-header>
+
+  <ion-item>
+    <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="pet.color1?.rgbCode && pet.color1.color === 'Blanco'" [ngStyle]="{ 'background-color': pet.color1.rgbCode }"></ion-avatar>
+    <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="pet.color1?.rgbCode && pet.color1.color !== 'Blanco'" [ngStyle]="{ 'background-color': pet.color1.rgbCode }"></ion-avatar>
+    <ion-label>Dominante: {{pet.color1.name}} ({{pet.color1.color}})</ion-label>
+  </ion-item>
+    
+  <ion-item *ngIf="pet.color2">
+    <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="pet.color2?.rgbCode && pet.color2.color === 'Blanco'" [ngStyle]="{ 'background-color': pet.color2.rgbCode }"></ion-avatar>
+    <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="pet.color2?.rgbCode && pet.color2.color !== 'Blanco'" [ngStyle]="{ 'background-color': pet.color2.rgbCode }"></ion-avatar>
+    <ion-label>Secundario: {{pet.color2.name}} ({{pet.color2.color}})</ion-label>
+  </ion-item>
+
+  <ion-list-header *ngIf="ownerData">
+    <ion-label>Dueño</ion-label>
+  </ion-list-header>
+</ion-list>
+<app-user-profile *ngIf="ownerData" [user]="ownerData"></app-user-profile>

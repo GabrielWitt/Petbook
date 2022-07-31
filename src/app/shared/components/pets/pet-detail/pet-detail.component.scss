@@ -1,0 +1,13 @@
+.profileCircle{
+    --border-radius: 50%;
+    --size: 40pt;
+    position: relative;
+}
+
+.redImage{
+    border: 3pt solid var(--ion-color-danger);
+}
+
+.grayScale{
+    filter: grayscale(100%);
+}

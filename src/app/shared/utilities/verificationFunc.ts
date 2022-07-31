@@ -7,7 +7,7 @@ import { Keyboard } from '@capacitor/keyboard';
 })
 export class VerificationFuncService {
 
-  constructor() { }
+  constructor( ) { }
 
   async EnterSubmit(evt, form, block){
     if (evt.keyCode === 13 && form.status === 'VALID' && !block){
@@ -16,4 +16,5 @@ export class VerificationFuncService {
     }
     return false
   }
+  
 }

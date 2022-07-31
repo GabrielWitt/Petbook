@@ -128,6 +128,12 @@ export class TimeHandlerModule {
     }
   }
 
+  getCurrentDateEs(){
+    moment.locale('es');
+    return moment().format('ddd, DD MMM YYYY');
+    
+  }
+
  }
 
  export const joinDateTimeInISO8601 = (date: string, time: string) => {

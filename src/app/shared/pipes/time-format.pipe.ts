@@ -16,6 +16,9 @@ export class TimeFormatPipe implements PipeTransform {
       case 'DD/MM/YYYY':
         this.RESULT =  moment(date).format('DD/MM/YYYY');
         break;
+      case 'DD/MM/YY':
+        this.RESULT =  moment(date).format('DD/MM/YY');
+        break;
       default:
         this.RESULT =  date;
     }

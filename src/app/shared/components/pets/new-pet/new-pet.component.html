@@ -31,59 +31,14 @@
 </ion-content>
 
 <ion-content class="ion-padding"  *ngIf="!loading && pet && !editPetForm">
-  <ion-list>
-    <ion-item>
-      <ion-thumbnail slot="start" class="profileCircle">
-        <img *ngIf="pet" src="{{pet.photo}}">
-      </ion-thumbnail>
-      <ion-label>Nombre: {{myPetData.name}}</ion-label>
-    </ion-item>
-
-    <ion-item>
-      <ion-label>Especie: {{myPetData.specie}}</ion-label>
-    </ion-item>
-
-    <ion-item *ngIf="myPetData.breed?.length > 0">
-      <ion-label>Raza: {{myPetData.breed}}</ion-label>
-    </ion-item>
-
-    <ion-item>
-      <ion-label>Fecha de Nacimiento: {{myPetData.birthDate | timeFormat:'DD/MM/YYYY'}} </ion-label>
-    </ion-item>
-
-    <ion-item>
-      <ion-label>Microchip:</ion-label>
-      <ion-checkbox slot="end" mode='md' [checked]="myPetData.microchip" color="primary" [disabled]="true"></ion-checkbox>
-    </ion-item>
-
-    <ion-list-header>
-      <ion-label>Colores de Pelaje</ion-label>
-    </ion-list-header>
-
-    <ion-item>
-      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
-      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color1?.rgbCode && myPetData.color1.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color1.rgbCode }"></ion-avatar>
-      <ion-label>Dominante: {{myPetData.color1.name}} ({{myPetData.color1.color}})</ion-label>
-    </ion-item>
-      
-    <ion-item *ngIf="myPetData.color2">
-      <ion-avatar style="border: 1px solid black;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color === 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
-      <ion-avatar style="border: 1px solid white;" slot="start" *ngIf="myPetData.color2?.rgbCode && myPetData.color2.color !== 'Blanco'" [ngStyle]="{ 'background-color': myPetData.color2.rgbCode }"></ion-avatar>
-      <ion-label>Secundario: {{myPetData.color2.name}} ({{myPetData.color2.color}})</ion-label>
-    </ion-item>
-
-    <ion-list-header *ngIf="ownerData">
-      <ion-label>Dueño</ion-label>
-    </ion-list-header>
-  </ion-list>
-  <app-user-profile *ngIf="ownerData" [user]="ownerData"></app-user-profile>
+  <app-pet-detail [pet]="pet" [ownerData]="ownerData"></app-pet-detail>
 </ion-content>
 
 <ion-content class="ion-padding" *ngIf="!loading && (!pet || editPetForm)">
   <ion-list>
     <ion-item>
       <ion-thumbnail *ngIf="!newImage && !pet" slot="start" class="profileCircle redImage" (click)="addPhoto()">
-        <ion-icon *ngIf="" class="imageProfile" name="paw-outline"></ion-icon>
+        <ion-icon class="imageProfile" name="paw-outline"></ion-icon>
         <div class="cameraButton">
           <ion-icon name="camera-outline" color="light"></ion-icon>
         </div>
@@ -150,6 +105,21 @@
       presentation="date"
       ></ion-datetime>
     </ion-row>
+
+    <ion-item (click)="showHideCalendar2()">
+      <ion-label>Fecha de Deceso: {{myPetData.deceaseDate ? (myPetData.deceaseDate | timeFormat:'DD/MM/YYYY') : ''}} </ion-label>
+      <ion-button size="small" slot="end" color="secondary"><ion-icon color="light" name="calendar-outline"></ion-icon></ion-button>
+    </ion-item>
+    <ion-row *ngIf="showCalendar2" class="ion-align-center {{needDate? 'redText': ''}}">
+      <ion-datetime style="margin: auto;"
+      locale="es-EC"
+      [(ngModel)]="birthDate"
+      [min]="minDate"
+      [max]="maxDate"
+      (ionChange)="handleCalendar2($event)"
+      presentation="date"
+      ></ion-datetime>
+    </ion-row>
     <ion-text class="ion-padding-start" color="danger" *ngIf="needDate"> 
       <ion-icon class="vertical-align" color="danger" name="alert-circle-outline"> </ion-icon> Ingrese la fecha de nacimiento
     </ion-text>
@@ -189,3 +159,11 @@
     </ion-item>
   </ion-list>
 </ion-content>
+<ion-footer *ngIf="pet && !editPetForm && (userData.uid === pet.ownerUid) && !pet.deceaseDate" class="ion-margin-top">
+  <ion-toolbar *ngIf="pet.status === 'good'">
+    <app-big-button LABEL="Reportar Perdido" buttonType="'RED'" [loading]="loading" [disabled]="loading" (click)="reportLost()"></app-big-button>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="pet.status === 'lost'">
+    <app-big-button LABEL="Reportar Encontrado" buttonType="'SECONDARY'" [loading]="loading" [disabled]="loading" (click)="reportFound()"></app-big-button>
+  </ion-toolbar>
+</ion-footer>

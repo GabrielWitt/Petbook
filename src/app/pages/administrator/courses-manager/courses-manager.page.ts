@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Course } from 'src/app/core/models/cousers';
-import { NewCourseComponent } from 'src/app/shared/components/new-course/new-course.component';
 import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { User, userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { CoursesService } from 'src/app/core/services/modules/courses.service';
+import { DetailCourseComponent } from 'src/app/shared/components/course/detail-course/detail-course.component';
 
 @Component({
   selector: 'app-courses-manager',
@@ -50,7 +50,7 @@ export class CoursesManagerPage implements OnInit {
 
   async detailCourse(course){
     const modal = await this.modal.create({
-      component: NewCourseComponent,
+      component: DetailCourseComponent,
       componentProps: {course, user: this.userData},
       mode: 'ios',
       presentingElement: this.routerOutlet.nativeEl

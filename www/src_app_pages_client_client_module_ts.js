@@ -184,7 +184,7 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
   \**********************************************************/
 /***/ ((module) => {
 
-module.exports = "<ion-content>\n  <ion-tabs>\n    <ion-tab-bar slot=\"bottom\">\n\n      <ion-tab-button tab=\"news\">\n        <ion-icon name=\"newspaper-outline\"></ion-icon>\n        <ion-label>ANUNCIOS</ion-label>\n      </ion-tab-button>\n\n      <ion-tab-button tab=\"courses\">\n        <ion-icon name=\"school-outline\"></ion-icon>\n        <ion-label>CURSOS</ion-label>\n      </ion-tab-button> \n      \n      <ion-tab-button tab=\"pets\">\n        <ion-icon name=\"paw-outline\"></ion-icon>\n        <ion-label>MASCOTAS</ion-label>\n      </ion-tab-button>\n\n      <ion-tab-button tab=\"profile\">\n        <ion-icon name=\"person-outline\"></ion-icon>\n        <ion-label>PERFIL</ion-label>\n      </ion-tab-button>\n    </ion-tab-bar>\n  </ion-tabs>\n</ion-content>\n";
+module.exports = "<ion-content>\n  <ion-tabs>\n    <ion-tab-bar slot=\"bottom\">\n\n      <ion-tab-button tab=\"news\">\n        <ion-icon name=\"newspaper-outline\"></ion-icon>\n        <ion-label>ANUNCIOS</ion-label>\n      </ion-tab-button>\n\n      <ion-tab-button tab=\"courses\">\n        <ion-icon name=\"school-outline\"></ion-icon>\n        <ion-label>CURSOS</ion-label>\n      </ion-tab-button> \n\n      <ion-tab-button tab=\"profile\">\n        <ion-icon name=\"person-outline\"></ion-icon>\n        <ion-label>PERFIL</ion-label>\n      </ion-tab-button>\n    </ion-tab-bar>\n  </ion-tabs>\n</ion-content>\n";
 
 /***/ })
 

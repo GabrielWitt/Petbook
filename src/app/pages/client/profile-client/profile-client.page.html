@@ -29,7 +29,7 @@
         </ion-text>
         <p>{{user?.email ? user?.email : '_'}}</p>
         <ion-text color="primary">
-          <p class="ion-text-capitalize">Tipo: {{user?.displayName ? user?.displayName : '_'}}</p>
+          <p class="ion-text-capitalize">Tipo: {{user?.displayName ? user?.displayName : 'Cliente'}}</p>
         </ion-text>
       </ion-label>
       <ion-button size="small" color="secondary"  *ngIf="!edit"

@@ -4,7 +4,7 @@ import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
-import { NewCourseComponent } from '../../new-course/new-course.component';
+import { NewCourseComponent } from '../../course/new-course/new-course.component';
 import { NewNoticeComponent } from '../../new-notice/new-notice.component';
 
 @Component({
@@ -48,7 +48,7 @@ export class MainHeaderComponent implements OnInit {
   async createNotice(){
     const modal = await this.modal.create({
       component: NewNoticeComponent,
-      componentProps: {notice: null, user: this.user},
+      componentProps: {notice: null, user: this.user, pet: null},
       mode: 'ios',
       presentingElement: this.routerOutlet.nativeEl
     });

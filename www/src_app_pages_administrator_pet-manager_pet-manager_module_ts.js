@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
-/* harmony import */ var src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/pet-service.service */ 81132);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 /* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
 
@@ -69,7 +69,6 @@ let NewSpecieComponent = class NewSpecieComponent {
         const imageName = Date().toString() + '_Specie' + this.newSpecieForm.value.name;
         this.upload.uploadFile('SpeciesList', imageName, this.newImage.file, (progress) => { this.progress = progress; })
             .then((data) => {
-            console.log(data.url);
             this.upload.deletePicture();
             let newSpecie = {
                 name: this.newSpecieForm.value.name,
@@ -88,7 +87,7 @@ let NewSpecieComponent = class NewSpecieComponent {
     }
 };
 NewSpecieComponent.ctorParameters = () => [
-    { type: src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_3__.PetService },
+    { type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_3__.PetService },
     { type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__.AlertsService },
     { type: src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_2__.ImageUploaderService },
     { type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__.AttachmentsService },
@@ -209,15 +208,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "PetManagerPage": () => (/* binding */ PetManagerPage)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _pet_manager_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pet-manager.page.html?ngResource */ 49114);
 /* harmony import */ var _pet_manager_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pet-manager.page.scss?ngResource */ 61413);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 93819);
-/* harmony import */ var src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/pet-service.service */ 81132);
-/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
-/* harmony import */ var _new_specie_new_specie_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./new-specie/new-specie.component */ 78034);
-/* harmony import */ var _specie_detail_specie_detail_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./specie-detail/specie-detail.component */ 52879);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+/* harmony import */ var src_app_shared_components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/components/pets/new-pet/new-pet.component */ 20982);
+/* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
+/* harmony import */ var _new_specie_new_specie_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./new-specie/new-specie.component */ 78034);
+/* harmony import */ var _specie_detail_specie_detail_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./specie-detail/specie-detail.component */ 52879);
+
+
 
 
 
@@ -229,8 +232,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let PetManagerPage = class PetManagerPage {
-  constructor(pets, alerts, modal, routerOutlet) {
+  constructor(pets, auth, alerts, modal, routerOutlet) {
     this.pets = pets;
+    this.auth = auth;
     this.alerts = alerts;
     this.modal = modal;
     this.routerOutlet = routerOutlet;
@@ -245,7 +249,12 @@ let PetManagerPage = class PetManagerPage {
   }
 
   ngOnInit() {
-    this.loadData();
+    this.loading = true;
+    this.auth.checkUser().then(user => {
+      this.user = user.user;
+      this.userData = user.data;
+      this.loadData();
+    });
   }
 
   loadData() {
@@ -311,7 +320,7 @@ let PetManagerPage = class PetManagerPage {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this5.modal.create({
-        component: _new_specie_new_specie_component__WEBPACK_IMPORTED_MODULE_5__.NewSpecieComponent,
+        component: _new_specie_new_specie_component__WEBPACK_IMPORTED_MODULE_7__.NewSpecieComponent,
         mode: 'ios',
         presentingElement: _this5.routerOutlet.nativeEl
       });
@@ -351,7 +360,7 @@ let PetManagerPage = class PetManagerPage {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this8.modal.create({
-        component: _specie_detail_specie_detail_component__WEBPACK_IMPORTED_MODULE_6__.SpecieDetailComponent,
+        component: _specie_detail_specie_detail_component__WEBPACK_IMPORTED_MODULE_8__.SpecieDetailComponent,
         componentProps: {
           specie
         },
@@ -391,19 +400,43 @@ let PetManagerPage = class PetManagerPage {
     })();
   }
 
+  editPet(pet) {
+    var _this10 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const modal = yield _this10.modal.create({
+        component: src_app_shared_components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_5__.NewPetComponent,
+        componentProps: {
+          pet,
+          userData: _this10.userData
+        },
+        mode: 'ios',
+        presentingElement: _this10.routerOutlet.nativeEl
+      });
+      modal.present();
+      const modalResult = yield modal.onWillDismiss();
+
+      if (modalResult.data) {
+        _this10.loadPets();
+      }
+    })();
+  }
+
 };
 
 PetManagerPage.ctorParameters = () => [{
-  type: src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_3__.PetService
+  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_4__.PetService
 }, {
-  type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__.AlertsService
+  type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__.FireAuthService
 }, {
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_7__.ModalController
+  type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_6__.AlertsService
 }, {
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_7__.IonRouterOutlet
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_9__.ModalController
+}, {
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_9__.IonRouterOutlet
 }];
 
-PetManagerPage = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+PetManagerPage = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.Component)({
   selector: 'app-pet-manager',
   template: _pet_manager_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [_pet_manager_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
@@ -503,7 +536,7 @@ module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons s
   \**********************************************************************************/
 /***/ ((module) => {
 
-module.exports = "<app-main-header title=\"Mascotas\"></app-main-header>\n\n<ion-content>\n  <ion-segment mode=\"ios\" (ionChange)=\"segmentChanged($event)\" value=\"list\">\n    <ion-segment-button value=\"list\">\n      <ion-label> <h2>Lista de Mascotas</h2> </ion-label> \n    </ion-segment-button>\n    <ion-segment-button value=\"types\">\n      <ion-label> <h2>Lista de Especies</h2> </ion-label>\n    </ion-segment-button>\n  </ion-segment>\n  <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n    <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n  </ion-refresher>\n  \n  <app-not-data-yet-message \n    *ngIf=\"selectedTab === 'list' && petList.length == 0 && !loading\"\n    text=\"No hay mascotas aún\" icon=\"alert-circle-outline\"\n  ></app-not-data-yet-message>\n\n  <app-not-data-yet-message \n    *ngIf=\"selectedTab === 'types' && speciesList.length == 0 && !loading\"\n    text=\"No hay especies aún\" icon=\"archive-outline\"\n  ></app-not-data-yet-message>\n\n  <ion-list *ngIf=\"selectedTab === 'list' && petList.length>0\">\n    <ion-item *ngFor=\"let pet of petList\" detail>\n      <ion-avatar slot=\"start\">  <img [src]=\"pet.photo\"> </ion-avatar>\n      <ion-label>\n        <h3> {{pet.name}} </h3>\n        <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n      </ion-label>\n    </ion-item>\n  </ion-list>\n\n  <ion-list *ngIf=\"selectedTab === 'types' && (speciesList.length > 0 || colorList.length>0)\">\n\n    <div *ngIf=\"speciesList.length > 0 && !newColorShow\">\n      <ion-list-header>\n        <ion-label>Especies</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let item of speciesList\" (click)=\"openSpecieDetail(item)\" detail>\n        <ion-avatar slot=\"start\">  <img [src]=\"item.photo\"> </ion-avatar>\n        <ion-label> {{item.name}} </ion-label>\n      </ion-item>\n    </div>\n\n    <ion-card *ngIf=\"newColorShow\" class=\"ion-padding\">\n      <ion-row>\n        <ion-col size=\"3\">\n          <ion-button  size=\"small\" color=\"danger\" (click)=\"newColorShow = false\" \n            [disabled]=\"(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor\">\n            <ion-spinner *ngIf=\"loadingColor\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n            <ion-text *ngIf=\"!loadingColor\" color=\"light\">Cancelar</ion-text>\n          </ion-button>\n        </ion-col>\n        <ion-col class=\"ion-text-uppercase ion-text-center ion-padding-top\">\n          {{newColor.uid ?'Editar':'Nuevo'}} Color\n        </ion-col>\n        <ion-col size=\"3\">\n          <ion-button size=\"small\" color=\"success\" (click)=\"saveColorData()\" \n            [disabled]=\"(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor\">\n            <ion-spinner *ngIf=\"loadingColor\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n            <ion-text *ngIf=\"!loadingColor\" color=\"light\">Guardar</ion-text>\n          </ion-button>\n        </ion-col>\n      </ion-row>\n      <ion-card-content>\n        <ion-item>\n          <ion-label position=\"stacked\">Color de Pelaje:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.name\" placeholder=\"Nombre Color\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.name\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese un nombre\n        </ion-text>\n  \n        <ion-item>\n          <ion-label position=\"stacked\">Color de referencia:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.color\" placeholder=\"Color Referencía\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.color\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese una referencia\n        </ion-text>\n  \n        <ion-item>\n          <ion-avatar style=\"border: 1px solid black;\" size=\"small\" slot=\"start\" *ngIf=\"newColor.rgbCode.length > 1\" [ngStyle]=\"{ 'background-color': newColor.rgbCode }\">\n          </ion-avatar>\n          <ion-label position=\"stacked\">Color en código:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.rgbCode\" placeholder=\"Busque codigo de color rgb en google y pegue aquí\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.rgbCode\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese un código\n        </ion-text>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newColor.rgbCode.length > 0 && newColor.rgbCode.length < 7\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Codigo incompleto \n        </ion-text>\n      </ion-card-content>\n    </ion-card>\n\n    <div *ngIf=\"colorList.length > 0\">\n      <ion-list-header>\n        <ion-label>Colores Disponibles</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let color of colorList\">\n        <ion-avatar style=\"border: 1px solid black;\" size=\"small\" slot=\"start\" [ngStyle]=\"{ 'background-color': color.rgbCode }\"></ion-avatar>\n        <ion-label> {{color.name}} ({{color.color}}) </ion-label>\n        <ion-button fill=\"outline\" slot=\"end\" (click)=\"editColor(color)\">Editar</ion-button>\n      </ion-item>\n    </div>\n    <ion-fab *ngIf=\"selectedTab === 'types' && !loadingColor && !loading && !newColorShow\" horizontal=\"end\" vertical=\"top\" slot=\"fixed\">\n      <ion-fab-button close-icon=\"close-outline\" id=\"open-modal\">\n        <ion-icon name=\"add-outline\"></ion-icon>\n      </ion-fab-button>\n      <ion-fab-list side=\"down\">\n        <ion-fab-button color=\"secondary\" (click)=\"newType()\">\n          <ion-icon name=\"extension-puzzle-outline\"></ion-icon>\n        </ion-fab-button>\n        <ion-fab-button color=\"secondary\" (click)=\"newColorOption()\">\n          <ion-icon name=\"brush-outline\"></ion-icon>\n        </ion-fab-button>\n      </ion-fab-list>\n    </ion-fab>  \n  </ion-list>\n  \n  <ion-list *ngIf=\"loading\">\n    <ion-item *ngFor=\"let item of loadingList\">\n      <ion-avatar slot=\"start\">\n        <ion-skeleton-text animated></ion-skeleton-text>\n      </ion-avatar>\n      <ion-label>\n        <h3>\n          <ion-skeleton-text animated style=\"width: 50%\"></ion-skeleton-text>\n        </h3>\n        <p>\n          <ion-skeleton-text animated style=\"width: 80%\"></ion-skeleton-text>\n        </p>\n      </ion-label>\n    </ion-item>\n  </ion-list>\n  \n</ion-content>\n";
+module.exports = "<app-main-header title=\"Mascotas\"></app-main-header>\n\n<ion-content>\n  <ion-segment mode=\"ios\" (ionChange)=\"segmentChanged($event)\" value=\"list\">\n    <ion-segment-button value=\"list\">\n      <ion-label> <h2>Lista de Mascotas</h2> </ion-label> \n    </ion-segment-button>\n    <ion-segment-button value=\"types\">\n      <ion-label> <h2>Lista de Especies</h2> </ion-label>\n    </ion-segment-button>\n  </ion-segment>\n  <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n    <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n  </ion-refresher>\n  \n  <app-not-data-yet-message \n    *ngIf=\"selectedTab === 'list' && petList.length == 0 && !loading\"\n    text=\"No hay mascotas aún\" icon=\"alert-circle-outline\"\n  ></app-not-data-yet-message>\n\n  <app-not-data-yet-message \n    *ngIf=\"selectedTab === 'types' && speciesList.length == 0 && !loading\"\n    text=\"No hay especies aún\" icon=\"archive-outline\"\n  ></app-not-data-yet-message>\n\n  <ion-list *ngIf=\"selectedTab === 'list' && petList.length>0\">\n    <ion-item *ngFor=\"let pet of petList\" (click)=\"editPet(pet)\" detail>\n      <ion-avatar slot=\"start\">  <img [src]=\"pet.photo\"> </ion-avatar>\n      <ion-label>\n        <h3> {{pet.name}} </h3>\n        <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n      </ion-label>\n    </ion-item>\n  </ion-list>\n\n  <ion-list *ngIf=\"selectedTab === 'types' && (speciesList.length > 0 || colorList.length>0)\">\n\n    <div *ngIf=\"speciesList.length > 0 && !newColorShow\">\n      <ion-list-header>\n        <ion-label>Especies</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let item of speciesList\" (click)=\"openSpecieDetail(item)\" detail>\n        <ion-avatar slot=\"start\">  <img [src]=\"item.photo\"> </ion-avatar>\n        <ion-label> {{item.name}} </ion-label>\n      </ion-item>\n    </div>\n\n    <ion-card *ngIf=\"newColorShow\" class=\"ion-padding\">\n      <ion-row>\n        <ion-col size=\"3\">\n          <ion-button  size=\"small\" color=\"danger\" (click)=\"newColorShow = false\" \n            [disabled]=\"(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor\">\n            <ion-spinner *ngIf=\"loadingColor\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n            <ion-text *ngIf=\"!loadingColor\" color=\"light\">Cancelar</ion-text>\n          </ion-button>\n        </ion-col>\n        <ion-col class=\"ion-text-uppercase ion-text-center ion-padding-top\">\n          {{newColor.uid ?'Editar':'Nuevo'}} Color\n        </ion-col>\n        <ion-col size=\"3\">\n          <ion-button size=\"small\" color=\"success\" (click)=\"saveColorData()\" \n            [disabled]=\"(!newColor.name && newColor.color && (newColor.rgbCode?.length < 7)) || loadingColor\">\n            <ion-spinner *ngIf=\"loadingColor\" style=\"margin-left: 10px;\" color=\"light\" name=\"dots\"></ion-spinner>\n            <ion-text *ngIf=\"!loadingColor\" color=\"light\">Guardar</ion-text>\n          </ion-button>\n        </ion-col>\n      </ion-row>\n      <ion-card-content>\n        <ion-item>\n          <ion-label position=\"stacked\">Color de Pelaje:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.name\" placeholder=\"Nombre Color\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.name\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese un nombre\n        </ion-text>\n  \n        <ion-item>\n          <ion-label position=\"stacked\">Color de referencia:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.color\" placeholder=\"Color Referencía\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.color\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese una referencia\n        </ion-text>\n  \n        <ion-item>\n          <ion-avatar style=\"border: 1px solid black;\" size=\"small\" slot=\"start\" *ngIf=\"newColor.rgbCode.length > 1\" [ngStyle]=\"{ 'background-color': newColor.rgbCode }\">\n          </ion-avatar>\n          <ion-label position=\"stacked\">Color en código:</ion-label>\n          <ion-input [(ngModel)]=\"newColor.rgbCode\" placeholder=\"Busque codigo de color rgb en google y pegue aquí\"></ion-input>\n        </ion-item>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!newColor.rgbCode\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Ingrese un código\n        </ion-text>\n        <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newColor.rgbCode.length > 0 && newColor.rgbCode.length < 7\"> \n          <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Codigo incompleto \n        </ion-text>\n      </ion-card-content>\n    </ion-card>\n\n    <div *ngIf=\"colorList.length > 0\">\n      <ion-list-header>\n        <ion-label>Colores Disponibles</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let color of colorList\">\n        <ion-avatar style=\"border: 1px solid black;\" size=\"small\" slot=\"start\" [ngStyle]=\"{ 'background-color': color.rgbCode }\"></ion-avatar>\n        <ion-label> {{color.name}} ({{color.color}}) </ion-label>\n        <ion-button fill=\"outline\" slot=\"end\" (click)=\"editColor(color)\">Editar</ion-button>\n      </ion-item>\n    </div>\n    <ion-fab *ngIf=\"selectedTab === 'types' && !loadingColor && !loading && !newColorShow\" horizontal=\"end\" vertical=\"top\" slot=\"fixed\">\n      <ion-fab-button close-icon=\"close-outline\" id=\"open-modal\">\n        <ion-icon name=\"add-outline\"></ion-icon>\n      </ion-fab-button>\n      <ion-fab-list side=\"down\">\n        <ion-fab-button color=\"secondary\" (click)=\"newType()\">\n          <ion-icon name=\"extension-puzzle-outline\"></ion-icon>\n        </ion-fab-button>\n        <ion-fab-button color=\"secondary\" (click)=\"newColorOption()\">\n          <ion-icon name=\"brush-outline\"></ion-icon>\n        </ion-fab-button>\n      </ion-fab-list>\n    </ion-fab>  \n  </ion-list>\n  \n  <ion-list *ngIf=\"loading\">\n    <ion-item *ngFor=\"let item of loadingList\">\n      <ion-avatar slot=\"start\">\n        <ion-skeleton-text animated></ion-skeleton-text>\n      </ion-avatar>\n      <ion-label>\n        <h3>\n          <ion-skeleton-text animated style=\"width: 50%\"></ion-skeleton-text>\n        </h3>\n        <p>\n          <ion-skeleton-text animated style=\"width: 80%\"></ion-skeleton-text>\n        </p>\n      </ion-label>\n    </ion-item>\n  </ion-list>\n  \n</ion-content>\n";
 
 /***/ }),
 

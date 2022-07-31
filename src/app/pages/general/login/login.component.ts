@@ -46,39 +46,7 @@ export class LoginComponent implements OnInit {
         Validators.required
       ]))
     });
-    this.checkUser();
-  }
-
-  checkUser() {
-    this.loading = true;
-    this.auth.getUser().then((data: any) =>{
-      if(data.user && data.user.email){
-        if(data.user.emailVerified){ 
-          switch(data.user.displayName){
-            case 'administrador':
-              this.router.navigateByUrl('administrator');
-              this.loading = false;
-              break;
-            case 'cliente':
-              this.router.navigateByUrl('client');
-              this.loading = false;
-              break;
-            default:
-              this.router.navigateByUrl('client');
-              this.loading = false;
-              break;
-          } 
-        } else { 
-          this.router.navigateByUrl('general/verify-email/'+data.user.email);
-          this.loading = false;
-        }
-      }else{
-        this.loading = false;
-      }
-    }).catch(error => {
-      console.log(error);
-      this.loading = false;
-    });
+    this.userProcess();
   }
 
   EnterSubmit(evt, form){
@@ -90,11 +58,19 @@ export class LoginComponent implements OnInit {
   loginProcess(form) {
     this.loading = true;
     this.auth.login(this.loginForm.value.email,this.loginForm.value.password)
-    .then(() => { this.checkUser();  })
+    .then(() => { this.userProcess();  })
     .catch(error => {
       this.messageError = error;
       this.loading = false;
     })
+  }
+
+  userProcess(){
+    this.loading = true;
+    this.auth.loginProcessUser().then(answer => {
+      console.log(answer)
+      this.loading = false;
+    }).catch(e=> { console.log(e); this.loading = false;});
   }
 
   forgotPassword(){

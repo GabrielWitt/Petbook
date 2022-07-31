@@ -11,6 +11,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Capacitor } from '@capacitor/core';
 import { Chooser } from '@awesome-cordova-plugins/chooser/ngx';
 import { NgxImageCompressService } from 'ngx-image-compress';
+import { YoutubeVideoPlayer } from '@awesome-cordova-plugins/youtube-video-player/ngx'
+import { NativeStorage } from '@awesome-cordova-plugins/native-storage/ngx';
 
 
 // @angular/fire
@@ -47,6 +49,8 @@ import { indexedDBLocalPersistence, initializeAuth } from 'firebase/auth';
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: PERSISTENCE, useValue: 'session' },
     Chooser,
+    NativeStorage,
+    YoutubeVideoPlayer,
     NgxImageCompressService
   ],
   bootstrap: [AppComponent],

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Storage } from '@capacitor/storage';
 import { UserPhoto } from '../models/images';
 import { Filesystem } from '@capacitor/filesystem';
 import { DOC_ORIENTATION, NgxImageCompressService} from 'ngx-image-compress';
@@ -119,8 +118,8 @@ export class ImageUploaderService {
       try {
         // Retrieve cached photo array data
         const photoList = await this.store.readFile(this.PHOTO_STORAGE);
-        this.photo = photoList ? JSON.parse(photoList.value) : [];
-        if(this.photo?.length){
+        this.photo = photoList ? photoList : [];
+        if(this.photo.length > 0){
           if(this.photo[0].route !== this.router.url){
             if(this.photo[0].route  === ''){  this.deletePicture(); resolve([]); 
             } else { this.photo[0].deploy = false; resolve(this.photo); }

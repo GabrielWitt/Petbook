@@ -1,12 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { IonContent, ModalController } from '@ionic/angular';
 import { attachmentOptions } from 'src/app/core/models/images';
 import { Comments, Notice } from 'src/app/core/models/notice';
+import { Pet } from 'src/app/core/models/species';
 import { shortUser, userFormData } from 'src/app/core/models/user';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
 import { NoticeService } from 'src/app/core/services/modules/notice.service';
+import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { AlertsService } from '../../utilities/alerts';
+import { TimeHandlerModule } from '../../utilities/time-handler';
 
 @Component({
   selector: 'app-new-notice',
@@ -14,8 +17,15 @@ import { AlertsService } from '../../utilities/alerts';
   styleUrls: ['./new-notice.component.scss'],
 })
 export class NewNoticeComponent implements OnInit {
+  @ViewChild( IonContent, { static: false }) content: IonContent;
+  public scroll = false;
+  private fullHeight = 0;
+  public showScroll = 0;
+  defaultUser = 'assets/profile/ProfileBlank.png';
   @Input() user: userFormData;
   @Input() notice: Notice;
+  @Input() pet: Pet;
+  @Input() delete: boolean;
   writer: shortUser;
   typeList = []
   myNotice: Notice = {
@@ -44,14 +54,19 @@ export class NewNoticeComponent implements OnInit {
   }
 
   constructor(
+    private pets: PetService,
     private notices: NoticeService,
     public modal: ModalController,
+    private time: TimeHandlerModule,
     private alerts: AlertsService,
     private images: AttachmentsService,
     private upload: ImageUploaderService,
   ) { }
 
   ngOnInit() {
+    console.log(this.notice, this .user)
+    console.log(this .user)
+    console.log(this.pet)
     this.loadTypes().then(() => {
       this.loading = false;
       if(this.notice){
@@ -65,6 +80,18 @@ export class NewNoticeComponent implements OnInit {
           email: this.user.email,
           name: this.user.name + ' ' + this.user.lastName
         }
+      }
+      if(this.pet){
+        this.noticeType = this.typeList[1].name;
+        this.myNotice.type = this.typeList[1];
+        this.myNotice.title = this.pet.specie +' Perdido: ' + this.time.getCurrentDateEs();
+        this.myNotice.photo = this.pet.photo;
+        let prevMessage = this.pet.specie +' perdido, su nombre es ' + this.pet.name + ' y es de color ' + this.pet.color1.color
+        if(this.pet.color2){ prevMessage = prevMessage + ' con '+ this.pet.color2.color}
+        if(this.pet.breed){ prevMessage = prevMessage + '. Es de raza '+ this.pet.breed}
+        prevMessage = prevMessage + (this.pet.microchip ? '. Tiene' : 'No tiene' ) + ' microchip. Ser perdio en (agregar dirección)';
+        prevMessage = prevMessage + '. Si tiene información llamar al (agregar número)';
+        this.myNotice.description = prevMessage;
       }
     })
   }
@@ -145,12 +172,27 @@ export class NewNoticeComponent implements OnInit {
   async createNotice(){
     try {
       this.loading = true;
-      this.myNotice.photo =  await this.uploadPhoto();
+      if(this.newImage){this.myNotice.photo =  await this.uploadPhoto();}
       console.log(this.myNotice);
       if(this.notice){
+        this.myNotice['createdAt'] = this.time.dateTransform(this.notice['createdAt']);
         await this.notices.UpdateNotice(this.myNotice);
       }else{
+        if(this.pet){
+          this.myNotice.pet = {
+            uid: this.pet.uid,
+            name: this.pet.name,
+            specie: this.pet.specie,
+            status: 'lost',
+            ownerUid: this.pet.ownerUid,
+            photo: this.pet.photo,
+            color1: this.pet.color1,
+            microchip: this.pet.microchip,
+          }
+          if(this.pet.color2){this.myNotice.pet.color2 = this.pet.color2;}
+        }
         await this.notices.createNotice(this.myNotice);
+        if(this.pet){ await this.pets.statusMyPet(this.pet,'lost') }
       }
       this.alerts.showAlert( 'ANUNCIOS', 
       this.notice? 'Datos de '+ this.myNotice.title + ' actualizados' : 'Nuevo anuncio agregado', 'OK');
@@ -159,29 +201,6 @@ export class NewNoticeComponent implements OnInit {
     } catch (error) {
       console.log(error);
       this.loading = false;
-    }
-  }
-
-  async addLike(){
-    this.sending = true;
-    this.myNotice = this.notice;
-    try {
-      if(this.myLike){
-        let likeList = [];
-        this.notice.likes.forEach(like =>{
-          if(this.user.uid !== like){ likeList.push(like)}
-        });
-        this.myNotice.likes = likeList;
-      } else {
-        this.myNotice.likes.push(this.user.uid);
-      }
-      await this.notices.UpdateNotice(this.myNotice);
-      this.sending = false;
-      this.notice.likes = this.myNotice.likes;
-      this.myLike = !this.myLike;
-    } catch (error) {
-      console.log(error);
-      this.sending = false;
     }
   }
 
@@ -201,12 +220,29 @@ export class NewNoticeComponent implements OnInit {
       }
       this.myNotice.comments.push(this.newComment);
       await this.notices.UpdateNotice(this.myNotice);
-      this.sending = false;
+      setTimeout(() => {
+        this.sending = false;
+      }, 5000);
       this.notice.comments = this.myNotice.comments;
+      this.newComment = {
+        text: '',
+        user: null
+      }
+      this.scrollDown();
     } catch (error) {
       console.log(error);
       this.sending = false;
     }
+  }
+
+  checkScroll(scroll, content) {
+    this.content = content;
+    if (this.fullHeight < scroll.detail.currentY){ this.fullHeight = scroll.detail.currentY; }
+    this.showScroll = (this.fullHeight - scroll.detail.scrollTop);
+  }
+
+  scrollDown() {
+    if (this.content?.scrollToBottom){ setTimeout(() => { this.content.scrollToBottom(400); setTimeout(() => { this.showScroll = 1; }, 1000); } , 500); }
   }
 
 }

@@ -5,7 +5,7 @@
       <ion-text *ngIf="!loading" class="ion-text-uppercase" color="light">{{LABEL}}</ion-text>
     </ion-label>
   </ion-button>
-
+  
   <ion-button *ngSwitchCase="'SECONDARY'" class='buttonStyle' color="secondary" [disabled]="disabled">
     <ion-label>
       <ion-spinner *ngIf="loading" style="margin-left: 10px;" color="light" name="dots"></ion-spinner>

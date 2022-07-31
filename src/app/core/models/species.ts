@@ -24,11 +24,27 @@ export interface Pet {
     uid?: string;
     name: string;
     specie: string;
+    status?: string;
     breed?: string;
     birthDate: any;
+    deceaseDate?: any;
     color1: BreedColor;
     color2?: BreedColor;
     microchip: boolean;
     photo?: string;
     ownerUid: string;
 }
+
+export interface shortPet {
+    uid?: string;
+    name: string;
+    status?: string;
+    photo?: string;
+    ownerUid: string;
+    color1: BreedColor;
+    color2?: BreedColor;
+    microchip: boolean;
+    specie: string;
+}
+
+

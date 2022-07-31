@@ -95,20 +95,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ProfileClientPage": () => (/* binding */ ProfileClientPage)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _profile_client_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./profile-client.page.html?ngResource */ 37524);
 /* harmony import */ var _profile_client_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./profile-client.page.scss?ngResource */ 82765);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/router */ 60124);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/router */ 60124);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 /* harmony import */ var src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/verificationFunc */ 94264);
 /* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
 /* harmony import */ var src_app_shared_components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! src/app/shared/components/pets/new-pet/new-pet.component */ 20982);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ionic/angular */ 93819);
-/* harmony import */ var src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! src/app/core/services/pet-service.service */ 81132);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/forms */ 2508);
-/* harmony import */ var src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! src/app/core/services/fire-auth.service */ 28255);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/forms */ 2508);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
+/* harmony import */ var src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! src/app/shared/components/new-notice/new-notice.component */ 67186);
+
 
 
 
@@ -141,9 +143,6 @@ let ProfileClientPage = class ProfileClientPage {
     this.defaultUser = '../../../../assets/profile/ProfileBlank.png';
     this.progress = 0;
     this.petList = [];
-  }
-
-  ngOnInit() {
     this.validationMessages = {
       name: [{
         type: 'required',
@@ -158,15 +157,18 @@ let ProfileClientPage = class ProfileClientPage {
         message: ' Ingresa tu fecha de nacimiento'
       }]
     };
+  }
+
+  ngOnInit() {
     this.registerForm = this.formBuilder.group({
       name: [null, {
-        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.minLength(2)]
+        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.minLength(2)]
       }],
       lastName: [null, {
-        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.minLength(3)]
+        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.minLength(3)]
       }],
       birthday: [null, {
-        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required]
+        validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required]
       }]
     });
     this.checkUser().then(ok => {
@@ -188,19 +190,21 @@ let ProfileClientPage = class ProfileClientPage {
 
   checkUser() {
     return new Promise((resolve, reject) => {
-      this.loading = true;
-      this.auth.checkUser().then(user => {
-        this.user = user.user;
-        this.userData = user.data;
-        this.loadMyPets().then(ok => {
-          this.loading = false;
-          resolve('done');
+      try {
+        this.loading = true;
+        this.auth.checkUser().then(user => {
+          this.user = user.user;
+          this.userData = user.data;
+          this.loadMyPets().then(ok => {
+            this.loading = false;
+            resolve('done');
+          });
         });
-      }).catch(error => {
+      } catch (error) {
         console.log(error);
         this.loading = false;
         reject(error);
-      });
+      }
     });
   }
 
@@ -210,7 +214,6 @@ let ProfileClientPage = class ProfileClientPage {
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.petList = yield _this.pets.myPetList(_this.user.uid);
-        console.log(_this.petList);
         return 'done';
       } catch (error) {
         console.log(error);
@@ -223,13 +226,13 @@ let ProfileClientPage = class ProfileClientPage {
       this.edit = !this.edit;
       this.registerForm = this.formBuilder.group({
         name: [this.userData.name, {
-          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.minLength(2)]
+          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.minLength(2)]
         }],
         lastName: [this.userData.lastName, {
-          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.minLength(3)]
+          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.minLength(3)]
         }],
         birthday: [this.userData.birthDate, {
-          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_10__.Validators.required]
+          validators: [_angular_forms__WEBPACK_IMPORTED_MODULE_11__.Validators.required]
         }]
       });
     } else {
@@ -279,7 +282,7 @@ let ProfileClientPage = class ProfileClientPage {
     this.upload.uploadFile('profile', imageName, image.file, progress => {
       this.progress = progress;
     }).then(data => {
-      this.auth.updateUser(this.user.displayName, data.url).then(done => {
+      this.auth.updateUser('administrador', data.url).then(done => {
         this.alerts.showAlert('PERFIL', 'Tus imagen de perfil ha sido actualizada', 'OK');
         this.upload.deletePicture();
         this.newImage = null;
@@ -357,7 +360,36 @@ let ProfileClientPage = class ProfileClientPage {
       const modalResult = yield modal.onWillDismiss();
 
       if (modalResult.data) {
-        _this4.loadMyPets();
+        console.log(modalResult.data.action);
+
+        if (modalResult.data.action === 'update') {
+          _this4.loadMyPets();
+        } else if (modalResult.data.action === 'report') {
+          _this4.newReport(modalResult.data.pet);
+        }
+      }
+    })();
+  }
+
+  newReport(pet) {
+    var _this5 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const modal = yield _this5.modal.create({
+        component: src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__.NewNoticeComponent,
+        componentProps: {
+          notice: null,
+          user: _this5.userData,
+          pet
+        },
+        mode: 'ios',
+        presentingElement: _this5.routerOutlet.nativeEl
+      });
+      modal.present();
+      const modalResult = yield modal.onWillDismiss();
+
+      if (modalResult.data) {
+        _this5.router.navigateByUrl('client/news');
       }
     })();
   }
@@ -365,9 +397,9 @@ let ProfileClientPage = class ProfileClientPage {
 };
 
 ProfileClientPage.ctorParameters = () => [{
-  type: _angular_router__WEBPACK_IMPORTED_MODULE_11__.Router
+  type: _angular_router__WEBPACK_IMPORTED_MODULE_12__.Router
 }, {
-  type: src_app_core_services_pet_service_service__WEBPACK_IMPORTED_MODULE_8__.PetService
+  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_8__.PetService
 }, {
   type: src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_3__.AlertsService
 }, {
@@ -375,18 +407,18 @@ ProfileClientPage.ctorParameters = () => [{
 }, {
   type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__.AttachmentsService
 }, {
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_12__.ModalController
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_13__.ModalController
 }, {
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_12__.IonRouterOutlet
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_13__.IonRouterOutlet
 }, {
-  type: _angular_forms__WEBPACK_IMPORTED_MODULE_10__.FormBuilder
+  type: _angular_forms__WEBPACK_IMPORTED_MODULE_11__.FormBuilder
 }, {
-  type: src_app_core_services_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__.FireAuthService
+  type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__.FireAuthService
 }, {
   type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__.VerificationFuncService
 }];
 
-ProfileClientPage = (0,tslib__WEBPACK_IMPORTED_MODULE_13__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_14__.Component)({
+ProfileClientPage = (0,tslib__WEBPACK_IMPORTED_MODULE_14__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.Component)({
   selector: 'app-profile-client',
   template: _profile_client_page_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [_profile_client_page_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
@@ -411,7 +443,7 @@ module.exports = ".ripple-parent {\n  position: relative;\n  overflow: hidden;\n
   \*********************************************************************************/
 /***/ ((module) => {
 
-module.exports = "<app-main-header title=\"Mi Perfil\"></app-main-header>\n\n<ion-content>\n  <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n    <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n  </ion-refresher>\n\n  <ion-fab horizontal=\"end\" vertical=\"bottom\" slot=\"fixed\" (click)=\"newPet()\" *ngIf=\"!loading\">\n    <ion-fab-button close-icon=\"close-outline\" id=\"open-modal\">\n      <ion-icon name=\"add-outline\"></ion-icon>\n    </ion-fab-button>\n  </ion-fab>  \n\n  <ion-list class=\"ion-padding\">\n    <ion-item>\n      <ion-thumbnail *ngIf=\"!newImage\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img class=\"imageProfile\" src=\"{{user?.photoURL ? user?.photoURL : defaultUser}}\">\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"newImage\" slot=\"start\" class=\"profileCircle\">\n        <img src=\"{{newImage.webPath}}\">\n        <ion-spinner class=\"uploadingImage\" size=\"large\" name=\"circles\"></ion-spinner>\n        <ion-progress-bar class=\"loadingImage\" color=\"primary\" [value]=\"progress\"></ion-progress-bar>\n      </ion-thumbnail>\n      <ion-label class=\"ion-text-wrap\">\n        <ion-text color=\"dark\">\n          <ion-card-title>{{userData ? userData.name + ' ' + userData.lastName : 'Loading...'}}</ion-card-title>\n        </ion-text>\n        <p>{{user?.email ? user?.email : '_'}}</p>\n        <ion-text color=\"primary\">\n          <p class=\"ion-text-capitalize\">Tipo: {{user?.displayName ? user?.displayName : '_'}}</p>\n        </ion-text>\n      </ion-label>\n      <ion-button size=\"small\" color=\"secondary\"  *ngIf=\"!edit\"\n      [disabled]=\"loading\" (click)=\"editForm()\">Editar</ion-button>\n    </ion-item>\n    <ion-item class=\"ion-activatable ripple-parent\" (click)=\"upgradeProfile()\"\n     *ngIf=\"user?.displayName !== 'administrador' && userData?.manager\">\n      <ion-label>\n        <h2>Presiona la estrella </h2>\n        <h2>para ser administrador</h2>\n      </ion-label>\n      <ion-button fill=\"clear\" slot=\"end\">\n        <ion-icon size=\"large\" color=\"warning\" name=\"star-outline\"></ion-icon>\n      </ion-button>\n      <ion-ripple-effect></ion-ripple-effect>\n    </ion-item>\n    <ion-list *ngIf=\"!edit\">\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Nombre</b></ion-label>\n        <ion-input value=\"{{userData ? userData.name : ''}}\" type=\"text\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Apellido</b></ion-label>\n        <ion-input value=\"{{userData ? userData.lastName : ''}}\" type=\"text\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n      <ion-item>\n        <ion-label color=\"dark\" position='floating'><b>Cumpleaños</b></ion-label>\n        <ion-input value=\"{{userData ? userData.birthDate : ''}}\" type=\"date\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n    </ion-list>\n\n    <form *ngIf=\"edit\" #email=\"ngForm\" [formGroup]=\"registerForm\" (keydown)=\"EnterSubmit($event, registerForm)\" novalidate>\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Nombre</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"name\" type=\"text\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.name\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('name').hasError(validation.type) && (registerForm.get('name').dirty || registerForm.get('name').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    \n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Apellido</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"lastName\" type=\"text\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.lastName\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('lastName').hasError(validation.type) && (registerForm.get('lastName').dirty || registerForm.get('lastName').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    \n      <ion-item>\n        <ion-label color=\"dark\" position='floating'><b>Cumpleaños</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"birthday\" type=\"date\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.birthday\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('birthday').hasError(validation.type) && (registerForm.get('birthday').dirty || registerForm.get('birthday').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    </form>\n    <ion-row *ngIf=\"edit\">\n      <app-big-button class=\"ion-padding-top\"  style=\"width: 100%;\" LABEL=\"GUARDAR\" buttonType=\"danger\" [loading]=\"loading\" [disabled]=\"false\" (click)=\"editForm()\"></app-big-button>\n    </ion-row>\n    \n    <div *ngIf=\"petList.length > 0\">\n      <ion-list-header>\n        <ion-label>Mis Mascotas</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let pet of petList\" (click)=\"editPet(pet)\" detail>\n        <ion-avatar slot=\"start\">  <img [src]=\"pet.photo\"> </ion-avatar>\n        <ion-label>\n          <h3> {{pet.name}} </h3>\n          <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n        </ion-label>\n      </ion-item>\n    </div>\n  </ion-list>\n</ion-content>\n";
+module.exports = "<app-main-header title=\"Mi Perfil\"></app-main-header>\n\n<ion-content>\n    <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n      <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n    </ion-refresher>\n\n    <ion-fab horizontal=\"end\" vertical=\"bottom\" slot=\"fixed\" (click)=\"newPet()\" *ngIf=\"!loading\">\n      <ion-fab-button close-icon=\"close-outline\" id=\"open-modal\">\n        <ion-icon name=\"add-outline\"></ion-icon>\n      </ion-fab-button>\n    </ion-fab>  \n    <ion-list class=\"ion-padding\">\n    <ion-item>\n      <ion-thumbnail *ngIf=\"!newImage\" slot=\"start\" class=\"profileCircle\" (click)=\"addPhoto()\">\n        <img class=\"imageProfile\" src=\"{{user?.photoURL ? user?.photoURL : defaultUser}}\">\n        <div class=\"cameraButton\">\n          <ion-icon name=\"camera-outline\" color=\"light\"></ion-icon>\n        </div>\n      </ion-thumbnail>\n      <ion-thumbnail *ngIf=\"newImage\" slot=\"start\" class=\"profileCircle\">\n        <img src=\"{{newImage.webPath}}\">\n        <ion-spinner class=\"uploadingImage\" size=\"large\" name=\"circles\"></ion-spinner>\n        <ion-progress-bar class=\"loadingImage\" color=\"primary\" [value]=\"progress\"></ion-progress-bar>\n      </ion-thumbnail>\n      <ion-label class=\"ion-text-wrap\">\n        <ion-text color=\"dark\">\n          <ion-card-title>{{userData ? userData.name + ' ' + userData.lastName : 'Cargando'}} <ion-spinner *ngIf=\"!userData\" name=\"dots\"></ion-spinner></ion-card-title>\n        </ion-text>\n        <p>{{user?.email ? user?.email : '_'}}</p>\n        <ion-text color=\"primary\">\n          <p class=\"ion-text-capitalize\">Tipo: {{user?.displayName ? user?.displayName : 'Cliente'}}</p>\n        </ion-text>\n      </ion-label>\n      <ion-button size=\"small\" color=\"secondary\"  *ngIf=\"!edit\"\n      [disabled]=\"loading\" (click)=\"editForm()\">Editar</ion-button>\n    </ion-item>\n    <ion-item class=\"ion-activatable ripple-parent\" (click)=\"upgradeProfile()\"\n     *ngIf=\"user?.displayName !== 'administrador' && userData?.manager\">\n      <ion-label>\n        <h2>Presiona la estrella </h2>\n        <h2>para ser administrador</h2>\n      </ion-label>\n      <ion-button fill=\"clear\" slot=\"end\">\n        <ion-icon size=\"large\" color=\"warning\" name=\"star-outline\"></ion-icon>\n      </ion-button>\n      <ion-ripple-effect></ion-ripple-effect>\n    </ion-item>\n    <ion-list *ngIf=\"!edit\">\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Nombre</b></ion-label>\n        <ion-input value=\"{{userData ? userData.name : ''}}\" type=\"text\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Apellido</b></ion-label>\n        <ion-input value=\"{{userData ? userData.lastName : ''}}\" type=\"text\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n      <ion-item>\n        <ion-label color=\"dark\" position='floating'><b>Cumpleaños</b></ion-label>\n        <ion-input value=\"{{userData ? userData.birthDate : ''}}\" type=\"date\" [disabled]=\"true\"></ion-input>\n      </ion-item>\n    </ion-list>\n\n    <form *ngIf=\"edit\" #email=\"ngForm\" [formGroup]=\"registerForm\" (keydown)=\"EnterSubmit($event, registerForm)\" novalidate>\n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Nombre</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"name\" type=\"text\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.name\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('name').hasError(validation.type) && (registerForm.get('name').dirty || registerForm.get('name').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    \n      <ion-item>\n        <ion-label color=\"dark\" position=\"floating\"> <b>Apellido</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"lastName\" type=\"text\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.lastName\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('lastName').hasError(validation.type) && (registerForm.get('lastName').dirty || registerForm.get('lastName').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    \n      <ion-item>\n        <ion-label color=\"dark\" position='floating'><b>Cumpleaños</b></ion-label>\n        <ion-input color=\"dark\" formControlName=\"birthday\" type=\"date\" clearInput=\"true\"></ion-input>\n      </ion-item>\n      <ng-container *ngFor=\"let validation of validationMessages.birthday\">\n        <div class=\"error-message\" *ngIf=\"registerForm.get('birthday').hasError(validation.type) && (registerForm.get('birthday').dirty || registerForm.get('birthday').touched)\">\n          <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n        </div>\n      </ng-container>\n    </form>\n    <ion-row *ngIf=\"edit\">\n      <app-big-button class=\"ion-padding-top\"  style=\"width: 100%;\" LABEL=\"GUARDAR\" buttonType=\"danger\" [loading]=\"loading\" [disabled]=\"false\" (click)=\"editForm()\"></app-big-button>\n    </ion-row>\n    <div *ngIf=\"petList.length > 0\">\n      <ion-list-header>\n        <ion-label>Mis Mascotas</ion-label>\n      </ion-list-header>\n      <ion-item *ngFor=\"let pet of petList\" (click)=\"editPet(pet)\" detail>\n        <ion-avatar slot=\"start\">  <img [src]=\"pet.photo\"> </ion-avatar>\n        <ion-label>\n          <h3> {{pet.name}} </h3>\n          <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n        </ion-label>\n      </ion-item>\n    </div>\n  </ion-list>\n</ion-content>";
 
 /***/ })
 

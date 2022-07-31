@@ -11,27 +11,22 @@
     ></app-not-data-yet-message>
   
     <ion-list *ngIf="noticeList.length>0">
-        <ion-card *ngFor="let notice of noticeList" (click)="detailNotice(notice)">
-            <ion-card-header>
-                <ion-card-subtitle>
-                    <ion-icon color="tertiary" size="small" [name]="notice.type.icon"></ion-icon>
-                    <ion-text color="tertiary">{{notice.type.name}}</ion-text>
-                </ion-card-subtitle>
-            </ion-card-header>
-            <img [src]="notice.photo">
-            <ion-item detail>
-                <ion-label>
-                    <p>{{notice.title}}</p>
-                </ion-label>
-            </ion-item>
-            <ion-row>
-                <ion-col class="ion-text-center">
-                    <ion-icon name="thumbs-up-outline"></ion-icon> Likes {{notice.likes.length}}
-                </ion-col>
-                <ion-col class="ion-text-center">
-                <ion-icon name="chatbubble-ellipses-outline"></ion-icon> Comentarios {{notice.comments.length}}
-                </ion-col>
-            </ion-row>
+        <ion-card *ngFor="let notice of noticeList">
+            <div (click)="detailNotice(notice)">
+                <ion-item lines="none">
+                    <ion-icon slot="start" color="secondary" size="small" [name]="notice.type.icon"></ion-icon>
+                    <ion-label>
+                        <ion-text color="secondary">{{notice.type.name}}</ion-text>
+                    </ion-label>
+                </ion-item>
+                <img [src]="notice.photo">
+                <ion-row class="ion-text-center" style="width: 100%;">
+                    <ion-text class="ion-text-capitalized" color="dark">
+                        <h3>{{notice.title}}</h3>
+                    </ion-text>
+                </ion-row>
+            </div>
+            <app-notice-bottom-bar [likes]="notice.likes.length" [comments]="notice.comments.length" [notice]="notice" [userUID]="user.uid"></app-notice-bottom-bar>
         </ion-card>
     </ion-list>
     
