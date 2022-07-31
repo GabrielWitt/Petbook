@@ -19,14 +19,14 @@
                         <ion-text color="secondary">{{notice.type.name}}</ion-text>
                     </ion-label>
                 </ion-item>
-                <img [src]="notice.photo">
+                <ion-img style="margin: 0 auto;" [src]="notice.photo"></ion-img>
                 <ion-row class="ion-text-center" style="width: 100%;">
                     <ion-text class="ion-text-capitalized" color="dark">
                         <h3>{{notice.title}}</h3>
                     </ion-text>
                 </ion-row>
             </div>
-            <app-notice-bottom-bar [likes]="notice.likes.length" [comments]="notice.comments.length" [notice]="notice" [userUID]="user.uid"></app-notice-bottom-bar>
+            <app-notice-bottom-bar [likes]="notice.likes.length" [comments]="notice.comments.length" [notice]="notice" [userUID]="userData?.uid"></app-notice-bottom-bar>
         </ion-card>
     </ion-list>
     

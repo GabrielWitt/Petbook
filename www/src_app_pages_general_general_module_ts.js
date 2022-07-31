@@ -259,47 +259,14 @@ let LoginComponent = class LoginComponent {
             ]
         };
         this.loginForm = this.formBuilder.group({
-            email: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormControl('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.compose([
+            email: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormControl('gabrowitt@hotmail.com', _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.compose([
                 _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.email
             ])),
-            password: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormControl('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.compose([
+            password: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormControl('Gabo123456!', _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.compose([
                 _angular_forms__WEBPACK_IMPORTED_MODULE_5__.Validators.required
             ]))
         });
-        this.checkUser();
-    }
-    checkUser() {
-        this.loading = true;
-        this.auth.getUser().then((data) => {
-            if (data.user && data.user.email) {
-                if (data.user.emailVerified) {
-                    switch (data.user.displayName) {
-                        case 'administrador':
-                            this.router.navigateByUrl('administrator');
-                            this.loading = false;
-                            break;
-                        case 'cliente':
-                            this.router.navigateByUrl('client');
-                            this.loading = false;
-                            break;
-                        default:
-                            this.router.navigateByUrl('client');
-                            this.loading = false;
-                            break;
-                    }
-                }
-                else {
-                    this.router.navigateByUrl('general/verify-email/' + data.user.email);
-                    this.loading = false;
-                }
-            }
-            else {
-                this.loading = false;
-            }
-        }).catch(error => {
-            console.log(error);
-            this.loading = false;
-        });
+        this.userProcess();
     }
     EnterSubmit(evt, form) {
         this.verification.EnterSubmit(evt, form, this.loading).then(answer => {
@@ -311,11 +278,18 @@ let LoginComponent = class LoginComponent {
     loginProcess(form) {
         this.loading = true;
         this.auth.login(this.loginForm.value.email, this.loginForm.value.password)
-            .then(() => { this.checkUser(); })
+            .then(() => { this.userProcess(); })
             .catch(error => {
             this.messageError = error;
             this.loading = false;
         });
+    }
+    userProcess() {
+        this.loading = true;
+        this.auth.loginProcessUser().then(answer => {
+            console.log(answer);
+            this.loading = false;
+        }).catch(e => { console.log(e); this.loading = false; });
     }
     forgotPassword() {
         this.router.navigateByUrl('general/forgot-password');
@@ -1374,7 +1348,7 @@ module.exports = "<ion-content class=\"ion-padding\">\n  <ion-toolbar>\n    <p c
   \*********************************************************************/
 /***/ ((module) => {
 
-module.exports = "<ion-content class=\"ion-padding\">\n  <ion-toolbar>\n    <p class=\"ion-text-center ion-text-capitalize inputLogin\" style=\"width: 100%;\"> INICIO DE SESIÓN </p>\n  </ion-toolbar>\n\n  \n  <form #login=\"ngForm\" [formGroup]=loginForm (ngSubmit)=loginProcess(loginForm.value) (keydown)=\"EnterSubmit($event, loginForm)\" novalidate>\n    <ion-item>\n      <ion-label color=\"dark\" position=\"floating\"> <b>Email</b></ion-label>\n      <ion-input color=\"dark\" formControlName=\"email\" type=\"email\" clearInput=\"true\"></ion-input>\n    </ion-item>\n    \n    <ng-container *ngFor=\"let validation of validationMessages.email\">\n      <div class=\"error-message\" *ngIf=\"loginForm.get('email').hasError(validation.type) && (loginForm.get('email').dirty || loginForm.get('email').touched)\">\n        <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n      </div>\n    </ng-container>\n    <ion-text class=\"ion-padding-start ion-margin-vertical\" color=\"danger\" *ngIf=\"messageError\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ messageError }}\n    </ion-text>\n\n    <ion-item #emailInput>\n      <ion-label color=\"dark\" position='floating'><b>Password</b></ion-label>\n      <ion-input color=\"dark\" formControlName=\"password\" type=\"password\" clearInput=\"true\"></ion-input>\n    </ion-item>\n\n    <ng-container *ngFor=\"let validation of validationMessages.password\">\n      <div class=\"error-message ion-margin-bottom\" *ngIf=\"loginForm.get('password').hasError(validation.type) && (loginForm.get('password').dirty || loginForm.get('password').touched)\">\n        <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n      </div>\n    </ng-container>\n    <ion-text class=\"ion-padding-start ion-margin-vertical\" color=\"danger\" *ngIf=\"messageError\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ messageError }}\n    </ion-text>\n\n\n    <div class='ion-padding-start' *ngIf=\"!this.block && !loading\"> \n      <ion-text color='dark'> <p class=\"forgot_text\" (click)='forgotPassword()'><span>¿Olvidó su contraseña?</span></p>    </ion-text> \n    </div>\n    <ion-row class=\"ion-margin-top\">\n      <app-big-button type=\"submit\" class=\"ion-padding-top\" LABEL=\"INICIAR SESIÓN\" buttonType=\"PRIMARY\" [loading]=\"loading\" [disabled]=\"!loginForm.valid || loading\" (click)=\"loginProcess(loginForm.value)\"></app-big-button>\n    </ion-row>\n    <ion-row class=\"ion-margin-top\">\n      <app-big-button class=\"ion-padding-top\" LABEL=\"REGISTRARSE\" buttonType=\"SECONDARY\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"registrase()\"></app-big-button>\n    </ion-row>\n  </form> \n\n</ion-content>";
+module.exports = "<ion-content class=\"ion-padding\">\n  <ion-toolbar>\n    <p class=\"ion-text-center ion-text-capitalize inputLogin\" style=\"width: 100%;\"> INICIO DE SESIÓN </p>\n  </ion-toolbar>\n  <form #login=\"ngForm\" [formGroup]=loginForm (ngSubmit)=loginProcess(loginForm.value) (keydown)=\"EnterSubmit($event, loginForm)\" novalidate>\n    <ion-item>\n      <ion-label color=\"dark\" position=\"floating\"> <b>Email</b></ion-label>\n      <ion-input color=\"dark\" formControlName=\"email\" type=\"email\" clearInput=\"true\"></ion-input>\n    </ion-item>\n    \n    <ng-container *ngFor=\"let validation of validationMessages.email\">\n      <div class=\"error-message\" *ngIf=\"loginForm.get('email').hasError(validation.type) && (loginForm.get('email').dirty || loginForm.get('email').touched)\">\n        <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n      </div>\n    </ng-container>\n    <ion-text class=\"ion-padding-start ion-margin-vertical\" color=\"danger\" *ngIf=\"messageError\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ messageError }}\n    </ion-text>\n\n    <ion-item #emailInput>\n      <ion-label color=\"dark\" position='floating'><b>Password</b></ion-label>\n      <ion-input color=\"dark\" formControlName=\"password\" type=\"password\" clearInput=\"true\"></ion-input>\n    </ion-item>\n\n    <ng-container *ngFor=\"let validation of validationMessages.password\">\n      <div class=\"error-message ion-margin-bottom\" *ngIf=\"loginForm.get('password').hasError(validation.type) && (loginForm.get('password').dirty || loginForm.get('password').touched)\">\n        <ion-text class=\"ion-padding-start\" color=\"danger\"> <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ validation.message }}</ion-text>\n      </div>\n    </ng-container>\n    <ion-text class=\"ion-padding-start ion-margin-vertical\" color=\"danger\" *ngIf=\"messageError\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>  {{ messageError }}\n    </ion-text>\n\n\n    <div class='ion-padding-start' *ngIf=\"!this.block && !loading\"> \n      <ion-text color='dark'> <p class=\"forgot_text\" (click)='forgotPassword()'><span>¿Olvidó su contraseña?</span></p>    </ion-text> \n    </div>\n    <ion-row class=\"ion-margin-top\">\n      <app-big-button type=\"submit\" class=\"ion-padding-top\" LABEL=\"INICIAR SESIÓN\" buttonType=\"PRIMARY\" [loading]=\"loading\" [disabled]=\"!loginForm.valid || loading\" (click)=\"loginProcess(loginForm.value)\"></app-big-button>\n    </ion-row>\n    <ion-row class=\"ion-margin-top\">\n      <app-big-button class=\"ion-padding-top\" LABEL=\"REGISTRARSE\" buttonType=\"SECONDARY\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"registrase()\"></app-big-button>\n    </ion-row>\n  </form> \n\n</ion-content>";
 
 /***/ }),
 

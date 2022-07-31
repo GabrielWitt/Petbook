@@ -6,6 +6,7 @@ import { shortUser, userFormData } from 'src/app/core/models/user';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
 import { CoursesService } from 'src/app/core/services/modules/courses.service';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
+import { VerificationFuncService } from 'src/app/shared/utilities/verificationFunc';
 import { AlertsService } from '../../../utilities/alerts';
 
 @Component({
@@ -37,6 +38,8 @@ export class NewCourseComponent implements OnInit {
   editCourseForm = false;
   progress = 0;
   newImage;
+  previewUrl = '';
+  courseVideo = ''
 
   QuestionNumber = 0;
 
@@ -44,6 +47,7 @@ export class NewCourseComponent implements OnInit {
     public modal: ModalController,
     private courses: CoursesService,
     private alerts: AlertsService,
+    private checkFunc: VerificationFuncService,
     private images: AttachmentsService,
     private upload: ImageUploaderService,
   ) { }
@@ -51,6 +55,9 @@ export class NewCourseComponent implements OnInit {
   ngOnInit() {
     if(this.course){
       this.myCourse = this.course;
+      this.previewUrl = 'http://img.youtube.com/vi/' + this.course.video + '/default.jpg';
+      this.courseVideo ='https://www.youtube.com/watch?v='+this.course.video;
+      this.newExamen = this.course.exam;
     }else{
       this.myCourse.author = {
         uid: this.user.uid,
@@ -59,7 +66,6 @@ export class NewCourseComponent implements OnInit {
         name: this.user.name + ' ' + this.user.lastName
       }
     }
-    console.log(this.newQuestion)
   }
 
   titleListener(e){
@@ -71,7 +77,11 @@ export class NewCourseComponent implements OnInit {
   }
 
   videoListener(e){
-    this.myCourse.video = e.detail.value;
+    this.courseVideo = e.detail.value;
+    if(this.courseVideo.length > 10) {
+      this.myCourse.video = this.checkFunc.getYTId(this.courseVideo);
+      this.previewUrl = 'http://img.youtube.com/vi/' + this.checkFunc.getYTId(this.courseVideo) + '/default.jpg';
+    }
   }
   
   questionListener(e){

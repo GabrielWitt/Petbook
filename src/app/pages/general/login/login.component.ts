@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { User } from 'firebase/auth';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { RouteHistoryService } from 'src/app/shared/utilities/route-history';
 import { VerificationFuncService } from 'src/app/shared/utilities/verificationFunc';
@@ -39,10 +38,10 @@ export class LoginComponent implements OnInit {
       ]
     };
     this.loginForm = this.formBuilder.group({
-      email: new FormControl('', Validators.compose([
+      email: new FormControl('gabrowitt@hotmail.com', Validators.compose([
         Validators.required, Validators.email
       ])),
-      password: new FormControl('', Validators.compose([
+      password: new FormControl('Gabo123456!', Validators.compose([
         Validators.required
       ]))
     });

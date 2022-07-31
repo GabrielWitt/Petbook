@@ -8,11 +8,11 @@ import { attachmentOptions, UserPhoto } from 'src/app/core/models/images';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
 import { ImageUploaderService } from 'src/app/core/services/image-uploader.service';
 import { NewPetComponent } from 'src/app/shared/components/pets/new-pet/new-pet.component';
+import { NewNoticeComponent } from 'src/app/shared/components/notices/new-notice/new-notice.component';
 import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Pet } from 'src/app/core/models/species';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
-import { NewNoticeComponent } from 'src/app/shared/components/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-profile-manager',

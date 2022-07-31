@@ -7,6 +7,7 @@ export interface Course {
     video: string;
     exam: Exam;
     author: shortUser;
+    createdAt?: string;
 }
 
 export interface Exam {

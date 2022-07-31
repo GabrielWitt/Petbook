@@ -5,6 +5,8 @@ import { User, userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { CoursesService } from 'src/app/core/services/modules/courses.service';
 import { DetailCourseComponent } from 'src/app/shared/components/course/detail-course/detail-course.component';
+import { NewCourseComponent } from 'src/app/shared/components/course/new-course/new-course.component';
+import { ExamCourseComponent } from 'src/app/shared/components/course/exam-course/exam-course.component';
 
 @Component({
   selector: 'app-courses-manager',
@@ -57,7 +59,40 @@ export class CoursesManagerPage implements OnInit {
     });
     modal.present();
     const modalResult = await modal.onWillDismiss();
-    if(modalResult.data){ this.loadData(); }
+    if(modalResult.data){
+      console.log(modalResult.data.action)
+      if(modalResult.data.action === 'update'){
+        this.loadData(); 
+      } else if(modalResult.data.action === 'editCourse') {
+        this.createCourse(course);
+      } else if(modalResult.data.action === 'exam') {
+        this.examCourse(course);
+      }
+    }
+  }
+
+  async examCourse(course){
+    const modal = await this.modal.create({
+      component: ExamCourseComponent,
+      componentProps: {course, user: this.user},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.loadData();}
+  }
+
+  async createCourse(course){
+    const modal = await this.modal.create({
+      component: NewCourseComponent,
+      componentProps: {course, user: this.user},
+      mode: 'ios',
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    modal.present();
+    const modalResult = await modal.onWillDismiss();
+    if(modalResult.data){ this.loadData();}
   }
 
 

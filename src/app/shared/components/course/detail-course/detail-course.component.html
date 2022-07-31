@@ -1,11 +1,42 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Implement YouTube Video Player in Ionic
-    </ion-title>
+<ion-header>
+  <ion-toolbar mode="ios">
+    <ion-buttons slot="start">
+      <ion-button color="primary" [disabled]="loading" (click)="modal.dismiss(false)">
+        Atrás
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-uppercase">{{course.title}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="course && ((user.uid === course.author?.uid) || this.user.manager)" color="dark" (click)="editCourse()">
+          Editar
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
-  
-  <ion-button (click)="invokeVideoPlayer()">Start Video Player</ion-button>
+  <ion-row>
+    <ion-col size="5" class="ion-no-margin">
+      <ion-button size="small" *ngIf="user.manager" (click)="eraseCourse()">Eliminar Curso</ion-button>
+    </ion-col>
+    <ion-col size="7" class="ion-margin-top">
+      <div class="ion-text-end">
+        <ion-text color="secondary">Publicado: {{course.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-card>
+    <ion-img *ngIf="previewUrl" style="margin: 0 auto;" [src]="previewUrl"></ion-img>
+    <ion-card-header>
+      <ion-card-subtitle>
+        Por: {{course.author.name}}
+      </ion-card-subtitle>
+      <ion-card-title>Título: {{course.title}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      {{course.description}}
+    </ion-card-content>
+  </ion-card>
+  <app-big-button LABEL="Ver Video" buttonType="SECONDARY" [loading]="loading" [disabled]="loading" (click)="invokeVideoPlayer()"></app-big-button>
+  <div  class="ion-margin-top"></div>
+  <app-big-button LABEL="Tomar Examen" buttonType="" [loading]="loading" [disabled]="loading" (click)="doExam()"></app-big-button>
 </ion-content>

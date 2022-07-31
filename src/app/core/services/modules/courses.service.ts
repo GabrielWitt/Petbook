@@ -31,6 +31,14 @@ export class CoursesService {
     });
   }
 
+  deleteCourse(courseUID: string){
+    return new Promise((resolve,reject) => {
+      this.firestore.eraseDocument(this.courseFolder, courseUID)
+      .then((docs: any[]) => { resolve(docs) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
+  }
+
   readCourseList(){
     return new Promise<Course[]>((resolve,reject) => {
       this.firestore.readCollection(this.courseFolder)

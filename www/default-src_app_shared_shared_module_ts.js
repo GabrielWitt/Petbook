@@ -102,6 +102,19 @@ let FirestoreActionsService = class FirestoreActionsService {
             }
         });
     }
+    eraseDocument(folder, filename) {
+        return new Promise((resolve, reject) => {
+            try {
+                const callDoc = this.afs.collection(folder).doc(filename);
+                callDoc.delete().then((data) => {
+                    resolve(data);
+                });
+            }
+            catch (error) {
+                reject(this.error.handle(error));
+            }
+        });
+    }
 };
 FirestoreActionsService.ctorParameters = () => [
     { type: src_app_shared_utilities_error_handler_service__WEBPACK_IMPORTED_MODULE_0__.ErrorHandlerService },
@@ -227,26 +240,105 @@ let FireAuthService = class FireAuthService {
     this.auth = auth;
     this.FS = FS;
     this.error = error;
+    this.session = 'session';
     this.auth.authState.subscribe(user => {
       if (user) {
         this.user = this.setUser(user);
-        this.store.setData('session', user);
+        this.store.setData(this.session, this.user);
       } else {
-        this.store.removeFile('session');
+        this.store.removeFile(this.session);
       }
     });
   }
 
-  checkUser() {
+  loginSavedUser() {
     var _this = this;
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        _this.getUser().then(user => {
+        try {
+          _this.store.readFile(_this.credentials).then(data => {
+            if (data?.email && data?.password) {
+              _this.login(data.email, data.password).then(userCredential => {
+                const user = userCredential.user;
+                _this.user = _this.setUser(user);
+
+                _this.store.setData(_this.session, _this.user);
+
+                resolve(user);
+              });
+            } else {
+              resolve(false);
+            }
+          });
+        } catch (error) {
+          console.log(error);
+          reject(false);
+        }
+      });
+    })();
+  }
+
+  loginProcessUser() {
+    return new Promise((resolve, reject) => {
+      this.getUser().then(data => {
+        if (data?.user) {
+          this.routerCheck(data.user).then(answer => {
+            resolve(answer);
+          });
+        } else {
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log(error);
+        reject(false);
+      });
+    });
+  }
+
+  routerCheck(user) {
+    var _this2 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (user.email) {
+        if (user.emailVerified) {
+          switch (user.displayName) {
+            case 'administrador':
+              _this2.router.navigateByUrl('administrator');
+
+              return true;
+
+            case 'cliente':
+              _this2.router.navigateByUrl('client');
+
+              return true;
+
+            default:
+              _this2.router.navigateByUrl('client');
+
+              return true;
+          }
+        } else {
+          _this2.router.navigateByUrl('general/verify-email/' + user.email);
+
+          return true;
+        }
+      } else {
+        return false;
+      }
+    })();
+  }
+
+  checkUser() {
+    var _this3 = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      return new Promise((resolve, reject) => {
+        _this3.getUser().then(user => {
           if (user) {
             resolve(user);
           } else {
-            _this.router.navigateByUrl('general');
+            _this3.router.navigateByUrl('general');
 
             reject('user not found');
           }
@@ -256,19 +348,22 @@ let FireAuthService = class FireAuthService {
   }
 
   login(email, password) {
-    var _this2 = this;
+    var _this4 = this;
 
     return new Promise((resolve, reject) => {
       this.auth.signInWithEmailAndPassword(email, password).then( /*#__PURE__*/function () {
         var _ref = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (userCredential) {
-          // Signed in 
+          yield _this4.store.setData(_this4.credentials, {
+            email: email,
+            password: password
+          }); // Signed in 
+
           const user = userCredential.user;
-          _this2.user = _this2.setUser(user);
+          _this4.user = _this4.setUser(user);
+          yield _this4.store.setData(_this4.session, _this4.user);
 
-          _this2.store.setData('session', _this2.user);
-
-          _this2.getUser().then(myData => {
-            _this2.uploadUserForm(myData.user.uid, {
+          _this4.getUser().then(myData => {
+            _this4.uploadUserForm(myData.user.uid, {
               uid: user.uid,
               email: user.email,
               photo: user.photoURL,
@@ -316,15 +411,15 @@ let FireAuthService = class FireAuthService {
   }
 
   verifyEmail() {
-    var _this3 = this;
+    var _this5 = this;
 
     return new Promise( /*#__PURE__*/function () {
       var _ref2 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this3.auth.currentUser).sendEmailVerification().then(() => {
+        (yield _this5.auth.currentUser).sendEmailVerification().then(() => {
           // Email verification sent!
           resolve('Se ha enviado un email de verificación');
         }).catch(error => {
-          reject(_this3.error.handle(error));
+          reject(_this5.error.handle(error));
         });
       });
 
@@ -357,69 +452,55 @@ let FireAuthService = class FireAuthService {
   }
 
   getUser() {
-    var _this4 = this;
+    var _this6 = this;
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      return new Promise((resolve, reject) => {
-        try {
-          _this4.store.readFile('session').then(session => {
+      return new Promise( /*#__PURE__*/function () {
+        var _ref3 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+          try {
+            let session = yield _this6.store.readFile(_this6.session);
+
+            if (!session) {
+              session = yield _this6.loginSavedUser();
+            }
+
             if (session) {
-              _this4.readUserForm(session.uid).then(data => {
-                resolve({
-                  user: _this4.user,
-                  data
-                });
+              const data = yield _this6.readUserForm(session.uid);
+              resolve({
+                user: _this6.user,
+                data
               });
             } else {
-              _this4.router.navigateByUrl('general');
+              _this6.router.navigateByUrl('general');
 
               resolve(null);
             }
-          }).catch(error => {
+          } catch (error) {
+            console.log('error');
             reject(error);
-          });
-        } catch (error) {
-          console.log('error');
-          reject(error);
-        }
-      });
+          }
+        });
+
+        return function (_x4, _x5) {
+          return _ref3.apply(this, arguments);
+        };
+      }());
     })();
   }
 
   updateUser(displayName, photoURL) {
-    var _this5 = this;
+    var _this7 = this;
 
     return new Promise( /*#__PURE__*/function () {
-      var _ref3 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this5.auth.currentUser).updateProfile({
+      var _ref4 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+        (yield _this7.auth.currentUser).updateProfile({
           displayName,
           photoURL
         }).then(() => {
           // Profile updated!
           resolve('Tus datos se han actualizado');
         }).catch(error => {
-          reject(_this5.error.handle(error));
-        });
-      });
-
-      return function (_x4, _x5) {
-        return _ref3.apply(this, arguments);
-      };
-    }());
-  }
-
-  upgradeUser() {
-    var _this6 = this;
-
-    return new Promise( /*#__PURE__*/function () {
-      var _ref4 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
-        (yield _this6.auth.currentUser).updateProfile({
-          displayName: 'administrador'
-        }).then(() => {
-          // Profile updated!
-          resolve('Tu tipo de usuario se ha actualizado');
-        }).catch(error => {
-          reject(_this6.error.handle(error));
+          reject(_this7.error.handle(error));
         });
       });
 
@@ -429,13 +510,35 @@ let FireAuthService = class FireAuthService {
     }());
   }
 
-  signOut() {
-    return new Promise((resolve, reject) => {
-      this.auth.signOut().then(() => {
-        this.store.removeFile('session'); // Sign-out successful.
+  upgradeUser() {
+    var _this8 = this;
 
+    return new Promise( /*#__PURE__*/function () {
+      var _ref5 = (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+        (yield _this8.auth.currentUser).updateProfile({
+          displayName: 'administrador'
+        }).then(() => {
+          // Profile updated!
+          resolve('Tu tipo de usuario se ha actualizado');
+        }).catch(error => {
+          reject(_this8.error.handle(error));
+        });
+      });
+
+      return function (_x8, _x9) {
+        return _ref5.apply(this, arguments);
+      };
+    }());
+  }
+
+  signOut() {
+    var _this9 = this;
+
+    return new Promise((resolve, reject) => {
+      this.auth.signOut().then( /*#__PURE__*/(0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        yield _this9.store.clearStore();
         resolve('Se ha cerrado sesión');
-      }).catch(error => {
+      })).catch(error => {
         reject(this.error.handle(error));
       });
     });
@@ -525,6 +628,13 @@ let NoticeService = class NoticeService {
     UpdateNotice(data) {
         return new Promise((resolve, reject) => {
             this.firestore.setNamedDocument(this.noticeFolder, data.uid, data)
+                .then((docs) => { resolve(docs); })
+                .catch((error) => { reject(this.error.handle(error)); });
+        });
+    }
+    deleteNotice(noticeUID) {
+        return new Promise((resolve, reject) => {
+            this.firestore.eraseDocument(this.noticeFolder, noticeUID)
                 .then((docs) => { resolve(docs); })
                 .catch((error) => { reject(this.error.handle(error)); });
         });
@@ -756,21 +866,47 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DetailCourseComponent": () => (/* binding */ DetailCourseComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _detail_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail-course.component.html?ngResource */ 59710);
 /* harmony import */ var _detail_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail-course.component.scss?ngResource */ 60999);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _capacitor_browser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @capacitor/browser */ 18313);
+/* harmony import */ var src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/courses.service */ 40267);
+/* harmony import */ var src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/verificationFunc */ 94264);
+
+
+
 
 
 
 
 let DetailCourseComponent = class DetailCourseComponent {
-    constructor() { }
-    ngOnInit() { }
+    constructor(courses, checkFunc) {
+        this.courses = courses;
+        this.checkFunc = checkFunc;
+        this.defaultUser = 'assets/profile/ProfileBlank.png';
+        this.previewUrl = '';
+        this.loading = false;
+    }
+    ngOnInit() {
+        this.previewUrl = 'http://img.youtube.com/vi/' + this.course.video + '/default.jpg';
+    }
+    invokeVideoPlayer() {
+        _capacitor_browser__WEBPACK_IMPORTED_MODULE_2__.Browser.open({ url: 'https://www.youtube.com/watch?v=' + this.course.video });
+    }
+    eraseCourse() {
+    }
 };
-DetailCourseComponent.ctorParameters = () => [];
-DetailCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
+DetailCourseComponent.ctorParameters = () => [
+    { type: src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_3__.CoursesService },
+    { type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__.VerificationFuncService }
+];
+DetailCourseComponent.propDecorators = {
+    user: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_5__.Input }],
+    course: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_5__.Input }]
+};
+DetailCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Component)({
         selector: 'app-detail-course',
         template: _detail_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
         styles: [_detail_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1__]
@@ -793,15 +929,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "NewCourseComponent": () => (/* binding */ NewCourseComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 34929);
 /* harmony import */ var _new_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-course.component.html?ngResource */ 14489);
 /* harmony import */ var _new_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-course.component.scss?ngResource */ 83840);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
 /* harmony import */ var src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/courses.service */ 40267);
 /* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
-/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../utilities/alerts */ 80884);
+/* harmony import */ var src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/verificationFunc */ 94264);
+/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../utilities/alerts */ 80884);
+
 
 
 
@@ -813,10 +951,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let NewCourseComponent = class NewCourseComponent {
-  constructor(modal, courses, alerts, images, upload) {
+  constructor(modal, courses, alerts, checkFunc, images, upload) {
     this.modal = modal;
     this.courses = courses;
     this.alerts = alerts;
+    this.checkFunc = checkFunc;
     this.images = images;
     this.upload = upload;
     this.myCourse = {
@@ -845,6 +984,8 @@ let NewCourseComponent = class NewCourseComponent {
     this.loading = false;
     this.editCourseForm = false;
     this.progress = 0;
+    this.previewUrl = '';
+    this.courseVideo = '';
     this.QuestionNumber = 0;
   }
 
@@ -872,7 +1013,12 @@ let NewCourseComponent = class NewCourseComponent {
   }
 
   videoListener(e) {
-    this.myCourse.video = e.detail.value;
+    this.courseVideo = e.detail.value;
+
+    if (this.courseVideo.length > 10) {
+      this.myCourse.video = this.checkFunc.getYTId(this.courseVideo);
+      this.previewUrl = 'http://img.youtube.com/vi/' + this.checkFunc.getYTId(this.courseVideo) + '/default.jpg';
+    }
   }
 
   questionListener(e) {
@@ -981,11 +1127,13 @@ let NewCourseComponent = class NewCourseComponent {
 };
 
 NewCourseComponent.ctorParameters = () => [{
-  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_7__.ModalController
+  type: _ionic_angular__WEBPACK_IMPORTED_MODULE_8__.ModalController
 }, {
   type: src_app_core_services_modules_courses_service__WEBPACK_IMPORTED_MODULE_4__.CoursesService
 }, {
-  type: _utilities_alerts__WEBPACK_IMPORTED_MODULE_6__.AlertsService
+  type: _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__.AlertsService
+}, {
+  type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_6__.VerificationFuncService
 }, {
   type: src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__.AttachmentsService
 }, {
@@ -994,13 +1142,13 @@ NewCourseComponent.ctorParameters = () => [{
 
 NewCourseComponent.propDecorators = {
   user: [{
-    type: _angular_core__WEBPACK_IMPORTED_MODULE_8__.Input
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
   }],
   course: [{
-    type: _angular_core__WEBPACK_IMPORTED_MODULE_8__.Input
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Input
   }]
 };
-NewCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+NewCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
   selector: 'app-new-course',
   template: _new_course_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [_new_course_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
@@ -1009,10 +1157,10 @@ NewCourseComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angu
 
 /***/ }),
 
-/***/ 67186:
-/*!**********************************************************************!*\
-  !*** ./src/app/shared/components/new-notice/new-notice.component.ts ***!
-  \**********************************************************************/
+/***/ 69005:
+/*!******************************************************************************!*\
+  !*** ./src/app/shared/components/notices/new-notice/new-notice.component.ts ***!
+  \******************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1022,16 +1170,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _new_notice_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-notice.component.html?ngResource */ 49578);
-/* harmony import */ var _new_notice_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-notice.component.scss?ngResource */ 41142);
+/* harmony import */ var _new_notice_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./new-notice.component.html?ngResource */ 12821);
+/* harmony import */ var _new_notice_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./new-notice.component.scss?ngResource */ 55914);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
 /* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
 /* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
 /* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
-/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utilities/alerts */ 80884);
-/* harmony import */ var _utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utilities/time-handler */ 8123);
+/* harmony import */ var _utilities_alerts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../utilities/alerts */ 80884);
+/* harmony import */ var _utilities_time_handler__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../utilities/time-handler */ 8123);
 
 
 
@@ -1259,6 +1407,19 @@ let NewNoticeComponent = class NewNoticeComponent {
     })();
   }
 
+  eraseNotice() {
+    this.alerts.AlertConfirm(this.notice.title, '¿Esta seguro que desea eliminar este anuncio?').then(answer => {
+      if (answer) {
+        this.loading = true;
+        this.notices.deleteNotice(this.notice.uid).then(() => {
+          this.alerts.showAlert('ANUNCIOS', 'Anuncio: ' + this.notice.title + ' ha sido eliminado.', 'OK');
+          this.loading = false;
+          this.modal.dismiss(true);
+        });
+      }
+    });
+  }
+
   commentListener(e) {
     this.newComment.text = e.detail.value;
   }
@@ -1277,13 +1438,11 @@ let NewNoticeComponent = class NewNoticeComponent {
           email: _this3.user.email,
           name: _this3.user.name + ' ' + _this3.user.lastName
         };
+        yield _this3.notices.UpdateNotice(_this3.myNotice);
 
         _this3.myNotice.comments.push(_this3.newComment);
 
-        yield _this3.notices.UpdateNotice(_this3.myNotice);
-        setTimeout(() => {
-          _this3.sending = false;
-        }, 5000);
+        _this3.sending = false;
         _this3.notice.comments = _this3.myNotice.comments;
         _this3.newComment = {
           text: '',
@@ -1359,6 +1518,155 @@ NewNoticeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_ang
   template: _new_notice_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [_new_notice_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
 })], NewNoticeComponent);
+
+
+/***/ }),
+
+/***/ 22685:
+/*!************************************************************************************!*\
+  !*** ./src/app/shared/components/notices/notice-detail/notice-detail.component.ts ***!
+  \************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NoticeDetailComponent": () => (/* binding */ NoticeDetailComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _notice_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./notice-detail.component.html?ngResource */ 9862);
+/* harmony import */ var _notice_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./notice-detail.component.scss?ngResource */ 74473);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ionic/angular */ 93819);
+/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
+
+
+
+
+
+
+
+let NoticeDetailComponent = class NoticeDetailComponent {
+  constructor(notices) {
+    this.notices = notices;
+    this.scroll = false;
+    this.fullHeight = 0;
+    this.showScroll = 0;
+    this.editNoticeForm = false;
+    this.myNotice = {
+      title: '',
+      type: null,
+      description: '',
+      photo: '',
+      writer: null,
+      comments: [],
+      likes: []
+    }; // Comments
+
+    this.sending = false;
+    this.newComment = {
+      text: '',
+      user: null
+    };
+  }
+
+  ngOnInit() {}
+
+  commentListener(e) {
+    this.newComment.text = e.detail.value;
+  }
+
+  pressSend() {
+    var _this = this;
+
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.sending = true;
+      _this.myNotice = _this.notice;
+
+      try {
+        _this.newComment.user = {
+          uid: _this.user.uid,
+          photo: _this.user.photo,
+          email: _this.user.email,
+          name: _this.user.name + ' ' + _this.user.lastName
+        };
+
+        _this.myNotice.comments.push(_this.newComment);
+
+        yield _this.notices.UpdateNotice(_this.myNotice);
+        setTimeout(() => {
+          _this.sending = false;
+        }, 5000);
+        _this.notice.comments = _this.myNotice.comments;
+        _this.newComment = {
+          text: '',
+          user: null
+        };
+
+        _this.scrollDown();
+      } catch (error) {
+        console.log(error);
+        _this.sending = false;
+      }
+    })();
+  }
+
+  checkScroll(scroll, content) {
+    this.content = content;
+
+    if (this.fullHeight < scroll.detail.currentY) {
+      this.fullHeight = scroll.detail.currentY;
+    }
+
+    this.showScroll = this.fullHeight - scroll.detail.scrollTop;
+  }
+
+  scrollDown() {
+    if (this.content?.scrollToBottom) {
+      setTimeout(() => {
+        this.content.scrollToBottom(400);
+        setTimeout(() => {
+          this.showScroll = 1;
+        }, 1000);
+      }, 500);
+    }
+  }
+
+};
+
+NoticeDetailComponent.ctorParameters = () => [{
+  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_3__.NoticeService
+}];
+
+NoticeDetailComponent.propDecorators = {
+  content: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.ViewChild,
+    args: [_ionic_angular__WEBPACK_IMPORTED_MODULE_5__.IonContent, {
+      static: false
+    }]
+  }],
+  user: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  notice: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  pet: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  delete: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }],
+  loading: [{
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+  }]
+};
+NoticeDetailComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+  selector: 'app-notice-detail',
+  template: _notice_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [_notice_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__]
+})], NoticeDetailComponent);
 
 
 /***/ }),
@@ -1991,7 +2299,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 /* harmony import */ var src_app_shared_utilities_alerts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/utilities/alerts */ 80884);
 /* harmony import */ var _course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../course/new-course/new-course.component */ 29913);
-/* harmony import */ var _new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../new-notice/new-notice.component */ 67186);
+/* harmony import */ var _notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../notices/new-notice/new-notice.component */ 69005);
 
 
 
@@ -2038,7 +2346,7 @@ let MainHeaderComponent = class MainHeaderComponent {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this.modal.create({
-        component: _new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__.NewNoticeComponent,
+        component: _notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_6__.NewNoticeComponent,
         componentProps: {
           notice: null,
           user: _this.user,
@@ -2352,9 +2660,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "SharedModule": () => (/* binding */ SharedModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/core */ 22560);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/common */ 94666);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/common */ 94666);
 /* harmony import */ var _pipes_first_key_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pipes/first-key.pipe */ 82234);
 /* harmony import */ var _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/user-profile/user-profile.component */ 94046);
 /* harmony import */ var _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/view/big-button/big-button.component */ 23740);
@@ -2362,16 +2670,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/view/detail-header/detail-header.component */ 88999);
 /* harmony import */ var _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/view/not-data-yet-message/not-data-yet-message.component */ 29168);
 /* harmony import */ var _components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/pets/new-pet/new-pet.component */ 20982);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/forms */ 2508);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _components_view_loading_view_loading_view_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/view/loading-view/loading-view.component */ 266);
 /* harmony import */ var _pipes_time_format_pipe__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pipes/time-format.pipe */ 84203);
 /* harmony import */ var _utilities_time_handler__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utilities/time-handler */ 8123);
-/* harmony import */ var _components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/new-notice/new-notice.component */ 67186);
-/* harmony import */ var _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/course/new-course/new-course.component */ 29913);
-/* harmony import */ var _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/view/notice-bottom-bar/notice-bottom-bar.component */ 67798);
-/* harmony import */ var _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/pets/pet-detail/pet-detail.component */ 98481);
-/* harmony import */ var _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/pets/pet-item/pet-item.component */ 2926);
-/* harmony import */ var _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./components/course/detail-course/detail-course.component */ 34674);
+/* harmony import */ var _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/course/new-course/new-course.component */ 29913);
+/* harmony import */ var _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/view/notice-bottom-bar/notice-bottom-bar.component */ 67798);
+/* harmony import */ var _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/pets/pet-detail/pet-detail.component */ 98481);
+/* harmony import */ var _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/pets/pet-item/pet-item.component */ 2926);
+/* harmony import */ var _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/course/detail-course/detail-course.component */ 34674);
+/* harmony import */ var _components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./components/notices/new-notice/new-notice.component */ 69005);
+/* harmony import */ var _components_notices_notice_detail_notice_detail_component__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./components/notices/notice-detail/notice-detail.component */ 22685);
 
 
 
@@ -2395,20 +2704,22 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // General view
 const components = [
     _components_view_big_button_big_button_component__WEBPACK_IMPORTED_MODULE_2__.BigButtonComponent,
     _components_user_profile_user_profile_component__WEBPACK_IMPORTED_MODULE_1__.UserProfileComponent,
     _components_view_main_header_main_header_component__WEBPACK_IMPORTED_MODULE_3__.MainHeaderComponent,
-    _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_12__.NoticeBottomBarComponent,
+    _components_view_notice_bottom_bar_notice_bottom_bar_component__WEBPACK_IMPORTED_MODULE_11__.NoticeBottomBarComponent,
     _components_view_detail_header_detail_header_component__WEBPACK_IMPORTED_MODULE_4__.DetailHeaderComponent,
     _components_view_not_data_yet_message_not_data_yet_message_component__WEBPACK_IMPORTED_MODULE_5__.NotDataYetMessageComponent,
     _components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_6__.NewPetComponent,
-    _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_13__.PetDetailComponent,
-    _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_14__.PetItemComponent,
-    _components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__.NewNoticeComponent,
-    _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_11__.NewCourseComponent,
-    _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_15__.DetailCourseComponent,
+    _components_pets_pet_detail_pet_detail_component__WEBPACK_IMPORTED_MODULE_12__.PetDetailComponent,
+    _components_pets_pet_item_pet_item_component__WEBPACK_IMPORTED_MODULE_13__.PetItemComponent,
+    _components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_15__.NewNoticeComponent,
+    _components_notices_notice_detail_notice_detail_component__WEBPACK_IMPORTED_MODULE_16__.NoticeDetailComponent,
+    _components_course_new_course_new_course_component__WEBPACK_IMPORTED_MODULE_10__.NewCourseComponent,
+    _components_course_detail_course_detail_course_component__WEBPACK_IMPORTED_MODULE_14__.DetailCourseComponent,
     _components_view_loading_view_loading_view_component__WEBPACK_IMPORTED_MODULE_7__.LoadingViewComponent
 ];
 const pipes = [
@@ -2417,12 +2728,12 @@ const pipes = [
 ];
 let SharedModule = class SharedModule {
 };
-SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_17__.NgModule)({
+SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_17__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_18__.NgModule)({
         imports: [
-            _angular_common__WEBPACK_IMPORTED_MODULE_18__.CommonModule,
-            _angular_forms__WEBPACK_IMPORTED_MODULE_19__.FormsModule,
-            _angular_forms__WEBPACK_IMPORTED_MODULE_19__.ReactiveFormsModule,
+            _angular_common__WEBPACK_IMPORTED_MODULE_19__.CommonModule,
+            _angular_forms__WEBPACK_IMPORTED_MODULE_20__.FormsModule,
+            _angular_forms__WEBPACK_IMPORTED_MODULE_20__.ReactiveFormsModule,
             _utilities_time_handler__WEBPACK_IMPORTED_MODULE_9__.TimeHandlerModule
         ],
         declarations: [
@@ -2433,7 +2744,7 @@ SharedModule = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([
             ...pipes,
             ...components
         ],
-        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_17__.CUSTOM_ELEMENTS_SCHEMA],
+        schemas: [_angular_core__WEBPACK_IMPORTED_MODULE_18__.CUSTOM_ELEMENTS_SCHEMA],
     })
 ], SharedModule);
 
@@ -2666,6 +2977,195 @@ const joinDateTimeInISO8601 = (date, time) => {
     s: 0
   }).format('YYYY-MM-DDTHH:mm:ss');
 };
+
+/***/ }),
+
+/***/ 94264:
+/*!******************************************************!*\
+  !*** ./src/app/shared/utilities/verificationFunc.ts ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "VerificationFuncService": () => (/* binding */ VerificationFuncService)
+/* harmony export */ });
+/* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _capacitor_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @capacitor/core */ 26549);
+/* harmony import */ var _capacitor_keyboard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @capacitor/keyboard */ 10523);
+
+
+
+
+
+let VerificationFuncService = class VerificationFuncService {
+  constructor() {}
+
+  EnterSubmit(evt, form, block) {
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (evt.keyCode === 13 && form.status === 'VALID' && !block) {
+        if (_capacitor_core__WEBPACK_IMPORTED_MODULE_1__.Capacitor.getPlatform() !== 'web') {
+          _capacitor_keyboard__WEBPACK_IMPORTED_MODULE_2__.Keyboard.hide();
+        }
+
+        return true;
+      }
+
+      return false;
+    })();
+  }
+
+  getYTId(url) {
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    var match = url.match(regExp);
+    return match && match[7].length == 11 ? match[7] : false;
+  }
+
+};
+
+VerificationFuncService.ctorParameters = () => [];
+
+VerificationFuncService = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Injectable)({
+  providedIn: 'root'
+})], VerificationFuncService);
+
+
+/***/ }),
+
+/***/ 74687:
+/*!*****************************************************************!*\
+  !*** ./node_modules/@capacitor/browser/dist/esm/definitions.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+
+/***/ }),
+
+/***/ 18313:
+/*!***********************************************************!*\
+  !*** ./node_modules/@capacitor/browser/dist/esm/index.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Browser": () => (/* binding */ Browser)
+/* harmony export */ });
+/* harmony import */ var _capacitor_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @capacitor/core */ 26549);
+/* harmony import */ var _definitions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./definitions */ 74687);
+
+const Browser = (0,_capacitor_core__WEBPACK_IMPORTED_MODULE_0__.registerPlugin)('Browser', {
+  web: () => __webpack_require__.e(/*! import() */ "node_modules_capacitor_browser_dist_esm_web_js").then(__webpack_require__.bind(__webpack_require__, /*! ./web */ 86998)).then(m => new m.BrowserWeb())
+});
+
+
+
+/***/ }),
+
+/***/ 19125:
+/*!******************************************************************!*\
+  !*** ./node_modules/@capacitor/keyboard/dist/esm/definitions.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "KeyboardResize": () => (/* binding */ KeyboardResize),
+/* harmony export */   "KeyboardStyle": () => (/* binding */ KeyboardStyle)
+/* harmony export */ });
+/// <reference types="@capacitor/cli" />
+var KeyboardStyle;
+
+(function (KeyboardStyle) {
+  /**
+   * Dark keyboard.
+   *
+   * @since 1.0.0
+   */
+  KeyboardStyle["Dark"] = "DARK";
+  /**
+   * Light keyboard.
+   *
+   * @since 1.0.0
+   */
+
+  KeyboardStyle["Light"] = "LIGHT";
+  /**
+   * On iOS 13 and newer the keyboard style is based on the device appearance.
+   * If the device is using Dark mode, the keyboard will be dark.
+   * If the device is using Light mode, the keyboard will be light.
+   * On iOS 12 the keyboard will be light.
+   *
+   * @since 1.0.0
+   */
+
+  KeyboardStyle["Default"] = "DEFAULT";
+})(KeyboardStyle || (KeyboardStyle = {}));
+
+var KeyboardResize;
+
+(function (KeyboardResize) {
+  /**
+   * Only the `body` HTML element will be resized.
+   * Relative units are not affected, because the viewport does not change.
+   *
+   * @since 1.0.0
+   */
+  KeyboardResize["Body"] = "body";
+  /**
+   * Only the `ion-app` HTML element will be resized.
+   * Use it only for Ionic Framework apps.
+   *
+   * @since 1.0.0
+   */
+
+  KeyboardResize["Ionic"] = "ionic";
+  /**
+   * The whole native Web View will be resized when the keyboard shows/hides.
+   * This affects the `vh` relative unit.
+   *
+   * @since 1.0.0
+   */
+
+  KeyboardResize["Native"] = "native";
+  /**
+   * Neither the app nor the Web View are resized.
+   *
+   * @since 1.0.0
+   */
+
+  KeyboardResize["None"] = "none";
+})(KeyboardResize || (KeyboardResize = {}));
+
+/***/ }),
+
+/***/ 10523:
+/*!************************************************************!*\
+  !*** ./node_modules/@capacitor/keyboard/dist/esm/index.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Keyboard": () => (/* binding */ Keyboard),
+/* harmony export */   "KeyboardResize": () => (/* reexport safe */ _definitions__WEBPACK_IMPORTED_MODULE_1__.KeyboardResize),
+/* harmony export */   "KeyboardStyle": () => (/* reexport safe */ _definitions__WEBPACK_IMPORTED_MODULE_1__.KeyboardStyle)
+/* harmony export */ });
+/* harmony import */ var _capacitor_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @capacitor/core */ 26549);
+/* harmony import */ var _definitions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./definitions */ 19125);
+
+const Keyboard = (0,_capacitor_core__WEBPACK_IMPORTED_MODULE_0__.registerPlugin)('Keyboard');
+
+
 
 /***/ }),
 
@@ -22869,14 +23369,25 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 
 /***/ }),
 
-/***/ 41142:
-/*!***********************************************************************************!*\
-  !*** ./src/app/shared/components/new-notice/new-notice.component.scss?ngResource ***!
-  \***********************************************************************************/
+/***/ 55914:
+/*!*******************************************************************************************!*\
+  !*** ./src/app/shared/components/notices/new-notice/new-notice.component.scss?ngResource ***!
+  \*******************************************************************************************/
 /***/ ((module) => {
 
 "use strict";
-module.exports = ".rightButtonContainer {\n  text-align: center;\n}\n\n.rightButton {\n  width: 35px;\n  height: 35px;\n  margin: 3px 0px 3px -5px;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5ldy1ub3RpY2UuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvbmV3LW5vdGljZS9uZXctbm90aWNlLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0ksa0JBQUE7QUNDSjs7QURFQTtFQUNJLFdBQUE7RUFDQSxZQUFBO0VBQ0Esd0JBQUE7QUNDSiIsImZpbGUiOiJuZXctbm90aWNlLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnJpZ2h0QnV0dG9uQ29udGFpbmVye1xuICAgIHRleHQtYWxpZ246IGNlbnRlcjtcbn1cblxuLnJpZ2h0QnV0dG9ue1xuICAgIHdpZHRoOiAzNXB4OyBcbiAgICBoZWlnaHQ6IDM1cHg7IFxuICAgIG1hcmdpbjogM3B4IDBweCAzcHggLTVweDtcbn0iLCIucmlnaHRCdXR0b25Db250YWluZXIge1xuICB0ZXh0LWFsaWduOiBjZW50ZXI7XG59XG5cbi5yaWdodEJ1dHRvbiB7XG4gIHdpZHRoOiAzNXB4O1xuICBoZWlnaHQ6IDM1cHg7XG4gIG1hcmdpbjogM3B4IDBweCAzcHggLTVweDtcbn0iXX0= */";
+module.exports = ".rightButtonContainer {\n  text-align: center;\n}\n\n.rightButton {\n  width: 35px;\n  height: 35px;\n  margin: 3px 0px 3px -5px;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5ldy1ub3RpY2UuY29tcG9uZW50LnNjc3MiLCIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9JbmdlbmllcmklQ0MlODFhJTIwZGUlMjBTb2Z0d2FyZS9QZXRib29rL3NyYy9hcHAvc2hhcmVkL2NvbXBvbmVudHMvbm90aWNlcy9uZXctbm90aWNlL25ldy1ub3RpY2UuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSSxrQkFBQTtBQ0NKOztBREVBO0VBQ0ksV0FBQTtFQUNBLFlBQUE7RUFDQSx3QkFBQTtBQ0NKIiwiZmlsZSI6Im5ldy1ub3RpY2UuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIucmlnaHRCdXR0b25Db250YWluZXJ7XG4gICAgdGV4dC1hbGlnbjogY2VudGVyO1xufVxuXG4ucmlnaHRCdXR0b257XG4gICAgd2lkdGg6IDM1cHg7IFxuICAgIGhlaWdodDogMzVweDsgXG4gICAgbWFyZ2luOiAzcHggMHB4IDNweCAtNXB4O1xufSIsIi5yaWdodEJ1dHRvbkNvbnRhaW5lciB7XG4gIHRleHQtYWxpZ246IGNlbnRlcjtcbn1cblxuLnJpZ2h0QnV0dG9uIHtcbiAgd2lkdGg6IDM1cHg7XG4gIGhlaWdodDogMzVweDtcbiAgbWFyZ2luOiAzcHggMHB4IDNweCAtNXB4O1xufSJdfQ== */";
+
+/***/ }),
+
+/***/ 74473:
+/*!*************************************************************************************************!*\
+  !*** ./src/app/shared/components/notices/notice-detail/notice-detail.component.scss?ngResource ***!
+  \*************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJub3RpY2UtZGV0YWlsLmNvbXBvbmVudC5zY3NzIn0= */";
 
 /***/ }),
 
@@ -22997,7 +23508,7 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<p>\n  detail-course works!\n</p>\n";
+module.exports = "<ion-header [translucent]=\"true\">\n  <ion-toolbar>\n    <ion-title>\n      Implement YouTube Video Player in Ionic\n    </ion-title>\n  </ion-toolbar>\n</ion-header>\n<ion-content [fullscreen]=\"true\">\n  <ion-row>\n    <ion-col size=\"5\" class=\"ion-no-margin\">\n      <ion-button size=\"small\" *ngIf=\"user.manager\" (click)=\"eraseCourse()\">Eliminar Anuncio</ion-button>\n    </ion-col>\n    <ion-col size=\"7\" class=\"ion-margin-top\">\n      <div class=\"ion-text-end\">\n        <ion-text color=\"secondary\">Publicado: {{course.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>\n      </div>\n    </ion-col>\n  </ion-row>\n  <ion-card>\n    <ion-img *ngIf=\"previewUrl\" style=\"margin: 0 auto;\" [src]=\"previewUrl\"></ion-img>\n    <ion-card-header>\n      <ion-card-subtitle>\n        Por: {{course.author.name}}\n      </ion-card-subtitle>\n      <ion-card-title>Título: {{course.title}}</ion-card-title>\n    </ion-card-header>\n    <ion-card-content>\n      {{course.description}}\n    </ion-card-content>\n  </ion-card>\n  <app-big-button LABEL=\"Ver Video\" buttonType=\"SECONDARY\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"invokeVideoPlayer()\"></app-big-button>\n  <app-big-button LABEL=\"Tomar Examen\" buttonType=\"\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"invokeVideoPlayer()\"></app-big-button>\n</ion-content>";
 
 /***/ }),
 
@@ -23008,18 +23519,29 @@ module.exports = "<p>\n  detail-course works!\n</p>\n";
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!course\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editCourseForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editCourse()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{course ? course.title: 'Nuevo Curso'}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!course || editCourseForm\" color=\"success\" (click)=\"createCourse()\" \n        [disabled]=\"loading || newExamen.questions.length < 5 || \n        (myCourse?.title.length === 0 || !myCourse?.title) || \n        (myCourse?.description.length === 0 || !myCourse?.description) ||\n        (myCourse?.video.length === 0 || !myCourse?.video) \">\n          Guardar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm && (user.uid === course.author?.uid)\" color=\"dark\" (click)=\"editCourse()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!course || editCourseForm)\">\n  <ion-card>\n\n    <ion-item>\n      <ion-label>Título:</ion-label>\n      <ion-input type=\"text\" [value]=\"myCourse.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.title.length === 0 || !myCourse?.title\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el título de este curso\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Contenido:</ion-label>\n      <ion-textarea rows=\"3\" [value]=\"myCourse.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.description.length === 0 || !myCourse?.description\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa una descripción corta de este curso\n    </ion-text>\n    <ion-item>\n      <ion-label>Video:</ion-label>\n      <ion-input type=\"text\" [value]=\"myCourse.video\" (ionChange)=\"videoListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.video.length === 0 || !myCourse?.video\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el url del video de este curso\n    </ion-text>\n  </ion-card>\n  \n  <ion-list class=\"ion-padding\">\n    <ion-header-list>\n      <ion-label>Preguntas {{newExamen.questions.length + 1}}/10</ion-label>\n    </ion-header-list>\n    <ion-grid *ngFor=\"let question of newExamen.questions; index as i\">\n      <ion-row>\n        <ion-col size=\"10\">\n          <ion-text> Pregunta {{i+1}}: {{question.question}} </ion-text>\n        </ion-col>\n        <ion-col size=\"2\">\n          <ion-icon size=\"large\" color=\"danger\" name=\"close-circle\"></ion-icon>\n        </ion-col>\n      </ion-row>\n      <ion-row *ngFor=\"let item of question.answers; index as j\" class=\"ion-text-center\">\n        <ion-col size=\"9\">\n          <ion-text>\n            {{j==0?'a':(j==1?'b':'c')}}). {{item.text}}\n          </ion-text>\n        </ion-col>\n        <ion-col size=\"3\">\n          <ion-icon color=\"success\" size=\"small\" *ngIf=\"item.correct\" name=\"checkbox\"></ion-icon>\n        </ion-col>\n      </ion-row>\n    </ion-grid>\n    <ion-item>\n      <ion-label>Pregunta {{newExamen.questions.length + 1}}:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.question\" (ionChange)=\"questionListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.question.length === 0 || !newQuestion?.question\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la pregunta 1\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Respuesta A:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[0].text\" (ionChange)=\"answerListener(0,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(0,$event)\" [checked]=\"newQuestion?.answers[0].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[0].text.length === 0 || !newQuestion?.answers[0].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta a\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta B:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[1].text\" (ionChange)=\"answerListener(1,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(1,$event)\" [checked]=\"newQuestion?.answers[1].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[1].text.length === 0 || !newQuestion?.answers[1].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta b\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta C:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[2].text\" (ionChange)=\"answerListener(2,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(2,$event)\" [checked]=\"newQuestion?.answers[2].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[2].text.length === 0 || !newQuestion?.answers[2].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta c\n    </ion-text>\n  </ion-list>\n  <ion-row>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newExamen.questions.length < 5\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Se necesitan 5 preguntas mínimo para crear un examen\n    </ion-text>\n    <app-big-button *ngIf=\"newExamen.questions.length < 10\" LABEL=\"Guardar Pregunta\" buttonType=\"\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"saveQuestion()\"></app-big-button>\n  </ion-row>\n</ion-content>";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!course\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editCourseForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editCourse()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{course ? course.title: 'Nuevo Curso'}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!course || editCourseForm\" color=\"success\" (click)=\"createCourse()\" \n        [disabled]=\"loading || newExamen.questions.length < 5 || \n        (myCourse?.title.length === 0 || !myCourse?.title) || \n        (myCourse?.description.length === 0 || !myCourse?.description) ||\n        (myCourse?.video.length === 0 || !myCourse?.video) \">\n          Guardar\n      </ion-button>\n      <ion-button *ngIf=\"course && !editCourseForm && (user.uid === course.author?.uid)\" color=\"dark\" (click)=\"editCourse()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!course || editCourseForm)\">\n  <ion-card>\n\n    <ion-item>\n      <ion-label>Título:</ion-label>\n      <ion-input type=\"text\" [value]=\"myCourse.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.title.length === 0 || !myCourse?.title\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el título de este curso\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Contenido:</ion-label>\n      <ion-textarea rows=\"3\" [value]=\"myCourse.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myCourse?.description.length === 0 || !myCourse?.description\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa una descripción corta de este curso\n    </ion-text>\n    <ion-item>\n      <ion-thumbnail slot=\"start\" *ngIf=\"previewUrl\">\n        <img [src]=\"previewUrl\">\n      </ion-thumbnail>\n      <ion-label>Video:</ion-label>\n      <ion-input type=\"text\" [value]=\"courseVideo\" (ionChange)=\"videoListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"courseVideo.length === 0 || !courseVideo\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa el url del video de este curso\n    </ion-text>\n  </ion-card>\n  \n  <ion-list class=\"ion-padding\">\n    <ion-header-list>\n      <ion-label>Preguntas {{newExamen.questions.length + 1}}/10</ion-label>\n    </ion-header-list>\n    <ion-grid *ngFor=\"let question of newExamen.questions; index as i\">\n      <ion-row>\n        <ion-col size=\"10\">\n          <ion-text> Pregunta {{i+1}}: {{question.question}} </ion-text>\n        </ion-col>\n        <ion-col size=\"2\">\n          <ion-icon size=\"large\" color=\"danger\" name=\"close-circle\"></ion-icon>\n        </ion-col>\n      </ion-row>\n      <ion-row *ngFor=\"let item of question.answers; index as j\" class=\"ion-text-center\">\n        <ion-col size=\"9\">\n          <ion-text>\n            {{j==0?'a':(j==1?'b':'c')}}). {{item.text}}\n          </ion-text>\n        </ion-col>\n        <ion-col size=\"3\">\n          <ion-icon color=\"success\" size=\"small\" *ngIf=\"item.correct\" name=\"checkbox\"></ion-icon>\n        </ion-col>\n      </ion-row>\n    </ion-grid>\n    <ion-item>\n      <ion-label>Pregunta {{newExamen.questions.length + 1}}:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.question\" (ionChange)=\"questionListener($event)\"></ion-input>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.question.length === 0 || !newQuestion?.question\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la pregunta 1\n    </ion-text>\n    \n    <ion-item>\n      <ion-label>Respuesta A:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[0].text\" (ionChange)=\"answerListener(0,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(0,$event)\" [checked]=\"newQuestion?.answers[0].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[0].text.length === 0 || !newQuestion?.answers[0].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta a\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta B:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[1].text\" (ionChange)=\"answerListener(1,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(1,$event)\" [checked]=\"newQuestion?.answers[1].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[1].text.length === 0 || !newQuestion?.answers[1].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta b\n    </ion-text>\n    <ion-item>\n      <ion-label>Respuesta C:</ion-label>\n      <ion-input type=\"text\" [value]=\"newQuestion?.answers[2].text\" (ionChange)=\"answerListener(2,$event)\"></ion-input>\n      <ion-checkbox slot=\"end\" mode='md' (ionChange)=\"checkBoxListener(2,$event)\" [checked]=\"newQuestion?.answers[2].correct\" color=\"primary\"></ion-checkbox>\n    </ion-item>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newQuestion?.answers[2].text.length === 0 || !newQuestion?.answers[2].text\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Ingresa la repuesta c\n    </ion-text>\n  </ion-list>\n  <ion-row>\n    <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"newExamen.questions.length < 5\"> \n      <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n      Se necesitan 5 preguntas mínimo para crear un examen\n    </ion-text>\n  </ion-row>\n  <app-big-button *ngIf=\"newExamen.questions.length < 10\" LABEL=\"Guardar Pregunta\" buttonType=\"\" [loading]=\"loading\" [disabled]=\"loading\" (click)=\"saveQuestion()\"></app-big-button>\n</ion-content>";
 
 /***/ }),
 
-/***/ 49578:
-/*!***********************************************************************************!*\
-  !*** ./src/app/shared/components/new-notice/new-notice.component.html?ngResource ***!
-  \***********************************************************************************/
+/***/ 12821:
+/*!*******************************************************************************************!*\
+  !*** ./src/app/shared/components/notices/new-notice/new-notice.component.html?ngResource ***!
+  \*******************************************************************************************/
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!notice\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editNoticeForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editNotice()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{notice ? notice.type.name: (pet? 'Animal Perdido' : 'Nuevo Anuncio')}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!notice || editNoticeForm\" color=\"success\" (click)=\"createNotice()\" \n        [disabled]=\"loading && (!newImage && myNotice.photo)\">\n          Enviar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm && ((user.uid === notice.writer?.uid) || this.user.manager)\" color=\"dark\" (click)=\"editNotice()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content *ngIf=\"!loading && notice && !editNoticeForm\" fullscreen  #ionScroll [scrollEvents]=\"true\" (ionScroll)=\"checkScroll($event, ionScroll)\">\n  <ion-row class=\"ion-float-right\">\n      <ion-text color=\"secondary\">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>\n  </ion-row>\n  <ion-card>\n    <img *ngIf=\"notice.photo\" [src]=\"notice.photo\" />\n    <ion-card-header>\n      <ion-card-subtitle>\n        Por: {{notice.writer.name}}\n      </ion-card-subtitle>\n      <ion-card-title>Título: {{notice.title}}</ion-card-title>\n    </ion-card-header>\n    <ion-card-content>\n      {{notice.description}}\n      <app-pet-item *ngIf=\"notice.pet\" [shortPet]=\"notice.pet\"></app-pet-item>\n    </ion-card-content>\n    <ion-footer>\n      <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"user.uid\"></app-notice-bottom-bar>\n    </ion-footer>\n  </ion-card>\n  <ion-list *ngIf=\"this.notice.comments.length > 0\">\n    <div *ngFor=\"let comment of this.notice.comments\">\n      <ion-item>\n        <ion-avatar slot=\"start\"><img src=\"{{comment.user.photo ? comment.user.photo : defaultUser}}\"></ion-avatar>\n        <ion-labe>\n          <h4>{{comment.user.name}}</h4>\n          <p>{{comment.text}}</p>\n        </ion-labe>\n      </ion-item>\n      <ion-row *ngIf=\"comment.photo\">\n        <img [src]=\"comment.photo\">\n      </ion-row>\n    </div>\n  </ion-list>\n  <ion-fab vertical=\"bottom\" horizontal=\"end\" slot=\"fixed\" style=\"bottom: 50px; right: 20px;\" *ngIf=\"showScroll > 400\">\n    <ion-fab-button color=\"light\" size=\"small\" (click)=\"scrollDown()\" close-icon=\"close-outline\">\n      <ion-icon name=\"chevron-down-outline\"></ion-icon>\n    </ion-fab-button>\n  </ion-fab>\n</ion-content>\n<ion-footer *ngIf=\"!loading && notice && !editNoticeForm\">\n  <ion-toolbar>\n    <ion-row class=\"inputMargin\" *ngIf=\"!loading\">\n      <ion-col size=\"11\">\n        <ion-textarea placeholder=\"Escribe un comentario...\" style=\"background-color: white; color:black; border-radius: 7pt; padding-left: 7px;\" rows=\"1\" [disabled]=\"sending\" [value]=\"newComment.text\" (ionChange)=\"commentListener($event)\"></ion-textarea>\n      </ion-col>\n      <ion-col size=\"1\" class=\"rightButtonContainer\"> \n        <ion-icon *ngIf=\"!sending\" color=\"dark\" name=\"arrow-up-circle\" class=\"rightButton\" (click)=\"pressSend()\"></ion-icon>\n        <ion-icon *ngIf=\"sending\" color=\"tertiary\" name=\"arrow-up-circle\" class=\"rightButton\"></ion-icon>\n      </ion-col>\n      <div>\n      </div>\n    </ion-row>\n  </ion-toolbar>\n</ion-footer>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!notice || editNoticeForm)\">\n  <ion-card>\n    <img *ngIf=\"!newImage && notice\" src=\"{{myNotice.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"!newImage && pet\" src=\"{{pet.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"newImage\" src=\"{{newImage.webPath}}\" (click)=\"addPhoto()\">\n    <ion-list>\n      <ion-item *ngIf=\"!newImage && !notice && !pet\" (click)=\"addPhoto()\">\n        <ion-label>Agregue una imagen:</ion-label>\n        <ion-button color=\"secondary\"><ion-icon name=\"camera-outline\" color=\"light\"></ion-icon></ion-button>\n      </ion-item>\n\n      <ion-item>\n        <ion-icon slot=\"start\" *ngIf=\"myNotice.type\" color=\"tertiary\" size=\"large\" [name]=\"myNotice.type.icon\"></ion-icon>\n        <ion-label position=\"stacked\">Tipo:</ion-label>\n        <ion-select mode='ios' [value]=\"noticeType\" (ionChange)=\"handleType($event)\" [disabled]=\"pet\">\n          <ion-select-option *ngFor=\"let type of typeList\" [value]=\"type.name\"> {{type.name}}</ion-select-option>\n        </ion-select>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!noticeType\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione un tipo de anuncio\n      </ion-text>\n\n      <ion-item>\n        <ion-label position=\"stacked\">Título:</ion-label>\n        <ion-input type=\"text\" [value]=\"myNotice.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.title.length === 0 || !myNotice?.title\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el título de este anuncio\n      </ion-text>\n      \n      <ion-item>\n        <ion-label position=\"stacked\">Contenido:</ion-label>\n        <ion-textarea rows=\"10\" placeholder=\"Ingrese el contenido de tu anuncio aquí...\" [value]=\"myNotice.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.description.length === 0 || !myNotice?.description\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el contenido de este anuncio\n      </ion-text>\n    </ion-list>\n  </ion-card>\n</ion-content>";
+module.exports = "<ion-header>\n  <ion-toolbar mode=\"ios\">\n    <ion-buttons slot=\"start\">\n      <ion-button *ngIf=\"!notice\" color=\"danger\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"editNoticeForm\" color=\"danger\" [disabled]=\"loading\" (click)=\"editNotice()\">\n        Cancelar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm\" color=\"primary\" [disabled]=\"loading\" (click)=\"modal.dismiss(false)\">\n        Atrás\n      </ion-button>\n    </ion-buttons>\n    <ion-title class=\"ion-text-uppercase\">{{notice ? notice.type.name: (pet? 'Animal Perdido' : 'Nuevo Anuncio')}}</ion-title>\n    <ion-buttons slot=\"end\">\n      <ion-button *ngIf=\"!notice || editNoticeForm\" color=\"success\" (click)=\"createNotice()\" \n        [disabled]=\"loading && (!newImage && myNotice.photo)\">\n          Enviar\n      </ion-button>\n      <ion-button *ngIf=\"notice && !editNoticeForm && ((user.uid === notice.writer?.uid) || this.user.manager)\" color=\"dark\" (click)=\"editNotice()\">\n          Editar\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class=\"ion-padding\"  *ngIf=\"loading\">\n  <app-loading-view></app-loading-view>\n</ion-content>\n\n<ion-content *ngIf=\"!loading && notice && !editNoticeForm\" fullscreen  #ionScroll [scrollEvents]=\"true\" (ionScroll)=\"checkScroll($event, ionScroll)\">\n  <ion-row>\n    <ion-col size=\"5\" class=\"ion-no-margin\">\n      <ion-button size=\"small\" *ngIf=\"user.manager\" (click)=\"eraseNotice()\">Eliminar Anuncio</ion-button>\n    </ion-col>\n    <ion-col size=\"7\" class=\"ion-margin-top\">\n      <div class=\"ion-text-end\">\n        <ion-text color=\"secondary\">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>\n      </div>\n    </ion-col>\n  </ion-row>\n  <ion-card>\n    <ion-img *ngIf=\"notice.photo\" style=\"margin: 0 auto;\" [src]=\"notice.photo\"></ion-img>\n    <ion-card-header>\n      <ion-card-subtitle>\n        Por: {{notice.writer.name}}\n      </ion-card-subtitle>\n      <ion-card-title>Título: {{notice.title}}</ion-card-title>\n    </ion-card-header>\n    <ion-card-content>\n      {{notice.description}}\n      <app-pet-item *ngIf=\"notice.pet\" [shortPet]=\"notice.pet\"></app-pet-item>\n    </ion-card-content>\n    <ion-footer>\n      <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"user.uid\"></app-notice-bottom-bar>\n    </ion-footer>\n  </ion-card>\n  <ion-list *ngIf=\"this.notice.comments.length > 0\">\n    <ion-list-header>\n      <ion-label>Comments</ion-label>\n    </ion-list-header>\n    <div *ngFor=\"let comment of this.notice.comments\">\n      <ion-item>\n        <ion-avatar slot=\"start\"><img src=\"{{comment.user.photo ? comment.user.photo : defaultUser}}\"></ion-avatar>\n        <ion-labe>\n          <h4>{{comment.user.name}}</h4>\n          <p>{{comment.text}}</p>\n        </ion-labe>\n      </ion-item>\n      <ion-row *ngIf=\"comment.photo\">\n        <img [src]=\"comment.photo\">\n      </ion-row>\n    </div>\n  </ion-list>\n  <ion-fab vertical=\"bottom\" horizontal=\"end\" slot=\"fixed\" style=\"bottom: 50px; right: 20px;\" *ngIf=\"showScroll > 400\">\n    <ion-fab-button color=\"light\" size=\"small\" (click)=\"scrollDown()\" close-icon=\"close-outline\">\n      <ion-icon name=\"chevron-down-outline\"></ion-icon>\n    </ion-fab-button>\n  </ion-fab>\n</ion-content>\n<ion-footer *ngIf=\"!loading && notice && !editNoticeForm\">\n  <ion-toolbar>\n    <ion-row class=\"inputMargin\" *ngIf=\"!loading\">\n      <ion-col size=\"11\">\n        <ion-textarea placeholder=\"Escribe un comentario...\" style=\"background-color: white; color:black; border-radius: 7pt; padding-left: 7px;\" rows=\"1\" [disabled]=\"sending\" [value]=\"newComment.text\" (ionChange)=\"commentListener($event)\"></ion-textarea>\n      </ion-col>\n      <ion-col size=\"1\" class=\"rightButtonContainer\"> \n        <ion-icon *ngIf=\"!sending\" color=\"dark\" name=\"arrow-up-circle\" class=\"rightButton\" (click)=\"pressSend()\"></ion-icon>\n        <ion-spinner *ngIf=\"sending\" color=\"tertiary\" class=\"rightButton\" name=\"dots\"></ion-spinner>\n      </ion-col>\n      <div>\n      </div>\n    </ion-row>\n  </ion-toolbar>\n</ion-footer>\n\n<ion-content class=\"ion-padding\" *ngIf=\"!loading && (!notice || editNoticeForm)\">\n  <ion-card>\n    <img *ngIf=\"!newImage && notice\" src=\"{{myNotice.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"!newImage && pet\" src=\"{{pet.photo}}\" (click)=\"addPhoto()\">\n    <img *ngIf=\"newImage\" src=\"{{newImage.webPath}}\" (click)=\"addPhoto()\">\n    <ion-list>\n      <ion-item *ngIf=\"!newImage && !notice && !pet\" (click)=\"addPhoto()\">\n        <ion-label>Agregue una imagen:</ion-label>\n        <ion-button color=\"secondary\"><ion-icon name=\"camera-outline\" color=\"light\"></ion-icon></ion-button>\n      </ion-item>\n\n      <ion-item>\n        <ion-icon slot=\"start\" *ngIf=\"myNotice.type\" color=\"tertiary\" size=\"large\" [name]=\"myNotice.type.icon\"></ion-icon>\n        <ion-label position=\"stacked\">Tipo:</ion-label>\n        <ion-select mode='ios' [value]=\"noticeType\" (ionChange)=\"handleType($event)\" [disabled]=\"pet\">\n          <ion-select-option *ngFor=\"let type of typeList\" [value]=\"type.name\"> {{type.name}}</ion-select-option>\n        </ion-select>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"!noticeType\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon> Seleccione un tipo de anuncio\n      </ion-text>\n\n      <ion-item>\n        <ion-label position=\"stacked\">Título:</ion-label>\n        <ion-input type=\"text\" [value]=\"myNotice.title\" (ionChange)=\"titleListener($event)\"></ion-input>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.title.length === 0 || !myNotice?.title\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el título de este anuncio\n      </ion-text>\n      \n      <ion-item>\n        <ion-label position=\"stacked\">Contenido:</ion-label>\n        <ion-textarea rows=\"10\" placeholder=\"Ingrese el contenido de tu anuncio aquí...\" [value]=\"myNotice.description\" (ionChange)=\"descriptionListener($event)\"></ion-textarea>\n      </ion-item>\n      <ion-text class=\"ion-padding-start\" color=\"danger\" *ngIf=\"myNotice?.description.length === 0 || !myNotice?.description\"> \n        <ion-icon class=\"vertical-align\" color=\"danger\" name=\"alert-circle-outline\"> </ion-icon>\n        Ingresa el contenido de este anuncio\n      </ion-text>\n    </ion-list>\n  </ion-card>\n</ion-content>";
+
+/***/ }),
+
+/***/ 9862:
+/*!*************************************************************************************************!*\
+  !*** ./src/app/shared/components/notices/notice-detail/notice-detail.component.html?ngResource ***!
+  \*************************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ion-content fullscreen  #ionScroll [scrollEvents]=\"true\" (ionScroll)=\"checkScroll($event, ionScroll)\">\n  <ion-row>\n    <ion-col size=\"5\" class=\"ion-no-margin\">\n      <ion-button size=\"small\" *ngIf=\"user.manager\">Eliminar Anuncio</ion-button>\n    </ion-col>\n    <ion-col size=\"7\" class=\"ion-margin-top\">\n      <div class=\"ion-text-end\">\n        <ion-text color=\"secondary\">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>\n      </div>\n    </ion-col>\n  </ion-row>\n  <ion-card>\n    <ion-img *ngIf=\"notice.photo\" style=\"margin: 0 auto;\" [src]=\"notice.photo\"></ion-img>\n    <ion-card-header>\n      <ion-card-subtitle>\n        Por: {{notice.writer.name}}\n      </ion-card-subtitle>\n      <ion-card-title>Título: {{notice.title}}</ion-card-title>\n    </ion-card-header>\n    <ion-card-content>\n      {{notice.description}}\n      <app-pet-item *ngIf=\"notice.pet\" [shortPet]=\"notice.pet\"></app-pet-item>\n    </ion-card-content>\n    <ion-footer>\n      <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"user.uid\"></app-notice-bottom-bar>\n    </ion-footer>\n  </ion-card>\n  <ion-fab vertical=\"bottom\" horizontal=\"end\" slot=\"fixed\" style=\"bottom: 50px; right: 20px;\" *ngIf=\"showScroll > 400\">\n    <ion-fab-button color=\"light\" size=\"small\" (click)=\"scrollDown()\" close-icon=\"close-outline\">\n      <ion-icon name=\"chevron-down-outline\"></ion-icon>\n    </ion-fab-button>\n  </ion-fab>\n</ion-content>\n<ion-footer *ngIf=\"!loading && notice && !editNoticeForm\">\n  <ion-toolbar>\n    <ion-row class=\"inputMargin\" *ngIf=\"!loading\">\n      <ion-col size=\"11\">\n        <ion-textarea placeholder=\"Escribe un comentario...\" style=\"background-color: white; color:black; border-radius: 7pt; padding-left: 7px;\" rows=\"1\" [disabled]=\"sending\" [value]=\"newComment.text\" (ionChange)=\"commentListener($event)\"></ion-textarea>\n      </ion-col>\n      <ion-col size=\"1\" class=\"rightButtonContainer\"> \n        <ion-icon *ngIf=\"!sending\" color=\"dark\" name=\"arrow-up-circle\" class=\"rightButton\" (click)=\"pressSend()\"></ion-icon>\n        <ion-spinner *ngIf=\"sending\" color=\"tertiary\" class=\"rightButton\" name=\"dots\"></ion-spinner>\n      </ion-col>\n      <div>\n      </div>\n    </ion-row>\n  </ion-toolbar>\n</ion-footer>\n  ";
 
 /***/ }),
 
@@ -23052,7 +23574,7 @@ module.exports = "<ion-list>\n  <ion-item>\n    <ion-thumbnail slot=\"start\" cl
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<ion-item *ngIf=\"pet\"  detail>\n  <ion-avatar slot=\"start\"ngClass = \"{{ pet.status === 'dead'?'grayScale': (pet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"pet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{pet.name}} </h3>\n    <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n  </ion-label>\n</ion-item>\n\n<ion-item *ngIf=\"shortPet\" >\n  <ion-avatar slot=\"start\"ngClass = \"{{ shortPet.status === 'dead'?'grayScale': (shortPet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"shortPet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{shortPet.name}} </h3>\n    <ion-text color=\"secondary\"[ngSwitch]=\"shortPet.status\">\n      <p *ngSwitchCase=\"'good'\">Status: Encontrado</p>\n      <p *ngSwitchCase=\"'lost'\" color=\"danger\">Status: Perdido</p>\n      <p *ngSwitchCase=\"'dead'\" color=\"dark\">Status: Fallecido</p>\n    </ion-text>\n  </ion-label>\n</ion-item>";
+module.exports = "<ion-item *ngIf=\"pet\"  detail>\n  <ion-avatar slot=\"start\"ngClass = \"{{ pet.status === 'dead'?'grayScale': (pet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"pet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{pet.name}} </h3>\n    <p> {{pet.specie}}  {{pet.breed?'/ '+pet.breed:''}}  </p>\n  </ion-label>\n</ion-item>\n\n<ion-item *ngIf=\"shortPet\" >\n  <ion-avatar slot=\"start\"ngClass = \"{{ shortPet.status === 'dead'?'grayScale': (shortPet.status === 'lost'?'redImage':'') }}\" >\n    <img [src]=\"shortPet.photo\"> \n  </ion-avatar>\n  <ion-label>\n    <h3> {{shortPet.name}} </h3>\n    <ion-text color=\"dark\"[ngSwitch]=\"shortPet.status\">Status:\n      <ion-text *ngSwitchCase=\"'good'\" color=\"success\"> Encontrado</ion-text>\n      <ion-text *ngSwitchCase=\"'lost'\" color=\"danger\"> Perdido</ion-text>\n      <ion-text *ngSwitchCase=\"'dead'\" color=\"dark\"> Fallecido</ion-text>\n    </ion-text>\n  </ion-label>\n</ion-item>";
 
 /***/ }),
 

@@ -31,7 +31,7 @@ const routes = [
         children: [
             {
                 path: 'profile',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_pages_administrator_profile-manager_profile-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../administrator/profile-manager/profile-manager.module */ 72232)).then(m => m.ProfileManagerPageModule),
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_administrator_profile-manager_profile-manager_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../administrator/profile-manager/profile-manager.module */ 72232)).then(m => m.ProfileManagerPageModule),
                 data: { viewName: 'Profile' }
             },
             {

@@ -14,10 +14,10 @@
   </ion-avatar>
   <ion-label>
     <h3> {{shortPet.name}} </h3>
-    <ion-text color="secondary"[ngSwitch]="shortPet.status">
-      <p *ngSwitchCase="'good'">Status: Encontrado</p>
-      <p *ngSwitchCase="'lost'" color="danger">Status: Perdido</p>
-      <p *ngSwitchCase="'dead'" color="dark">Status: Fallecido</p>
+    <ion-text color="dark"[ngSwitch]="shortPet.status">Status:
+      <ion-text *ngSwitchCase="'good'" color="success"> Encontrado</ion-text>
+      <ion-text *ngSwitchCase="'lost'" color="danger"> Perdido</ion-text>
+      <ion-text *ngSwitchCase="'dead'" color="dark"> Fallecido</ion-text>
     </ion-text>
   </ion-label>
 </ion-item>

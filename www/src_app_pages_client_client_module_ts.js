@@ -39,7 +39,7 @@ const routes = [
             },
             {
                 path: 'profile',
-                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_pages_client_profile-client_profile-client_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./profile-client/profile-client.module */ 72579)).then(m => m.ProfileClientPageModule)
+                loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_shared_shared_module_ts"), __webpack_require__.e("src_app_pages_client_profile-client_profile-client_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./profile-client/profile-client.module */ 72579)).then(m => m.ProfileClientPageModule)
             }
         ]
     },

@@ -91,4 +91,17 @@ export class FirestoreActionsService {
     })
   }
 
+  eraseDocument(folder: string, filename: string){
+    return new Promise((resolve, reject) => {
+      try {
+        const callDoc = this.afs.collection(folder).doc(filename)
+        callDoc.delete().then((data: any)=>{
+          resolve(data);
+        })
+      } catch (error) {
+        reject(this.error.handle(error));
+      }
+    })
+  }
+
 }

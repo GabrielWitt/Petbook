@@ -2,8 +2,6 @@
   <ion-toolbar>
     <p class="ion-text-center ion-text-capitalize inputLogin" style="width: 100%;"> INICIO DE SESIÓN </p>
   </ion-toolbar>
-
-  
   <form #login="ngForm" [formGroup]=loginForm (ngSubmit)=loginProcess(loginForm.value) (keydown)="EnterSubmit($event, loginForm)" novalidate>
     <ion-item>
       <ion-label color="dark" position="floating"> <b>Email</b></ion-label>

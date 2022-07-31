@@ -1,0 +1,49 @@
+<ion-content fullscreen  #ionScroll [scrollEvents]="true" (ionScroll)="checkScroll($event, ionScroll)">
+  <ion-row>
+    <ion-col size="5" class="ion-no-margin">
+      <ion-button size="small" *ngIf="user.manager">Eliminar Anuncio</ion-button>
+    </ion-col>
+    <ion-col size="7" class="ion-margin-top">
+      <div class="ion-text-end">
+        <ion-text color="secondary">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-card>
+    <ion-img *ngIf="notice.photo" style="margin: 0 auto;" [src]="notice.photo"></ion-img>
+    <ion-card-header>
+      <ion-card-subtitle>
+        Por: {{notice.writer.name}}
+      </ion-card-subtitle>
+      <ion-card-title>Título: {{notice.title}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      {{notice.description}}
+      <app-pet-item *ngIf="notice.pet" [shortPet]="notice.pet"></app-pet-item>
+    </ion-card-content>
+    <ion-footer>
+      <app-notice-bottom-bar [likes]="notice.likes.length" [comments]="notice.comments.length" [notice]="notice" [userUID]="user.uid"></app-notice-bottom-bar>
+    </ion-footer>
+  </ion-card>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="bottom: 50px; right: 20px;" *ngIf="showScroll > 400">
+    <ion-fab-button color="light" size="small" (click)="scrollDown()" close-icon="close-outline">
+      <ion-icon name="chevron-down-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+<ion-footer *ngIf="!loading && notice && !editNoticeForm">
+  <ion-toolbar>
+    <ion-row class="inputMargin" *ngIf="!loading">
+      <ion-col size="11">
+        <ion-textarea placeholder="Escribe un comentario..." style="background-color: white; color:black; border-radius: 7pt; padding-left: 7px;" rows="1" [disabled]="sending" [value]="newComment.text" (ionChange)="commentListener($event)"></ion-textarea>
+      </ion-col>
+      <ion-col size="1" class="rightButtonContainer"> 
+        <ion-icon *ngIf="!sending" color="dark" name="arrow-up-circle" class="rightButton" (click)="pressSend()"></ion-icon>
+        <ion-spinner *ngIf="sending" color="tertiary" class="rightButton" name="dots"></ion-spinner>
+      </ion-col>
+      <div>
+      </div>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>
+  

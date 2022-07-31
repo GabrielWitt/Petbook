@@ -5,7 +5,7 @@ import { userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
 import { AlertsService } from 'src/app/shared/utilities/alerts';
 import { NewCourseComponent } from '../../course/new-course/new-course.component';
-import { NewNoticeComponent } from '../../new-notice/new-notice.component';
+import { NewNoticeComponent } from '../../notices/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-main-header',
@@ -14,7 +14,7 @@ import { NewNoticeComponent } from '../../new-notice/new-notice.component';
 })
 export class MainHeaderComponent implements OnInit {
   loading = false;
-  @Input() title: string;
+  @Input() title: string; 
   @Input() rightButton: any;
   user: userFormData;
 

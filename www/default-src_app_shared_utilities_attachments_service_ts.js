@@ -335,9 +335,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MyStoreService": () => (/* binding */ MyStoreService)
 /* harmony export */ });
 /* harmony import */ var _Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 71670);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 34929);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 34929);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 22560);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/forms */ 2508);
 /* harmony import */ var _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @capacitor/storage */ 460);
+
 
 
 
@@ -349,6 +351,7 @@ let MyStoreService = class MyStoreService {
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const lockData = JSON.stringify(data);
+        console.log(filename, lockData);
         yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.set({
           key: filename,
           value: lockData
@@ -364,14 +367,18 @@ let MyStoreService = class MyStoreService {
   readFile(filename) {
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
-        const {
-          value
-        } = yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.get({
-          key: filename
-        });
-        return JSON.parse(value);
+        if (filename) {
+          const {
+            value
+          } = yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.get({
+            key: filename
+          });
+          return JSON.parse(value);
+        } else {
+          return _angular_forms__WEBPACK_IMPORTED_MODULE_2__.NonNullableFormBuilder;
+        }
       } catch (error) {
-        console.log(error);
+        console.log('keyStore: ' + error);
         return 'file not found';
       }
     })();
@@ -391,14 +398,94 @@ let MyStoreService = class MyStoreService {
     })();
   }
 
+  clearStore() {
+    return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        yield _capacitor_storage__WEBPACK_IMPORTED_MODULE_1__.Storage.clear();
+        return 'Clean store';
+      } catch (error) {
+        console.log(error);
+        return 'file not found';
+      }
+    })();
+  }
+
 };
 
 MyStoreService.ctorParameters = () => [];
 
-MyStoreService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+MyStoreService = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Injectable)({
   providedIn: 'root'
 })], MyStoreService);
 
+/*
+import { Injectable } from '@angular/core';
+import { NativeStorage } from '@awesome-cordova-plugins/native-storage/ngx';
+import { Capacitor } from '@capacitor/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MyStoreService {
+  webStorage = window.localStorage;
+
+  constructor(private nativeStorage: NativeStorage) { }
+
+  async setData(filename:string, data: any){
+    try {
+      if (Capacitor.getPlatform() !== 'web'){ await this.nativeStorage.setItem( filename, data ); }
+      else { this.webStorage.setItem(filename, JSON.stringify(data)) }
+      return 'ok'
+    } catch (error) {
+      console.log(error);
+      return 'data not saved';
+    }
+  }
+
+  async readFile(filename:string){
+    try {
+      if (Capacitor.getPlatform() !== 'web'){
+        const { value } = await this.nativeStorage.getItem(filename);
+        return JSON.parse(value);
+      } else {
+        const value = await this.webStorage.getItem(filename)
+        return JSON.parse(value);
+      }
+    } catch (error) {
+      console.log(error);
+      return 'file not found';
+    }
+  }
+
+  async removeFile(filename:string){
+    try {
+      if (Capacitor.getPlatform() !== 'web'){
+        await this.nativeStorage.remove(filename);
+      } else {
+        await this.webStorage.removeItem(filename)
+      }
+      return 'file removed'
+    } catch (error) {
+      console.log(error);
+      return 'file not found';
+    }
+  }
+
+  async cleanAllData(){
+    try {
+      if (Capacitor.getPlatform() !== 'web'){
+        await this.nativeStorage.clear();
+      } else {
+        await this.webStorage.clear();
+      }
+      return 'file removed'
+    } catch (error) {
+      console.log(error);
+      return 'file not found';
+    }
+  }
+}
+*/
 
 /***/ }),
 
@@ -917,7 +1004,7 @@ var CameraSource;
 
   CameraSource["Camera"] = "CAMERA";
   /**
-   * Pick an existing photo fron the gallery or photo album.
+   * Pick an existing photo from the gallery or photo album.
    */
 
   CameraSource["Photos"] = "PHOTOS";

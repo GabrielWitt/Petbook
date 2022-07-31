@@ -100,8 +100,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
-/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
-/* harmony import */ var src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/components/new-notice/new-notice.component */ 67186);
+/* harmony import */ var src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/components/notices/new-notice/new-notice.component */ 69005);
+/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
 
 
 
@@ -126,6 +126,7 @@ let NoticeManagerPage = class NoticeManagerPage {
   ngOnInit() {
     this.loading = true;
     this.auth.checkUser().then(user => {
+      console.log(user);
       this.user = user.user;
       this.userData = user.data;
       this.loadData().then(() => {
@@ -152,10 +153,11 @@ let NoticeManagerPage = class NoticeManagerPage {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this2.modal.create({
-        component: src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_5__.NewNoticeComponent,
+        component: src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_4__.NewNoticeComponent,
         componentProps: {
           notice,
-          user: _this2.userData
+          user: _this2.userData,
+          delete: true
         },
         mode: 'ios',
         presentingElement: _this2.routerOutlet.nativeEl
@@ -200,7 +202,7 @@ let NoticeManagerPage = class NoticeManagerPage {
 NoticeManagerPage.ctorParameters = () => [{
   type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__.FireAuthService
 }, {
-  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__.NoticeService
+  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_5__.NoticeService
 }, {
   type: _ionic_angular__WEBPACK_IMPORTED_MODULE_6__.ModalController
 }, {
@@ -232,7 +234,7 @@ module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW
   \****************************************************************************************/
 /***/ ((module) => {
 
-module.exports = "<app-main-header title=\"Anuncios\" [rightButton]=\"reloadData\"></app-main-header>\n\n<ion-content class=\"ion-padding\">\n    <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n      <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n    </ion-refresher>\n\n    <app-not-data-yet-message \n      *ngIf=\"noticeList.length == 0 && !loading\"\n      text=\"No hay anuncios aún\" icon=\"archive-outline\"\n    ></app-not-data-yet-message>\n  \n    <ion-list *ngIf=\"noticeList.length>0\">\n        <ion-card *ngFor=\"let notice of noticeList\">\n            <div (click)=\"detailNotice(notice)\">\n                <ion-item lines=\"none\">\n                    <ion-icon slot=\"start\" color=\"secondary\" size=\"small\" [name]=\"notice.type.icon\"></ion-icon>\n                    <ion-label>\n                        <ion-text color=\"secondary\">{{notice.type.name}}</ion-text>\n                    </ion-label>\n                </ion-item>\n                <img [src]=\"notice.photo\">\n                <ion-row class=\"ion-text-center\" style=\"width: 100%;\">\n                    <ion-text class=\"ion-text-capitalized\" color=\"dark\">\n                        <h3>{{notice.title}}</h3>\n                    </ion-text>\n                </ion-row>\n            </div>\n            <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"user.uid\"></app-notice-bottom-bar>\n        </ion-card>\n    </ion-list>\n    \n    <ion-list *ngIf=\"loading\">\n        <app-loading-view></app-loading-view>\n      </ion-list>\n</ion-content>\n";
+module.exports = "<app-main-header title=\"Anuncios\" [rightButton]=\"reloadData\"></app-main-header>\n\n<ion-content class=\"ion-padding\">\n    <ion-refresher slot=\"fixed\" (ionRefresh)=\"doRefresh($event)\" style=\"background-color: gray;\">\n      <ion-refresher-content pullingIcon=\"arrow-down\" pullingText=\"Desliza abajo para refrescar...\" refreshingSpinner=\"dots\"></ion-refresher-content> \n    </ion-refresher>\n\n    <app-not-data-yet-message \n      *ngIf=\"noticeList.length == 0 && !loading\"\n      text=\"No hay anuncios aún\" icon=\"archive-outline\"\n    ></app-not-data-yet-message>\n  \n    <ion-list *ngIf=\"noticeList.length>0\">\n        <ion-card *ngFor=\"let notice of noticeList\">\n            <div (click)=\"detailNotice(notice)\">\n                <ion-item lines=\"none\">\n                    <ion-icon slot=\"start\" color=\"secondary\" size=\"small\" [name]=\"notice.type.icon\"></ion-icon>\n                    <ion-label>\n                        <ion-text color=\"secondary\">{{notice.type.name}}</ion-text>\n                    </ion-label>\n                </ion-item>\n                <ion-img style=\"margin: 0 auto;\" [src]=\"notice.photo\"></ion-img>\n                <ion-row class=\"ion-text-center\" style=\"width: 100%;\">\n                    <ion-text class=\"ion-text-capitalized\" color=\"dark\">\n                        <h3>{{notice.title}}</h3>\n                    </ion-text>\n                </ion-row>\n            </div>\n            <app-notice-bottom-bar [likes]=\"notice.likes.length\" [comments]=\"notice.comments.length\" [notice]=\"notice\" [userUID]=\"userData?.uid\"></app-notice-bottom-bar>\n        </ion-card>\n    </ion-list>\n    \n    <ion-list *ngIf=\"loading\">\n        <app-loading-view></app-loading-view>\n      </ion-list>\n</ion-content>\n";
 
 /***/ })
 

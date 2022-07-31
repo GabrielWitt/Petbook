@@ -3,8 +3,8 @@ import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Notice } from 'src/app/core/models/notice';
 import { User, userFormData } from 'src/app/core/models/user';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
+import { NewNoticeComponent } from 'src/app/shared/components/notices/new-notice/new-notice.component';
 import { NoticeService } from 'src/app/core/services/modules/notice.service';
-import { NewNoticeComponent } from 'src/app/shared/components/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-notices-client',

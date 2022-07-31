@@ -1,4 +1,63 @@
 import { Injectable } from '@angular/core';
+import { NonNullableFormBuilder } from '@angular/forms';
+import { Storage } from '@capacitor/storage';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MyStoreService {
+
+  constructor() { }
+
+  async setData(filename:string, data: any){
+    try {
+      const lockData = JSON.stringify(data);
+      console.log(filename, lockData)
+      await Storage.set({ key: filename, value: lockData });
+      return 'ok'
+    } catch (error) {
+      console.log(error);
+      return 'data not saved';
+    }
+  }
+
+  async readFile(filename:string){
+    try {
+      if(filename){
+        const { value } =  await Storage.get({ key: filename });
+        return JSON.parse(value);
+      }else{
+        return NonNullableFormBuilder
+      }
+    } catch (error) {
+      console.log('keyStore: '+error);
+      return 'file not found';
+    }
+  }
+
+  async removeFile(filename:string){
+    try {
+      await Storage.remove({ key: filename });
+      return 'file removed'
+    } catch (error) {
+      console.log(error);
+      return 'file not found';
+    }
+  }
+
+  async clearStore(){
+    try {
+      await Storage.clear();
+      return 'Clean store'
+    } catch (error) {
+      console.log(error);
+      return 'file not found';
+    }
+  }
+}
+
+/*
+import { Injectable } from '@angular/core';
 import { NativeStorage } from '@awesome-cordova-plugins/native-storage/ngx';
 import { Capacitor } from '@capacitor/core';
 
@@ -64,3 +123,4 @@ export class MyStoreService {
     }
   }
 }
+*/

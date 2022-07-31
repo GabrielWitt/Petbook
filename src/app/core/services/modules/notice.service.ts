@@ -40,6 +40,14 @@ export class NoticeService {
     });
   }
 
+  deleteNotice(noticeUID: string){
+    return new Promise((resolve,reject) => {
+      this.firestore.eraseDocument(this.noticeFolder, noticeUID)
+      .then((docs: any[]) => { resolve(docs) })
+      .catch((error) => { reject(this.error.handle(error)); });
+    });
+  }
+
   readNoticeList(){
     return new Promise<Notice[]>((resolve,reject) => {
       this.firestore.readCollectionOrderBy(this.noticeFolder,'createdAt', 'desc')

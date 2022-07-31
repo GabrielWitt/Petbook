@@ -29,11 +29,18 @@
 </ion-content>
 
 <ion-content *ngIf="!loading && notice && !editNoticeForm" fullscreen  #ionScroll [scrollEvents]="true" (ionScroll)="checkScroll($event, ionScroll)">
-  <ion-row class="ion-float-right">
-      <ion-text color="secondary">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>
+  <ion-row>
+    <ion-col size="5" class="ion-no-margin">
+      <ion-button size="small" *ngIf="user.manager" (click)="eraseNotice()">Eliminar Anuncio</ion-button>
+    </ion-col>
+    <ion-col size="7" class="ion-margin-top">
+      <div class="ion-text-end">
+        <ion-text color="secondary">Publicado: {{notice.createdAt | timeFormat : 'DD/MM/YYYY'}}</ion-text>
+      </div>
+    </ion-col>
   </ion-row>
   <ion-card>
-    <img *ngIf="notice.photo" [src]="notice.photo" />
+    <ion-img *ngIf="notice.photo" style="margin: 0 auto;" [src]="notice.photo"></ion-img>
     <ion-card-header>
       <ion-card-subtitle>
         Por: {{notice.writer.name}}
@@ -49,6 +56,9 @@
     </ion-footer>
   </ion-card>
   <ion-list *ngIf="this.notice.comments.length > 0">
+    <ion-list-header>
+      <ion-label>Comments</ion-label>
+    </ion-list-header>
     <div *ngFor="let comment of this.notice.comments">
       <ion-item>
         <ion-avatar slot="start"><img src="{{comment.user.photo ? comment.user.photo : defaultUser}}"></ion-avatar>
@@ -76,7 +86,7 @@
       </ion-col>
       <ion-col size="1" class="rightButtonContainer"> 
         <ion-icon *ngIf="!sending" color="dark" name="arrow-up-circle" class="rightButton" (click)="pressSend()"></ion-icon>
-        <ion-icon *ngIf="sending" color="tertiary" name="arrow-up-circle" class="rightButton"></ion-icon>
+        <ion-spinner *ngIf="sending" color="tertiary" class="rightButton" name="dots"></ion-spinner>
       </ion-col>
       <div>
       </div>

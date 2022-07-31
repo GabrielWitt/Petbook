@@ -23,10 +23,11 @@ export class FireAuthService {
     public FS: FirestoreActionsService,
     private error: ErrorHandlerService,
   ) { 
+    this.session = 'session';
     this.auth.authState.subscribe((user) => {
       if (user) {
         this.user = this.setUser(user);
-        this.store.setData(this.session,user);
+        this.store.setData(this.session,this.user);
       } else {
         this.store.removeFile(this.session);
       }
@@ -36,10 +37,12 @@ export class FireAuthService {
   async loginSavedUser(){
     return new Promise((resolve, reject) => {
       try {
-        this.store.readFile('savedUser').then((data: any) => {
-          console.log(data)
-          if(data){
-            this.login(data.email, data.password).then((user:any) => {
+        this.store.readFile(this.credentials).then((data: any) => {
+          if(data?.email && data?.password){
+            this.login(data.email, data.password).then((userCredential:any) => {
+              const user = userCredential.user;
+              this.user = this.setUser(user);
+              this.store.setData(this.session, this.user);
               resolve(user);
             })
           } else {
@@ -59,12 +62,7 @@ export class FireAuthService {
         if(data?.user){
           this.routerCheck(data.user).then(answer => {resolve(answer);})
         } else{
-          this.loginSavedUser().then(user => {
-            this.routerCheck(user).then(answer => {resolve(answer);})
-          }).catch(error => {
-            console.log(error);
-            reject(false);
-          });
+          resolve(false);
         }
       }).catch(error => {
         console.log(error);
@@ -113,11 +111,11 @@ export class FireAuthService {
     return new Promise((resolve,reject) => {
       this.auth.signInWithEmailAndPassword(email, password)
       .then(async (userCredential) => {
-        this.store.setData('savedCredentials', { email:email, password:password })
+        await this.store.setData(this.credentials, { email:email, password:password })
         // Signed in 
         const user = userCredential.user;
         this.user = this.setUser(user);
-        this.store.setData(this.session, this.user);
+        await this.store.setData(this.session, this.user);
         this.getUser().then((myData: any) => {
           this.uploadUserForm(myData.user.uid, {
             uid: user.uid, 
@@ -182,18 +180,17 @@ export class FireAuthService {
   }
 
   async getUser(){
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        this.store.readFile(this.session).then(session => {
-          if (session) { 
-            this.readUserForm(session.uid).then((data:userFormData) => {
-              resolve({user: this.user, data});
-            });
-          } else { 
-            this.router.navigateByUrl('general'); 
-            resolve(null);
-          }
-        }).catch(error => { reject(error)})
+        let session = await this.store.readFile(this.session);
+        if (!session) {  session = await this.loginSavedUser(); }
+        if (session) { 
+          const data = await this.readUserForm(session.uid);
+          resolve({user: this.user, data});
+        } else { 
+          this.router.navigateByUrl('general'); 
+          resolve(null);
+        }
       } catch (error) {
         console.log('error');
         reject(error)
@@ -228,9 +225,8 @@ export class FireAuthService {
 
   signOut(){
     return new Promise((resolve,reject) => {
-      this.auth.signOut().then(() => {
-        this.store.removeFile(this.session);
-        // Sign-out successful.
+      this.auth.signOut().then(async () => {
+        await this.store.clearStore();
         resolve('Se ha cerrado sesión');
       })
       .catch((error) => { reject(this.error.handle(error)); });

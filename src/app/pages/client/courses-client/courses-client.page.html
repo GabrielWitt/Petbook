@@ -1,5 +1,33 @@
 <app-main-header title="Mis Cursos"></app-main-header>
 
-<ion-content>
 
+<ion-content class="ion-padding">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" style="background-color: gray;">
+      <ion-refresher-content pullingIcon="arrow-down" pullingText="Desliza abajo para refrescar..." refreshingSpinner="dots"></ion-refresher-content> 
+    </ion-refresher>
+
+    <app-not-data-yet-message 
+      *ngIf="courseList.length == 0 && !loading"
+      text="No hay cursos aún" icon="archive-outline"
+    ></app-not-data-yet-message>
+  
+    <ion-list *ngIf="courseList.length>0">
+        <ion-row *ngFor="let course of courseList" (click)="detailCourse(course)" style="border-bottom: 2px solid gray;">
+            <ion-col size="4">
+                <ion-img [src]="'http://img.youtube.com/vi/' + course.video + '/default.jpg'"></ion-img>
+            </ion-col>
+            <ion-col size="8">
+                <ion-item lines="none">
+                    <ion-label>
+                        <h3>{{course.title}} </h3>
+                        <p>{{course.description}} </p>
+                    </ion-label>
+                </ion-item>
+            </ion-col>
+        </ion-row>
+    </ion-list>
+    
+    <ion-list *ngIf="loading">
+        <app-loading-view></app-loading-view>
+    </ion-list>
 </ion-content>

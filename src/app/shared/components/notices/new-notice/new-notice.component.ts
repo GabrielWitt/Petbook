@@ -8,8 +8,8 @@ import { ImageUploaderService } from 'src/app/core/services/image-uploader.servi
 import { NoticeService } from 'src/app/core/services/modules/notice.service';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { AttachmentsService } from 'src/app/shared/utilities/attachments.service';
-import { AlertsService } from '../../utilities/alerts';
-import { TimeHandlerModule } from '../../utilities/time-handler';
+import { AlertsService } from '../../../utilities/alerts';
+import { TimeHandlerModule } from '../../../utilities/time-handler';
 
 @Component({
   selector: 'app-new-notice',
@@ -25,7 +25,6 @@ export class NewNoticeComponent implements OnInit {
   @Input() user: userFormData;
   @Input() notice: Notice;
   @Input() pet: Pet;
-  @Input() delete: boolean;
   writer: shortUser;
   typeList = []
   myNotice: Notice = {
@@ -64,9 +63,6 @@ export class NewNoticeComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.notice, this .user)
-    console.log(this .user)
-    console.log(this.pet)
     this.loadTypes().then(() => {
       this.loading = false;
       if(this.notice){
@@ -204,6 +200,20 @@ export class NewNoticeComponent implements OnInit {
     }
   }
 
+  eraseNotice(){
+    this.alerts.AlertConfirm(this.notice.title,'¿Esta seguro que desea eliminar este anuncio?')
+    .then(answer => {
+      if(answer){
+        this.loading = true;
+        this.notices.deleteNotice(this.notice.uid).then(() => {
+          this.alerts.showAlert( 'ANUNCIOS', 'Anuncio: '+ this.notice.title + ' ha sido eliminado.', 'OK');
+          this.loading = false;
+          this.modal.dismiss(true);
+        })
+      }
+    })
+  }
+
   commentListener(e){
     this.newComment.text = e.detail.value;
   }
@@ -218,11 +228,9 @@ export class NewNoticeComponent implements OnInit {
         email: this.user.email,
         name: this.user.name + ' ' + this.user.lastName
       }
-      this.myNotice.comments.push(this.newComment);
       await this.notices.UpdateNotice(this.myNotice);
-      setTimeout(() => {
-        this.sending = false;
-      }, 5000);
+      this.myNotice.comments.push(this.newComment);
+      this.sending = false;
       this.notice.comments = this.myNotice.comments;
       this.newComment = {
         text: '',

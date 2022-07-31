@@ -107,10 +107,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var src_app_shared_utilities_attachments_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/utilities/attachments.service */ 15909);
 /* harmony import */ var src_app_core_services_image_uploader_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/core/services/image-uploader.service */ 36071);
 /* harmony import */ var src_app_shared_components_pets_new_pet_new_pet_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! src/app/shared/components/pets/new-pet/new-pet.component */ 20982);
+/* harmony import */ var src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! src/app/shared/components/notices/new-notice/new-notice.component */ 69005);
 /* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @ionic/angular */ 93819);
-/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
-/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
-/* harmony import */ var src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! src/app/shared/components/new-notice/new-notice.component */ 67186);
+/* harmony import */ var src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! src/app/core/services/modules/pet-service.service */ 34514);
+/* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
 
 
 
@@ -386,7 +386,7 @@ let ProfileManagerPage = class ProfileManagerPage {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this5.modal.create({
-        component: src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_10__.NewNoticeComponent,
+        component: src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_8__.NewNoticeComponent,
         componentProps: {
           notice: null,
           user: _this5.userData,
@@ -407,7 +407,7 @@ let ProfileManagerPage = class ProfileManagerPage {
 };
 
 ProfileManagerPage.ctorParameters = () => [{
-  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_8__.PetService
+  type: src_app_core_services_modules_pet_service_service__WEBPACK_IMPORTED_MODULE_9__.PetService
 }, {
   type: _angular_router__WEBPACK_IMPORTED_MODULE_12__.Router
 }, {
@@ -423,7 +423,7 @@ ProfileManagerPage.ctorParameters = () => [{
 }, {
   type: _angular_forms__WEBPACK_IMPORTED_MODULE_11__.FormBuilder
 }, {
-  type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_9__.FireAuthService
+  type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_10__.FireAuthService
 }, {
   type: src_app_shared_utilities_verificationFunc__WEBPACK_IMPORTED_MODULE_4__.VerificationFuncService
 }];

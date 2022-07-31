@@ -17,12 +17,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoadingViewComponent } from './components/view/loading-view/loading-view.component';
 import { TimeFormatPipe } from './pipes/time-format.pipe';
 import { TimeHandlerModule } from './utilities/time-handler';
-import { NewNoticeComponent } from './components/new-notice/new-notice.component';
 import { NewCourseComponent } from './components/course/new-course/new-course.component';
 import { NoticeBottomBarComponent } from './components/view/notice-bottom-bar/notice-bottom-bar.component';
 import { PetDetailComponent } from './components/pets/pet-detail/pet-detail.component';
 import { PetItemComponent } from './components/pets/pet-item/pet-item.component';
 import { DetailCourseComponent } from './components/course/detail-course/detail-course.component';
+import { NewNoticeComponent } from './components/notices/new-notice/new-notice.component';
+import { NoticeDetailComponent } from './components/notices/notice-detail/notice-detail.component';
+import { ExamCourseComponent } from './components/course/exam-course/exam-course.component';
 
 // General view
 
@@ -37,8 +39,10 @@ const components = [
   PetDetailComponent,
   PetItemComponent,
   NewNoticeComponent,
+  NoticeDetailComponent,
   NewCourseComponent,
   DetailCourseComponent,
+  ExamCourseComponent,
   LoadingViewComponent
 ]
 const pipes = [

@@ -12,7 +12,7 @@ import { Pet } from 'src/app/core/models/species';
 import { PetService } from 'src/app/core/services/modules/pet-service.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FireAuthService } from 'src/app/core/services/modules/fire-auth.service';
-import { NewNoticeComponent } from 'src/app/shared/components/new-notice/new-notice.component';
+import { NewNoticeComponent } from 'src/app/shared/components/notices/new-notice/new-notice.component';
 
 @Component({
   selector: 'app-profile-client',

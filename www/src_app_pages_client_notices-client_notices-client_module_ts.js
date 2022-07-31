@@ -100,8 +100,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 22560);
 /* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ionic/angular */ 93819);
 /* harmony import */ var src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/core/services/modules/fire-auth.service */ 2687);
-/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
-/* harmony import */ var src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/shared/components/new-notice/new-notice.component */ 67186);
+/* harmony import */ var src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/shared/components/notices/new-notice/new-notice.component */ 69005);
+/* harmony import */ var src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! src/app/core/services/modules/notice.service */ 2941);
 
 
 
@@ -152,7 +152,7 @@ let NoticesClientPage = class NoticesClientPage {
 
     return (0,_Users_gabrielwitt_Desktop_UTPL_Ingenieri_a_de_Software_Petbook_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const modal = yield _this2.modal.create({
-        component: src_app_shared_components_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_5__.NewNoticeComponent,
+        component: src_app_shared_components_notices_new_notice_new_notice_component__WEBPACK_IMPORTED_MODULE_4__.NewNoticeComponent,
         componentProps: {
           notice,
           user: _this2.userData
@@ -200,7 +200,7 @@ let NoticesClientPage = class NoticesClientPage {
 NoticesClientPage.ctorParameters = () => [{
   type: src_app_core_services_modules_fire_auth_service__WEBPACK_IMPORTED_MODULE_3__.FireAuthService
 }, {
-  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_4__.NoticeService
+  type: src_app_core_services_modules_notice_service__WEBPACK_IMPORTED_MODULE_5__.NoticeService
 }, {
   type: _ionic_angular__WEBPACK_IMPORTED_MODULE_6__.ModalController
 }, {
